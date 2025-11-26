@@ -1,0 +1,5 @@
+# 忽略 .claude 文件夹
+.claude/
+
+# 忽略 claude.md 文件
+CLAUDE.md
