@@ -158,6 +158,110 @@
         .legend-item {
             margin: 3px 0;
         }
+
+        /* 商人对话框 */
+        .merchant-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2a2a2a;
+            border: 2px solid #FF9800;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            min-width: 400px;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
+        }
+
+        .merchant-dialog h3 {
+            color: #FF9800;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .merchant-inventory {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .merchant-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px;
+            background: #333;
+            border-radius: 5px;
+            border-left: 3px solid #FF9800;
+        }
+
+        .merchant-item:hover {
+            background: #444;
+        }
+
+        .merchant-item .item-info {
+            flex: 1;
+        }
+
+        .merchant-item .item-name {
+            color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        .merchant-item .item-stats {
+            color: #ccc;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .merchant-item .price {
+            color: #FFD700;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .merchant-item button {
+            padding: 5px 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .merchant-item button:hover {
+            background: #45a049;
+        }
+
+        .merchant-item button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .player-gold {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .merchant-dialog .close-btn {
+            width: 100%;
+            padding: 8px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .merchant-dialog .close-btn:hover {
+            background: #da190b;
+        }
     </style>
 </head>
 <body>
@@ -233,6 +337,7 @@
                     <div class="legend-item">+ 血瓶</div>
                     <div class="legend-item">↑ 武器</div>
                     <div class="legend-item">◆ 防具</div>
+                    <div class="legend-item">$ 商人</div>
                     <div class="legend-item"># 墙</div>
                 </div>
             </div>
@@ -241,8 +346,7 @@
 
     <div class="log-panel" id="log">
         <div class="log-entry">欢迎来到爬塔游戏！</div>
-        <div class="log-entry">使用方向键 (↑↓←→) 移动</div>
-        <div class="log-entry">按 E 键拾取道具，数字键 1-9 使用道具</div>
+        <div class="log-entry">使用方向键 (↑↓←→) 移动，数字键 1-9 使用道具</div>
         <div class="log-entry">目标：爬到第100层并击败最终Boss！</div>
     </div>
 
@@ -281,6 +385,7 @@
             '+': '#4CAF50',    // 血瓶 - 绿色
             '↑': '#9C27B0',    // 武器 - 紫色
             '◆': '#00BCD4',    // 防具 - 青色
+            '$': '#FF9800',    // 商人 - 橙色
             '#': '#555555',    // 墙 - 深灰
             '.': '#222222'     // 空地 - 黑色
         };
@@ -315,9 +420,20 @@
             document.getElementById('level').textContent = data.level || 1;
             document.getElementById('gold').textContent = data.gold || 0;
 
-            // 装备
-            document.getElementById('weapon').textContent = data.weapon_name || '无';
-            document.getElementById('armor').textContent = data.armor_name || '无';
+            // 装备 - 智能显示属性，避免重复
+            let weaponText = data.weapon_name || '无';
+            if (data.weapon_name && data.weapon_atk > 0 && !data.weapon_name.includes('+')) {
+                // 只有当装备名称不包含+时才添加属性值
+                weaponText = `${data.weapon_name} (+${data.weapon_atk})`;
+            }
+            document.getElementById('weapon').textContent = weaponText;
+
+            let armorText = data.armor_name || '无';
+            if (data.armor_name && data.armor_def > 0 && !data.armor_name.includes('+')) {
+                // 只有当装备名称不包含+时才添加属性值
+                armorText = `${data.armor_name} (+${data.armor_def})`;
+            }
+            document.getElementById('armor').textContent = armorText;
 
             // 背包
             const inventoryDiv = document.getElementById('inventory');
@@ -442,6 +558,27 @@
                     showGameOver(message.reason, message.final_floor);
                     break;
 
+                case 'merchant_info':
+                    // 显示商人信息
+                    console.log('商人信息数据:', message); // 调试日志
+                    if (message.has_merchant) {
+                        showMerchantDialog(message);
+                    } else {
+                        addLog('这里没有商人');
+                    }
+                    break;
+
+                case 'trade_success':
+                    // 交易成功
+                    addLog(message.message);
+                    closeMerchantDialog();
+                    break;
+
+                case 'trade_failed':
+                    // 交易失败
+                    addLog(message.message);
+                    break;
+
                 default:
                     console.warn('未知的消息类型:', message.type);
             }
@@ -463,6 +600,61 @@
             } else {
                 addLog('未连接到服务器');
             }
+        }
+
+        // 商人交易界面函数
+        function showMerchantDialog(merchantData) {
+            // 创建对话框背景遮罩
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            overlay.id = 'merchant-overlay';
+
+            // 创建商人对话框
+            console.log('创建商人对话框，数据:', merchantData); // 调试日志
+            const dialog = document.createElement('div');
+            dialog.className = 'merchant-dialog';
+            dialog.innerHTML = `
+                <h3>${merchantData.merchant.name}</h3>
+                <div class="merchant-inventory">
+                    ${merchantData.merchant.inventory.map(item => `
+                        <div class="merchant-item">
+                            <div class="item-info">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-stats">${item.type === 'potion' ? '回复' : item.type === 'weapon' ? '攻击' : '防御'} +${item.value}</div>
+                            </div>
+                            <div class="price">${item.price}金币</div>
+                            <button onclick="buyItem('${item.name}')" ${merchantData.gold < item.price ? 'disabled' : ''}>购买</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="player-gold">你的金币: ${merchantData.gold || 0}</div>
+                <button class="close-btn" onclick="closeMerchantDialog()">关闭</button>
+            `;
+
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+        }
+
+        function closeMerchantDialog() {
+            const overlay = document.getElementById('merchant-overlay');
+            if (overlay) {
+                document.body.removeChild(overlay);
+            }
+        }
+
+        function buyItem(itemName) {
+            sendMessage({cmd: 'trade', item_name: itemName});
         }
 
         // 键盘事件处理
@@ -519,6 +711,10 @@
                         const itemName = inventoryItems[index].querySelector('span:first-child').textContent;
                         command = {cmd: 'use_item', item_name: itemName};
                     }
+                    break;
+                case '0':
+                    // 与商人交易
+                    command = {cmd: 'merchant_info'};
                     break;
             }
 

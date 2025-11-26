@@ -62,6 +62,17 @@ class GameConfig:
     # 日志配置
     MAX_LOG_ENTRIES: int = 100
 
+    # 商人楼层配置
+    MERCHANT_FLOOR_INTERVAL: int = 10
+    MERCHANT_FLOOR_CHANCE: float = 0.2  # 基础概率20%
+    MERCHANT_BASE_PRICE: int = 10
+    MERCHANT_PRICE_SCALING: int = 5
+
+    # 商人库存配置
+    MERCHANT_POTION_RANGE: tuple = (3, 4)
+    MERCHANT_WEAPON_RANGE: tuple = (2, 3)
+    MERCHANT_ARMOR_RANGE: tuple = (2, 3)
+
     def __post_init__(self):
         """初始化后处理，设置默认值和计算属性"""
         if self.ITEM_WEIGHTS is None:

@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 import random
-from game_model import Player, Monster, Floor, Position, CellType, Item, Cell
+from game_model import Player, Monster, Floor, Position, CellType, Item, Cell, MerchantItem
 
 # 导入新的工具类和配置
 from utils.position_utils import PositionUtils
@@ -374,4 +374,68 @@ def descend_floor(player: Player, floor: Floor, current_floor_level: int) -> Dic
     result['logs'].append(f"进入了第{current_floor_level + 1}层...")
 
     return result
+
+
+# ==================== 商人交易系统 ====================
+
+def handle_trade_request(player: Player, floor: Floor, item_name: str) -> dict:
+    """处理购买请求"""
+    if not floor.is_merchant_floor:
+        return {"success": False, "message": "这里没有商人"}
+
+    # 查找商品
+    merchant_item = None
+    for item in floor.merchant.inventory:
+        if item.name == item_name:
+            merchant_item = item
+            break
+
+    if not merchant_item:
+        return {"success": False, "message": "商人没有这个物品"}
+
+    # 检查金币
+    if player.gold < merchant_item.price:
+        return {"success": False, "message": "金币不足"}
+
+    # 执行交易
+    player.gold -= merchant_item.price
+
+    # 添加物品到背包或装备
+    if merchant_item.effect_type == "potion":
+        player.inventory[merchant_item.name] = player.inventory.get(merchant_item.name, 0) + 1
+    elif merchant_item.effect_type == "weapon":
+        player.weapon_atk = merchant_item.effect_value
+        player.weapon_name = merchant_item.name
+    elif merchant_item.effect_type == "armor":
+        player.armor_def = merchant_item.effect_value
+        player.armor_name = merchant_item.name
+
+    return {
+        "success": True,
+        "message": f"购买了{merchant_item.name}",
+        "item": merchant_item,
+        "new_gold": player.gold
+    }
+
+def get_merchant_info(player: Player, floor: Floor) -> dict:
+    """获取商人信息"""
+    if not floor.is_merchant_floor:
+        return {"has_merchant": False}
+
+    return {
+        "has_merchant": True,
+        "merchant": {
+            "name": floor.merchant.name,
+            "inventory": [
+                {
+                    "name": item.name,
+                    "type": item.effect_type,
+                    "value": item.effect_value,
+                    "price": item.price
+                }
+                for item in floor.merchant.inventory
+            ]
+        },
+        "gold": player.gold
+    }
 

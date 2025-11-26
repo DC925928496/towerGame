@@ -8,7 +8,7 @@ from map_generator import generate_floor
 from game_model import Player, Floor, Position, CellType
 from game_logic import (
     move_player, pickup_item, player_attack,
-    descend_floor
+    descend_floor, handle_trade_request, get_merchant_info
 )
 
 
@@ -20,6 +20,7 @@ class GameState:
         self.floor_level: int = 1
         self.game_over: bool = False
         self.game_over_reason: str = ""
+        self.merchant_attempt_count: int = 0  # 商人楼层尝试计数器
 
     def new_game(self):
         """开始新游戏"""
@@ -27,10 +28,13 @@ class GameState:
         self.floor_level = 1
         self.game_over = False
         self.game_over_reason = ""
+        self.merchant_attempt_count = 0  # 重置商人楼层尝试计数器
 
         # 生成第一层
-        self.current_floor = generate_floor(1)
+        self.current_floor = generate_floor(1, None, self.merchant_attempt_count)
         self.player.position = self.current_floor.player_start_pos
+
+        # 第一层不需要更新商人计数器（不是每10层的候选）
 
         return self.get_initial_messages()
 
@@ -134,8 +138,11 @@ class GameState:
                         # 自动上楼成功，需要重新生成楼层
                         self.floor_level += 1
                         prev_floor = self.current_floor
-                        self.current_floor = generate_floor(self.floor_level, prev_floor)
+                        self.current_floor = generate_floor(self.floor_level, prev_floor, self.merchant_attempt_count)
                         self.player.position = self.current_floor.player_start_pos
+
+                        # 更新商人楼层尝试计数器（使用旧的楼层级别）
+                        self.update_merchant_attempt_count(self.current_floor, self.floor_level - 1)
 
                         # 发送新楼层地图
                         messages.append({
@@ -282,8 +289,11 @@ class GameState:
             # 进入下一层
             self.floor_level += 1
             prev_floor = self.current_floor
-            self.current_floor = generate_floor(self.floor_level, prev_floor)
+            self.current_floor = generate_floor(self.floor_level, prev_floor, self.merchant_attempt_count)
             self.player.position = self.current_floor.player_start_pos
+
+            # 更新商人楼层尝试计数器（使用旧的楼层级别）
+            self.update_merchant_attempt_count(self.current_floor, self.floor_level - 1)
 
             # 发送新楼层地图
             messages.append({
@@ -293,6 +303,61 @@ class GameState:
 
             # 更新玩家信息
             messages.append(self.get_player_info_message())
+
+        return messages
+
+    def update_merchant_attempt_count(self, new_floor: Floor, previous_level: int):
+        """更新商人楼层尝试计数器"""
+        if new_floor.is_merchant_floor:
+            # 触发了商人楼层，重置计数器
+            if self.merchant_attempt_count > 0:
+                print(f"调试：第{previous_level}层触发商人楼层，重置尝试计数器")
+            else:
+                print(f"调试：第{previous_level}层触发固定的商人楼层")
+            self.merchant_attempt_count = 0
+        elif previous_level > 10 and previous_level % 10 == 0 and previous_level < 100:
+            # 是候选楼层（第20,30,40...）但没有触发，增加计数器
+            self.merchant_attempt_count += 1
+            print(f"调试：第{previous_level}层未触发商人楼层，尝试次数增加到{self.merchant_attempt_count}")
+        elif previous_level == 10:
+            print(f"调试：第{previous_level}层固定触发商人楼层，无需重置计数器")
+
+    def merchant_info(self) -> List[Dict]:
+        """处理获取商人信息命令"""
+        if self.game_over:
+            return [{'type': 'log', 'message': '游戏已结束！'}]
+
+        response = get_merchant_info(self.player, self.current_floor)
+        return [{'type': 'merchant_info', **response}]
+
+    def trade(self, item_name: str) -> List[Dict]:
+        """处理购买命令"""
+        if self.game_over:
+            return [{'type': 'log', 'message': '游戏已结束！'}]
+
+        messages = []
+
+        result = handle_trade_request(self.player, self.current_floor, item_name)
+
+        if result['success']:
+            messages.append({
+                'type': 'trade_success',
+                'message': result['message'],
+                'new_gold': result['new_gold'],
+                'item': {
+                    'name': result['item'].name,
+                    'type': result['item'].effect_type,
+                    'value': result['item'].effect_value,
+                    'price': result['item'].price
+                }
+            })
+            # 发送更新后的玩家信息
+            messages.append(self.get_player_info_message())
+        else:
+            messages.append({
+                'type': 'trade_failed',
+                'message': result['message']
+            })
 
         return messages
 
@@ -335,6 +400,13 @@ async def handle_client(websocket):
                 elif cmd == 'use_item':
                     item_name = data.get('item_name')
                     response_messages = game.use_item(item_name)
+
+                elif cmd == 'merchant_info':
+                    response_messages = game.merchant_info()
+
+                elif cmd == 'trade':
+                    item_name = data.get('item_name')
+                    response_messages = game.trade(item_name)
 
                 # elif cmd == 'descend':
                 #     response_messages = game.descend()

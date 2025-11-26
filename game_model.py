@@ -42,6 +42,7 @@ class CellType(Enum):
     POTION = '+'   # 血瓶
     WEAPON = '↑'   # 武器
     ARMOR = '◆'    # 防具
+    MERCHANT = '$'  # 商人
 
 
 class Cell:
@@ -222,6 +223,28 @@ class Room:
                     other.y + other.height < self.y)
 
 
+# ==================== 商人系统 ====================
+
+@dataclass
+class MerchantItem:
+    """商人出售的物品"""
+    name: str
+    effect_type: str  # potion/weapon/armor
+    effect_value: int
+    price: int
+
+
+class Merchant:
+    """商人类"""
+    def __init__(self, position: Position, inventory: List[MerchantItem], name: str = "神秘商人"):
+        self.position = position
+        self.inventory = inventory
+        self.name = name
+        self.symbol = '$'
+
+
+# ==================== 楼层类 ====================
+
 class Floor:
     """楼层类（15×15地图）"""
     def __init__(self, level: int, width: int = 15, height: int = 15):
@@ -240,6 +263,10 @@ class Floor:
 
         self.stairs_pos: Optional[Position] = None
         self.player_start_pos: Optional[Position] = None
+
+        # 商人楼层相关
+        self.is_merchant_floor: bool = False
+        self.merchant: Optional[Merchant] = None
 
     def get_cell(self, pos: Position) -> Optional[Cell]:
         """获取指定位置的格子"""

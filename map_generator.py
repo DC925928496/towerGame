@@ -3,7 +3,7 @@ from typing import List, Optional, Dict
 
 from game_model import (
     Floor, Room, Position, Cell, CellType,
-    Monster, Item, FINAL_BOSS
+    Monster, Item, FINAL_BOSS, Merchant, MerchantItem
 )
 
 # 导入新的工具类和配置
@@ -427,7 +427,76 @@ def connect_rooms(room1: Room, room2: Room, floor: Floor):
                 floor.grid[x][y2] = Cell(CellType.EMPTY, passable=True)
 
 
-def generate_floor(level: int, prev_floor: Optional[Floor] = None) -> Floor:
+# ==================== 商人楼层生成 ====================
+
+def generate_merchant(floor_level: int) -> Merchant:
+    """生成商人和商品"""
+    inventory = generate_merchant_inventory(floor_level)
+    return Merchant(position=None, inventory=inventory)
+
+def generate_merchant_inventory(floor_level: int) -> List[MerchantItem]:
+    """生成商人库存"""
+    inventory = []
+    base_price = 10 + floor_level * 5  # 动态定价基础
+
+    # 药水 (3-4个)
+    potion_count = random.randint(3, 4)
+    for i in range(potion_count):
+        hp = 50 + floor_level * 20
+        price = base_price * 2
+        inventory.append(MerchantItem("血瓶", "potion", hp, price))
+
+    # 武器 (2-3个)
+    weapon_count = random.randint(2, 3)
+    for i in range(weapon_count):
+        atk = floor_level * 5 + 10
+        price = base_price * 3
+        inventory.append(MerchantItem("长剑", "weapon", atk, price))
+
+    # 防具 (2-3个)
+    armor_count = random.randint(2, 3)
+    for i in range(armor_count):
+        defense = floor_level * 3 + 5
+        price = int(base_price * 2.5)
+        inventory.append(MerchantItem("铠甲", "armor", defense, price))
+
+    return inventory
+
+def generate_merchant_floor(floor_level: int) -> Floor:
+    """生成商人楼层：15×15空房间，商人在中央，楼梯在角落"""
+    config = config_manager.get_config()
+    width, height = config.GRID_SIZE, config.GRID_SIZE
+
+    floor = Floor(floor_level, width, height)
+    floor.is_merchant_floor = True
+
+    # 15×15空房间，只有边界墙壁
+    for y in range(height):
+        for x in range(width):
+            # 创建边界墙壁
+            if y == 0 or y == height - 1 or x == 0 or x == width - 1:
+                floor.grid[x][y] = Cell(CellType.WALL, passable=False)
+            else:
+                floor.grid[x][y] = Cell(CellType.EMPTY, passable=True)
+
+    # 商人在中央 (7, 7)
+    merchant_pos = Position(7, 7)
+    merchant = generate_merchant(floor_level)
+    merchant.position = merchant_pos
+    floor.merchant = merchant
+    floor.grid[7][7] = Cell(CellType.EMPTY, passable=True, entity=merchant)
+
+    # 楼梯在角落 (1, 1)
+    floor.stairs_pos = Position(1, 1)
+    floor.grid[1][1] = Cell(CellType.STAIRS, passable=True)
+
+    # 玩家起始位置在另一角 (13, 13)
+    floor.player_start_pos = Position(13, 13)
+
+    return floor
+
+
+def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_attempt_count: int = 0) -> Floor:
     """
     生成楼层（房间+走廊风格）
 
@@ -439,6 +508,28 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None) -> Floor:
         Floor对象
     """
     config = config_manager.get_config()
+
+    # 商人楼层判断：前十层固定普通，第十层固定商人，之后累积概率
+    if level < 10:
+        # 前9层固定不触发
+        pass  # 继续生成普通楼层
+    elif level == 10:
+        # 第10层固定触发商人楼层
+        print(f"调试：第{level}层固定触发商人楼层")
+        return generate_merchant_floor(level)
+    elif level > 10 and level % 10 == 0 and level < 100:
+        # 11层起，每10层累积概率机制
+        # 计算累积概率：基础10% + 每次增加5%
+        base_probability = 0.1  # 基础概率10%
+        increment = 0.05  # 每次增加5%
+        probability = min(base_probability + merchant_attempt_count * increment, 1.0)  # 最高100%
+        print(f"调试：第{level}层检查商人楼层，概率为{probability:.2f}，尝试次数{merchant_attempt_count}")
+
+        if random.random() < probability:
+            print(f"调试：第{level}层触发商人楼层，概率为{probability:.2f}，尝试次数{merchant_attempt_count}")
+            # 触发商人楼层，重置计数器
+            return generate_merchant_floor(level)
+
     width, height = config.GRID_SIZE, config.GRID_SIZE
     floor = Floor(level, width, height)
 
