@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爬塔游戏 - Tower Climbing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Consolas, monospace;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 10px;
+        }
+
+        /* 游戏区域 */
+        .game-area {
+            display: flex;
+        }
+
+        #game {
+            border: 2px solid #444;
+            background-color: #000;
+            margin-right: 10px;
+        }
+
+        /* 信息面板 */
+        .info-panel {
+            width: 200px;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            font-size: 14px;
+            overflow-y: auto;
+        }
+
+        .info-panel h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .info-item {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-item span:last-child {
+            color: #FFC107;
+            font-weight: bold;
+        }
+
+        .separator {
+            height: 1px;
+            background-color: #444;
+            margin: 10px 0;
+        }
+
+        /* 日志面板 */
+        .log-panel {
+            height: 120px;
+            background-color: #2a2a2a;
+            border-top: 1px solid #444;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            padding: 5px 10px;
+            background-color: #333;
+            border-top: 1px solid #444;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .status-bar .connected {
+            color: #4CAF50;
+        }
+
+        .status-bar .disconnected {
+            color: #f44336;
+        }
+
+        /* 游戏结束遮罩 */
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 30px;
+            background-color: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 5px;
+        }
+
+        .game-over-content h2 {
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+
+        .game-over-content button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .game-over-content button:hover {
+            background-color: #45a049;
+        }
+
+        /* 图例 */
+        .legend {
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            margin: 3px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="game-area">
+            <canvas id="game" width="600" height="600"></canvas>
+
+            <div class="info-panel">
+                <h3>游戏信息</h3>
+
+                <div class="info-item">
+                    <span>楼层:</span>
+                    <span id="floor">1</span>
+                </div>
+
+                <div class="separator"></div>
+
+                <h3>玩家属性</h3>
+                <div class="info-item">
+                    <span>HP:</span>
+                    <span id="hp">500/500</span>
+                </div>
+                <div class="info-item">
+                    <span>攻击力:</span>
+                    <span id="atk">50</span>
+                </div>
+                <div class="info-item">
+                    <span>防御力:</span>
+                    <span id="def">20</span>
+                </div>
+                <div class="info-item">
+                    <span>经验值:</span>
+                    <span id="exp">0/100</span>
+                </div>
+                <div class="info-item">
+                    <span>等级:</span>
+                    <span id="level">1</span>
+                </div>
+                <div class="info-item">
+                    <span>金币:</span>
+                    <span id="gold">0</span>
+                </div>
+
+                <div class="separator"></div>
+
+                <h3>装备</h3>
+                <div class="info-item">
+                    <span>武器:</span>
+                    <span id="weapon">无</span>
+                </div>
+                <div class="info-item">
+                    <span>防具:</span>
+                    <span id="armor">无</span>
+                </div>
+
+                <div class="separator"></div>
+
+                <h3>背包</h3>
+                <div id="inventory">
+                    <div class="info-item">
+                        <span>小血瓶</span>
+                        <span>3</span>
+                    </div>
+                </div>
+
+                <div class="separator"></div>
+
+                <div class="legend">
+                    <h4>图例</h4>
+                    <div class="legend-item">@ 玩家</div>
+                    <div class="legend-item">M 怪物</div>
+                    <div class="legend-item">> 楼梯</div>
+                    <div class="legend-item">+ 血瓶</div>
+                    <div class="legend-item">↑ 武器</div>
+                    <div class="legend-item">◆ 防具</div>
+                    <div class="legend-item"># 墙</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="log-panel" id="log">
+        <div class="log-entry">欢迎来到爬塔游戏！</div>
+        <div class="log-entry">使用方向键 (↑↓←→) 移动</div>
+        <div class="log-entry">按 E 键拾取道具，数字键 1-9 使用道具</div>
+        <div class="log-entry">目标：爬到第100层并击败最终Boss！</div>
+    </div>
+
+    <div class="status-bar">
+        <span id="connection-status" class="disconnected">未连接</span>
+    </div>
+
+    <div class="game-over-overlay" id="game-over-overlay">
+        <div class="game-over-content">
+            <h2 id="game-over-title">游戏结束</h2>
+            <p id="game-over-message"></p>
+            <button onclick="location.reload()">重新开始</button>
+        </div>
+    </div>
+
+    <script>
+        // 画布设置
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const cellSize = 40;
+        const gridSize = 15;
+
+        // WebSocket连接
+        let ws = null;
+        let connected = false;
+
+        // 游戏状态
+        let currentGrid = [];
+        let playerPos = {x: 7, y: 7};
+
+        // 颜色配置
+        const colors = {
+            '@': '#2196F3',    // 玩家 - 蓝色
+            'M': '#f44336',    // 怪物 - 红色
+            '>': '#FFC107',    // 楼梯 - 黄色
+            '+': '#4CAF50',    // 血瓶 - 绿色
+            '↑': '#9C27B0',    // 武器 - 紫色
+            '◆': '#00BCD4',    // 防具 - 青色
+            '#': '#555555',    // 墙 - 深灰
+            '.': '#222222'     // 空地 - 黑色
+        };
+
+        // 日志系统
+        function addLog(message) {
+            const logPanel = document.getElementById('log');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = message;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+
+            // 限制日志数量
+            while (logPanel.children.length > 100) {
+                logPanel.removeChild(logPanel.firstChild);
+            }
+        }
+
+        // 清空日志
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // 更新信息面板
+        function updateInfoPanel(data) {
+            document.getElementById('floor').textContent = data.floor || 1;
+            document.getElementById('hp').textContent = `${data.hp || 0}/${data.max_hp || 0}`;
+            document.getElementById('atk').textContent = data.total_atk || 0;
+            document.getElementById('def').textContent = data.total_def || 0;
+            document.getElementById('exp').textContent = `${data.exp || 0}/${data.exp_needed || 100}`;
+            document.getElementById('level').textContent = data.level || 1;
+            document.getElementById('gold').textContent = data.gold || 0;
+
+            // 装备
+            document.getElementById('weapon').textContent = data.weapon_name || '无';
+            document.getElementById('armor').textContent = data.armor_name || '无';
+
+            // 背包
+            const inventoryDiv = document.getElementById('inventory');
+            inventoryDiv.innerHTML = '';
+            if (data.inventory && data.inventory.length > 0) {
+                data.inventory.forEach(([name, count]) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'info-item';
+                    itemDiv.innerHTML = `<span>${name}</span><span>${count}</span>`;
+                    inventoryDiv.appendChild(itemDiv);
+                });
+            } else {
+                inventoryDiv.innerHTML = '<div class="info-item"><span>空</span></div>';
+            }
+        }
+
+        // 渲染游戏地图
+        function renderGame() {
+            if (!currentGrid || currentGrid.length === 0) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    const cell = currentGrid[x][y];
+
+                    // 设置颜色
+                    ctx.fillStyle = colors[cell] || '#222222';
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+                    // 绘制符号
+                    if (cell !== '.' && cell !== '#') {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 24px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(cell, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+                    }
+                }
+            }
+
+            // 绘制网格线
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cellSize, 0);
+                ctx.lineTo(i * cellSize, gridSize * cellSize);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(gridSize * cellSize, i * cellSize);
+                ctx.stroke();
+            }
+        }
+
+        // 连接到WebSocket服务器
+        function connect() {
+            try {
+                ws = new WebSocket('ws://localhost:8080');
+
+                ws.onopen = function() {
+                    console.log('已连接到服务器');
+                    connected = true;
+                    document.getElementById('connection-status').textContent = '已连接';
+                    document.getElementById('connection-status').className = 'connected';
+                };
+
+                ws.onmessage = function(event) {
+                    const message = JSON.parse(event.data);
+                    handleMessage(message);
+                };
+
+                ws.onclose = function() {
+                    console.log('与服务器断开连接');
+                    connected = false;
+                    document.getElementById('connection-status').textContent = '已断开';
+                    document.getElementById('connection-status').className = 'disconnected';
+                };
+
+                ws.onerror = function(error) {
+                    console.error('WebSocket错误:', error);
+                    addLog('连接错误，请确保服务器已启动');
+                };
+
+            } catch (e) {
+                console.error('连接失败:', e);
+                addLog('无法连接到服务器，请确保服务器已启动');
+            }
+        }
+
+        // 处理接收到的消息
+        function handleMessage(message) {
+            console.log('收到消息:', message);
+
+            switch (message.type) {
+                case 'map':
+                    currentGrid = message.grid;
+                    renderGame();
+                    break;
+
+                case 'info':
+                    updateInfoPanel(message);
+                    break;
+
+                case 'log':
+                    addLog(message.message);
+                    break;
+
+                case 'auto_pickup':
+                    // 自动拾取道具
+                    addLog(`自动拾取了${message.item.name}`);
+                    break;
+
+                case 'auto_descend':
+                    // 自动进入下一层
+                    addLog(`自动进入了第${message.floor}层`);
+                    break;
+
+                case 'gameover':
+                    showGameOver(message.reason, message.final_floor);
+                    break;
+
+                default:
+                    console.warn('未知的消息类型:', message.type);
+            }
+        }
+
+        // 显示游戏结束画面
+        function showGameOver(reason, finalFloor) {
+            document.getElementById('game-over-title').textContent =
+                reason.includes('通关') ? '恭喜通关！' : '游戏结束';
+            document.getElementById('game-over-message').textContent =
+                `${reason} (到达第${finalFloor}层)`;
+            document.getElementById('game-over-overlay').style.display = 'flex';
+        }
+
+        // 发送消息到服务器
+        function sendMessage(message) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(message));
+            } else {
+                addLog('未连接到服务器');
+            }
+        }
+
+        // 键盘事件处理
+        document.addEventListener('keydown', function(event) {
+            if (!connected || document.getElementById('game-over-overlay').style.display === 'flex') {
+                return;
+            }
+
+            let command = null;
+
+            switch (event.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    command = {cmd: 'move', dir: 'up'};
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    command = {cmd: 'move', dir: 'down'};
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    command = {cmd: 'move', dir: 'left'};
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    command = {cmd: 'move', dir: 'right'};
+                    break;
+                // 移除手动拾取和下楼按键，改为自动交互
+                // case 'e':
+                // case 'E':
+                //     command = {cmd: 'pickup'};
+                //     break;
+                // case '>':
+                // case '.':
+                //     command = {cmd: 'descend'};
+                //     break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    // 获取背包中的第N个道具
+                    const inventoryItems = document.querySelectorAll('#inventory .info-item');
+                    const index = parseInt(event.key) - 1;
+                    if (inventoryItems[index]) {
+                        const itemName = inventoryItems[index].querySelector('span:first-child').textContent;
+                        command = {cmd: 'use_item', item_name: itemName};
+                    }
+                    break;
+            }
+
+            if (command) {
+                event.preventDefault();
+                sendMessage(command);
+            }
+        });
+
+        // 初始化连接
+        window.onload = function() {
+            setTimeout(connect, 500); // 延迟连接，确保服务器已启动
+            addLog('正在连接到服务器...');
+        };
+    </script>
+</body>
+</html>
