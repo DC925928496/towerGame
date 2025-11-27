@@ -12,8 +12,8 @@
         }
 
         body {
-            font-family: Consolas, monospace;
-            background-color: #1a1a1a;
+            font-family: 'Segoe UI', 'Consolas', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             color: #e0e0e0;
             display: flex;
             flex-direction: column;
@@ -24,67 +24,197 @@
         .main-container {
             display: flex;
             flex: 1;
-            padding: 10px;
+            padding: 20px;
+            gap: 20px;
+            min-height: 0; /* 防止flex子元素溢出 */
         }
 
         /* 游戏区域 */
         .game-area {
             display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            min-width: 0; /* 允许收缩 */
+        }
+
+        /* 左侧信息面板 */
+        .left-panel {
+            width: 240px;
+            min-width: 210px;
+            max-width: 280px;
+            padding: 15px;
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border: 1px solid #4a5568;
+            border-radius: 12px;
+            font-size: 13px;
+            overflow-y: auto;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3),
+                        inset 0 0 20px rgba(74, 85, 104, 0.05);
+            flex-shrink: 0; /* 防止压缩 */
+        }
+
+        /* 右侧信息面板 */
+        .right-panel {
+            width: 240px;
+            min-width: 210px;
+            max-width: 280px;
+            padding: 15px;
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border: 1px solid #4a5568;
+            border-radius: 12px;
+            font-size: 13px;
+            overflow-y: auto;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3),
+                        inset 0 0 20px rgba(74, 85, 104, 0.05);
+            flex-shrink: 0; /* 防止压缩 */
         }
 
         #game {
-            border: 2px solid #444;
-            background-color: #000;
-            margin-right: 10px;
+            border: 3px solid #4a5568;
+            background: linear-gradient(145deg, #000000 0%, #1a202c 100%);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+                        0 0 60px rgba(74, 85, 104, 0.2),
+                        inset 0 0 20px rgba(74, 85, 104, 0.1);
+            transition: all 0.3s ease;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
         }
 
-        /* 信息面板 */
-        .info-panel {
-            width: 200px;
-            padding: 10px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            font-size: 14px;
-            overflow-y: auto;
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .main-container {
+                padding: 15px;
+                gap: 15px;
+            }
+
+            .left-panel, .right-panel {
+                width: 240px;
+                padding: 15px;
+            }
         }
 
-        .info-panel h3 {
-            color: #4CAF50;
-            margin-bottom: 10px;
+        @media (max-width: 1200px) {
+            .left-panel, .right-panel {
+                width: 220px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;
+                gap: 15px;
+            }
+
+            .game-area {
+                order: 2;
+                width: 100%;
+                max-width: 700px;
+            }
+
+            .left-panel {
+                order: 1;
+                width: 100%;
+                max-width: 700px;
+            }
+
+            .right-panel {
+                order: 3;
+                width: 100%;
+                max-width: 700px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 8px;
+            }
+
+            .left-panel, .right-panel {
+                width: 100%;
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .log-panel {
+                height: 100px;
+                font-size: 12px;
+            }
+        }
+
+        .left-panel h3, .right-panel h3 {
+            color: #68d391;
+            margin-bottom: 12px;
             font-size: 16px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(104, 211, 145, 0.3);
+            padding-bottom: 8px;
+            border-bottom: 2px solid #68d391;
+            border-radius: 8px 8px 0 0;
+            background: linear-gradient(90deg, rgba(104, 211, 145, 0.1) 0%, transparent 100%);
         }
 
         .info-item {
-            margin: 5px 0;
+            margin: 8px 0;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: linear-gradient(145deg, rgba(74, 85, 104, 0.1) 0%, rgba(45, 55, 72, 0.05) 100%);
+            border-radius: 6px;
+            border: 1px solid rgba(74, 85, 104, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .info-item:hover {
+            background: linear-gradient(145deg, rgba(74, 85, 104, 0.2) 0%, rgba(45, 55, 72, 0.1) 100%);
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(74, 85, 104, 0.1);
         }
 
         .info-item span:last-child {
-            color: #FFC107;
+            color: #fbbf24;
             font-weight: bold;
+            font-size: 14px;
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
         }
 
         .separator {
             height: 1px;
-            background-color: #444;
-            margin: 10px 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(74, 85, 104, 0.5) 50%, transparent 100%);
+            margin: 15px 0;
+            border-radius: 2px;
         }
 
         /* 日志面板 */
         .log-panel {
-            height: 120px;
-            background-color: #2a2a2a;
-            border-top: 1px solid #444;
-            padding: 10px;
+            height: 140px;
+            background: linear-gradient(145deg, #1a202c 0%, #2d3748 100%);
+            border-top: 2px solid #4a5568;
+            padding: 15px;
             overflow-y: auto;
             font-size: 13px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
         }
 
         .log-entry {
-            margin: 2px 0;
-            padding: 2px 0;
-            border-bottom: 1px solid #333;
+            margin: 3px 0;
+            padding: 8px 12px;
+            background: rgba(74, 85, 104, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid #4a5568;
+            transition: all 0.2s ease;
+        }
+
+        .log-entry:hover {
+            background: rgba(74, 85, 104, 0.2);
+            transform: translateX(3px);
         }
 
         .log-entry:last-child {
@@ -93,19 +223,24 @@
 
         /* 状态栏 */
         .status-bar {
-            padding: 5px 10px;
-            background-color: #333;
-            border-top: 1px solid #444;
+            padding: 8px 15px;
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border-top: 2px solid #4a5568;
             font-size: 12px;
             text-align: center;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
         }
 
         .status-bar .connected {
-            color: #4CAF50;
+            color: #68d391;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(104, 211, 145, 0.5);
         }
 
         .status-bar .disconnected {
-            color: #f44336;
+            color: #f87171;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
         }
 
         /* 游戏结束遮罩 */
@@ -115,7 +250,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.9);
+            background: linear-gradient(135deg, rgba(26, 32, 44, 0.95) 0%, rgba(45, 55, 72, 0.95) 100%);
+            backdrop-filter: blur(10px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -124,39 +260,60 @@
 
         .game-over-content {
             text-align: center;
-            padding: 30px;
-            background-color: #2a2a2a;
-            border: 2px solid #444;
-            border-radius: 5px;
+            padding: 40px;
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border: 2px solid #4a5568;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 100px rgba(74, 85, 104, 0.2);
         }
 
         .game-over-content h2 {
-            color: #f44336;
-            margin-bottom: 20px;
+            color: #fc8181;
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-shadow: 0 0 20px rgba(252, 129, 129, 0.5);
         }
 
         .game-over-content button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(104, 211, 145, 0.3);
+            transition: all 0.3s ease;
         }
 
         .game-over-content button:hover {
-            background-color: #45a049;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(104, 211, 145, 0.4);
         }
 
         /* 图例 */
         .legend {
             margin-top: 15px;
-            font-size: 12px;
+            font-size: 11px;
+            background: linear-gradient(145deg, rgba(74, 85, 104, 0.1) 0%, rgba(45, 55, 72, 0.05) 100%);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(74, 85, 104, 0.2);
         }
 
         .legend-item {
             margin: 3px 0;
+            padding: 2px 0;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+        }
+
+        .legend-item:hover {
+            background: rgba(74, 85, 104, 0.1);
+            transform: translateX(3px);
         }
 
         /* 商人对话框 */
@@ -167,78 +324,227 @@
             transform: translate(-50%, -50%);
             background: #2a2a2a;
             border: 2px solid #FF9800;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 15px;
             z-index: 1000;
-            min-width: 400px;
-            box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
+            min-width: 90vw;
+            max-width: 95vw;
+            width: 800px;
+            height: 80vh;
+            max-height: 85vh;
+            box-shadow: 0 0 40px rgba(255, 152, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 商人对话框响应式设计 */
+        @media (max-width: 768px) {
+            .merchant-dialog {
+                min-width: 95vw;
+                max-width: 98vw;
+                height: 85vh;
+                max-height: 90vh;
+                padding: 15px;
+            }
         }
 
         .merchant-dialog h3 {
             color: #FF9800;
             margin-bottom: 15px;
             text-align: center;
+            font-size: 20px;
+        }
+
+        .merchant-inventory-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .merchant-inventory {
-            max-height: 300px;
+            flex: 1;
             overflow-y: auto;
-            margin-bottom: 15px;
+            padding: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: #FF9800 #333;
+        }
+
+        /* 美化滚动条 */
+        .merchant-inventory::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .merchant-inventory::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 6px;
+        }
+
+        .merchant-inventory::-webkit-scrollbar-thumb {
+            background: #FF9800;
+            border-radius: 6px;
+        }
+
+        .merchant-inventory::-webkit-scrollbar-thumb:hover {
+            background: #F57C00;
         }
 
         .merchant-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 10px 0;
-            padding: 8px;
-            background: #333;
-            border-radius: 5px;
-            border-left: 3px solid #FF9800;
+            margin: 18px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #333 0%, #444 100%);
+            border-radius: 12px;
+            border-left: 5px solid #FF9800;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* 商人商品项响应式设计 */
+        @media (max-width: 768px) {
+            .merchant-item {
+                padding: 12px 8px;
+                margin: 12px 0;
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .merchant-item .item-info {
+                padding: 0;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .merchant-item .price {
+                margin-right: 0;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+
+            .merchant-item button {
+                width: 100%;
+                min-width: auto;
+            }
         }
 
         .merchant-item:hover {
-            background: #444;
+            background: linear-gradient(135deg, #444 0%, #555 100%);
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
+            transform: translateY(-2px);
         }
 
         .merchant-item .item-info {
             flex: 1;
+            padding: 0 20px;
         }
 
         .merchant-item .item-name {
-            color: #e0e0e0;
+            color: #ffffff;
             font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
         }
 
         .merchant-item .item-stats {
-            color: #ccc;
-            font-size: 12px;
-            margin-top: 2px;
+            color: #bbb;
+            font-size: 13px;
+            background: rgba(255, 152, 0, 0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
         }
 
         .merchant-item .price {
             color: #FFD700;
             font-weight: bold;
-            margin-right: 10px;
+            margin-right: 20px;
+            font-size: 16px;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
         }
 
         .merchant-item button {
-            padding: 5px 10px;
-            background: #4CAF50;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 90px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
         }
 
         .merchant-item button:hover {
-            background: #45a049;
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+        }
+
+        .merchant-item button:active {
+            transform: translateY(0);
         }
 
         .merchant-item button:disabled {
-            background: #666;
+            background: linear-gradient(135deg, #666 0%, #555 100%);
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        /* 滚动控制按钮 */
+        .scroll-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, #333 0%, #444 100%);
+            border-top: 1px solid #555;
+        }
+
+        .scroll-btn {
+            width: 50px;
+            height: 35px;
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+        }
+
+        .scroll-btn:hover {
+            background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.5);
+        }
+
+        .scroll-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scroll-btn:disabled {
+            background: linear-gradient(135deg, #666 0%, #555 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.5;
         }
 
         .player-gold {
@@ -246,100 +552,167 @@
             margin-bottom: 10px;
             color: #FFD700;
             font-weight: bold;
+            font-size: 18px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
         .merchant-dialog .close-btn {
             width: 100%;
-            padding: 8px;
-            background: #f44336;
+            padding: 12px;
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
         }
 
         .merchant-dialog .close-btn:hover {
-            background: #da190b;
+            background: linear-gradient(135deg, #da190b 0%, #b71c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+        }
+
+        .merchant-dialog .close-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 键盘操作指引样式 */
+        .merchant-instructions {
+            background: linear-gradient(135deg, #333 0%, #444 100%);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #ddd;
+            text-align: center;
+            border: 1px solid rgba(255, 152, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .merchant-instructions div {
+            margin: 2px 0;
+            padding: 2px 0;
+            transition: all 0.2s ease;
+        }
+
+        .merchant-instructions div:hover {
+            color: #FF9800;
+            transform: scale(1.02);
+        }
+
+        /* 键盘快捷键提示样式 */
+        .merchant-item button[data-key] {
+            position: relative;
+        }
+
+        .merchant-item button[data-key]:not(:disabled)::after {
+            content: attr(data-key);
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 2px 6px rgba(76, 175, 80, 0.4);
+            border: 2px solid white;
         }
     </style>
 </head>
 <body>
     <div class="main-container">
+        <div class="left-panel">
+            <h3>游戏信息</h3>
+            <div class="info-item">
+                <span>楼层:</span>
+                <span id="floor">1</span>
+            </div>
+
+            <div class="separator"></div>
+
+            <h3>玩家属性</h3>
+            <div class="info-item">
+                <span>HP:</span>
+                <span id="hp">500/500</span>
+            </div>
+            <div class="info-item">
+                <span>攻击力:</span>
+                <span id="atk">50</span>
+            </div>
+            <div class="info-item">
+                <span>防御力:</span>
+                <span id="def">20</span>
+            </div>
+            <div class="info-item">
+                <span>经验值:</span>
+                <span id="exp">0/100</span>
+            </div>
+            <div class="info-item">
+                <span>等级:</span>
+                <span id="level">1</span>
+            </div>
+            <div class="info-item">
+                <span>金币:</span>
+                <span id="gold">0</span>
+            </div>
+        </div>
+
         <div class="game-area">
-            <canvas id="game" width="600" height="600"></canvas>
+            <canvas id="game" width="700" height="700"></canvas>
+        </div>
 
-            <div class="info-panel">
-                <h3>游戏信息</h3>
+        <div class="right-panel">
+            <h3>装备</h3>
+            <div class="info-item">
+                <span>武器:</span>
+                <span id="weapon">无</span>
+            </div>
+            <div class="info-item">
+                <span>防具:</span>
+                <span id="armor">无</span>
+            </div>
 
+            <div class="separator"></div>
+
+            <h3>背包</h3>
+            <div id="inventory">
                 <div class="info-item">
-                    <span>楼层:</span>
-                    <span id="floor">1</span>
+                    <span>小血瓶</span>
+                    <span>3</span>
                 </div>
+            </div>
 
-                <div class="separator"></div>
+            <div class="separator"></div>
 
-                <h3>玩家属性</h3>
-                <div class="info-item">
-                    <span>HP:</span>
-                    <span id="hp">500/500</span>
-                </div>
-                <div class="info-item">
-                    <span>攻击力:</span>
-                    <span id="atk">50</span>
-                </div>
-                <div class="info-item">
-                    <span>防御力:</span>
-                    <span id="def">20</span>
-                </div>
-                <div class="info-item">
-                    <span>经验值:</span>
-                    <span id="exp">0/100</span>
-                </div>
-                <div class="info-item">
-                    <span>等级:</span>
-                    <span id="level">1</span>
-                </div>
-                <div class="info-item">
-                    <span>金币:</span>
-                    <span id="gold">0</span>
-                </div>
+            <div class="legend">
+                <h4>图例</h4>
+                <div class="legend-item">@ 玩家</div>
+                <div class="legend-item">M 怪物</div>
+                <div class="legend-item">> 楼梯</div>
+                <div class="legend-item">+ 血瓶</div>
+                <div class="legend-item">↑ 武器</div>
+                <div class="legend-item">◆ 防具</div>
+                <div class="legend-item">$ 商人</div>
+                <div class="legend-item"># 墙</div>
 
-                <div class="separator"></div>
-
-                <h3>装备</h3>
-                <div class="info-item">
-                    <span>武器:</span>
-                    <span id="weapon">无</span>
-                </div>
-                <div class="info-item">
-                    <span>防具:</span>
-                    <span id="armor">无</span>
-                </div>
-
-                <div class="separator"></div>
-
-                <h3>背包</h3>
-                <div id="inventory">
-                    <div class="info-item">
-                        <span>小血瓶</span>
-                        <span>3</span>
-                    </div>
-                </div>
-
-                <div class="separator"></div>
-
-                <div class="legend">
-                    <h4>图例</h4>
-                    <div class="legend-item">@ 玩家</div>
-                    <div class="legend-item">M 怪物</div>
-                    <div class="legend-item">> 楼梯</div>
-                    <div class="legend-item">+ 血瓶</div>
-                    <div class="legend-item">↑ 武器</div>
-                    <div class="legend-item">◆ 防具</div>
-                    <div class="legend-item">$ 商人</div>
-                    <div class="legend-item"># 墙</div>
-                </div>
+                <h4 style="margin-top: 10px;">操作</h4>
+                <div class="legend-item">↑↓←→ 或 WASD 移动</div>
+                <div class="legend-item">1-9 使用背包道具</div>
+                <div class="legend-item">E 与商人交易</div>
             </div>
         </div>
     </div>
@@ -366,8 +739,42 @@
         // 画布设置
         const canvas = document.getElementById('game');
         const ctx = canvas.getContext('2d');
-        const cellSize = 40;
+
+        // 响应式画布大小计算
+        function updateCanvasSize() {
+            const gameArea = document.querySelector('.game-area');
+            const containerWidth = gameArea.offsetWidth;
+            const containerHeight = gameArea.offsetHeight;
+
+            // 计算最大可能的正方形尺寸
+            const maxSize = Math.min(containerWidth, containerHeight, 700); // 最大700px
+            const minSize = 300; // 最小300px
+
+            // 设置画布尺寸为正方形
+            canvas.width = maxSize;
+            canvas.height = maxSize;
+
+            // 重新计算单元格大小
+            const newCellSize = maxSize / gridSize;
+
+            // 保存到全局变量
+            window.currentCellSize = newCellSize;
+
+            console.log(`画布大小: ${maxSize}x${maxSize}px, 单元格大小: ${newCellSize}px`);
+
+            // 如果有游戏数据，重新渲染
+            if (currentGrid && currentGrid.length > 0) {
+                renderGame();
+            }
+        }
+
+        // 初始设置
+        let cellSize = 46.67; // 默认值
         const gridSize = 15;
+
+        // 页面加载完成后初始化画布大小
+        window.addEventListener('load', updateCanvasSize);
+        window.addEventListener('resize', updateCanvasSize);
 
         // WebSocket连接
         let ws = null;
@@ -454,6 +861,9 @@
         function renderGame() {
             if (!currentGrid || currentGrid.length === 0) return;
 
+            // 使用动态单元格大小
+            const cellSize = window.currentCellSize || 46.67;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             for (let x = 0; x < gridSize; x++) {
@@ -467,7 +877,7 @@
                     // 绘制符号
                     if (cell !== '.' && cell !== '#') {
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 24px monospace';
+                        ctx.font = `bold ${Math.max(16, cellSize * 0.6)}px monospace`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText(cell, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
@@ -626,24 +1036,74 @@
             dialog.className = 'merchant-dialog';
             dialog.innerHTML = `
                 <h3>${merchantData.merchant.name}</h3>
-                <div class="merchant-inventory">
-                    ${merchantData.merchant.inventory.map(item => `
-                        <div class="merchant-item">
-                            <div class="item-info">
-                                <div class="item-name">${item.name}</div>
-                                <div class="item-stats">${item.type === 'potion' ? '回复' : item.type === 'weapon' ? '攻击' : '防御'} +${item.value}</div>
+                <div class="merchant-inventory-container">
+                    <div class="merchant-inventory" id="merchant-items">
+                        ${merchantData.merchant.inventory.map((item, index) => `
+                            <div class="merchant-item" data-item-index="${index}">
+                                <div class="item-info">
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-stats">${item.type === 'potion' ? '回复' : item.type === 'weapon' ? '攻击' : '防御'} +${item.value}</div>
+                                </div>
+                                <div class="price">${item.price}金币</div>
+                                <button onclick="buyItem('${item.name}')" data-key="${index + 1}" ${merchantData.gold < item.price ? 'disabled' : ''}>购买 [${index + 1}]</button>
                             </div>
-                            <div class="price">${item.price}金币</div>
-                            <button onclick="buyItem('${item.name}')" ${merchantData.gold < item.price ? 'disabled' : ''}>购买</button>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
+                    <div class="scroll-controls">
+                        <button class="scroll-btn" id="scroll-up-btn" onclick="scrollMerchantItems('up')">↑</button>
+                        <button class="scroll-btn" id="scroll-down-btn" onclick="scrollMerchantItems('down')">↓</button>
+                    </div>
                 </div>
                 <div class="player-gold">你的金币: ${merchantData.gold || 0}</div>
-                <button class="close-btn" onclick="closeMerchantDialog()">关闭</button>
+                <div class="merchant-instructions">
+                    <div>按数字键 [1-9] 购买对应商品</div>
+                    <div>按 [E] 键关闭商人界面</div>
+                    <div>使用 ↑↓ 按钮滚动查看更多商品</div>
+                </div>
+                <button class="close-btn" onclick="closeMerchantDialog()">关闭 [E]</button>
             `;
 
             overlay.appendChild(dialog);
             document.body.appendChild(overlay);
+
+            // 初始化滚动按钮状态
+            updateScrollButtons();
+
+            // 添加滚动事件监听器
+            const merchantItems = document.getElementById('merchant-items');
+            if (merchantItems) {
+                merchantItems.addEventListener('scroll', updateScrollButtons);
+            }
+        }
+
+        function updateScrollButtons() {
+            const merchantItems = document.getElementById('merchant-items');
+            const scrollUpBtn = document.getElementById('scroll-up-btn');
+            const scrollDownBtn = document.getElementById('scroll-down-btn');
+
+            if (!merchantItems || !scrollUpBtn || !scrollDownBtn) return;
+
+            // 更新向上按钮状态
+            scrollUpBtn.disabled = merchantItems.scrollTop <= 0;
+
+            // 更新向下按钮状态
+            const isScrolledToBottom = merchantItems.scrollTop + merchantItems.clientHeight >= merchantItems.scrollHeight - 5;
+            scrollDownBtn.disabled = isScrolledToBottom;
+        }
+
+        function scrollMerchantItems(direction) {
+            const merchantItems = document.getElementById('merchant-items');
+            if (!merchantItems) return;
+
+            const scrollAmount = 180; // 增加每次滚动的像素
+            if (direction === 'up') {
+                merchantItems.scrollTop = Math.max(0, merchantItems.scrollTop - scrollAmount);
+            } else {
+                merchantItems.scrollTop = Math.min(merchantItems.scrollHeight, merchantItems.scrollTop + scrollAmount);
+            }
+
+            // 更新按钮状态
+            setTimeout(updateScrollButtons, 100);
         }
 
         function closeMerchantDialog() {
@@ -665,6 +1125,62 @@
 
             let command = null;
 
+            // 先检查商人界面是否打开，如果打开则处理商人界面的特殊按键
+            const merchantOverlay = document.getElementById('merchant-overlay');
+            if (merchantOverlay) {
+                // 商人界面打开时的特殊按键处理
+                switch (event.key) {
+                    case 'e':
+                    case 'E':
+                    case 'Escape':
+                    case 'Esc':
+                        closeMerchantDialog();
+                        event.preventDefault();
+                        return; // 直接返回，不执行后续逻辑
+
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        // 数字键购买商品
+                        const itemIndex = parseInt(event.key) - 1;
+                        const merchantItems = merchantOverlay.querySelectorAll('.merchant-item[data-item-index]');
+                        if (merchantItems[itemIndex]) {
+                            const itemName = merchantItems[itemIndex].querySelector('.item-name').textContent;
+                            const buyButton = merchantItems[itemIndex].querySelector('button');
+                            if (buyButton && !buyButton.disabled) {
+                                buyItem(itemName);
+                            }
+                        }
+                        event.preventDefault();
+                        return; // 直接返回，不执行后续逻辑
+
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        // 上键控制滚动
+                        scrollMerchantItems('up');
+                        event.preventDefault();
+                        return; // 直接返回，不执行后续逻辑
+
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        // 下键控制滚动
+                        scrollMerchantItems('down');
+                        event.preventDefault();
+                        return; // 直接返回，不执行后续逻辑
+                }
+                // 商人界面打开时，其他按键不处理
+                return;
+            }
+
+            // 正常游戏状态的按键处理
             switch (event.key) {
                 case 'ArrowUp':
                 case 'w':
@@ -686,15 +1202,11 @@
                 case 'D':
                     command = {cmd: 'move', dir: 'right'};
                     break;
-                // 移除手动拾取和下楼按键，改为自动交互
-                // case 'e':
-                // case 'E':
-                //     command = {cmd: 'pickup'};
-                //     break;
-                // case '>':
-                // case '.':
-                //     command = {cmd: 'descend'};
-                //     break;
+                // 添加商人交互按键
+                case 'e':
+                case 'E':
+                    command = {cmd: 'merchant_info'};
+                    break;
                 case '1':
                 case '2':
                 case '3':
@@ -711,10 +1223,6 @@
                         const itemName = inventoryItems[index].querySelector('span:first-child').textContent;
                         command = {cmd: 'use_item', item_name: itemName};
                     }
-                    break;
-                case '0':
-                    // 与商人交易
-                    command = {cmd: 'merchant_info'};
                     break;
             }
 
