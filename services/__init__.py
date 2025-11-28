@@ -5,6 +5,9 @@
 from .player_service import PlayerService
 from .game_save_service import GameSaveService
 from .merchant_service import MerchantService
+from .auth_service import AuthService
+from .equipment_service import EquipmentService
+from .inventory_service import InventoryService
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,6 +21,9 @@ class ServiceManager:
         self.player_service = PlayerService()
         self.game_save_service = GameSaveService()
         self.merchant_service = MerchantService()
+        self.auth_service = AuthService()
+        self.equipment_service = EquipmentService()
+        self.inventory_service = InventoryService()
 
     # 玩家相关服务
     @property
@@ -37,12 +43,33 @@ class ServiceManager:
         """商人服务"""
         return self.merchant_service
 
+    # 认证相关服务
+    @property
+    def auth(self) -> AuthService:
+        """认证服务"""
+        return self.auth_service
+
+    # 装备相关服务
+    @property
+    def equipment(self) -> EquipmentService:
+        """装备服务"""
+        return self.equipment_service
+
+    # 背包道具相关服务
+    @property
+    def inventory(self) -> InventoryService:
+        """背包道具服务"""
+        return self.inventory_service
+
     def get_all_services(self):
         """获取所有服务实例"""
         return {
             'player': self.player_service,
             'game_save': self.game_save_service,
-            'merchant': self.merchant_service
+            'merchant': self.merchant_service,
+            'auth': self.auth_service,
+            'equipment': self.equipment_service,
+            'inventory': self.inventory_service
         }
 
     def close_all_connections(self):
@@ -64,6 +91,9 @@ __all__ = [
     'PlayerService',
     'GameSaveService',
     'MerchantService',
+    'AuthService',
+    'EquipmentService',
+    'InventoryService',
     'ServiceManager',
     'service_manager'
 ]

@@ -5,6 +5,12 @@
 import os
 from typing import Optional
 from dataclasses import dataclass
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    print("警告: 未安装python-dotenv，将使用系统环境变量")
+    pass
 
 
 @dataclass
@@ -38,11 +44,11 @@ class DatabaseConfigManager:
         """从环境变量加载数据库配置"""
         if self._config is None:
             self._config = DatabaseConfig(
-                host=os.getenv('DB_HOST', 'mysql.sqlpub.com'),
+                host=os.getenv('DB_HOST', 'localhost'),
                 port=int(os.getenv('DB_PORT', '3306')),
-                database=os.getenv('DB_NAME', 'ling_qian'),
-                user=os.getenv('DB_USER', 'root_925928496'),
-                password=os.getenv('DB_PASSWORD', 'ax9lIK0Ft6H35gse'),
+                database=os.getenv('DB_NAME', 'tower_game'),
+                user=os.getenv('DB_USER', ''),
+                password=os.getenv('DB_PASSWORD', ''),
                 pool_size=int(os.getenv('DB_POOL_SIZE', '5')),
                 max_overflow=int(os.getenv('DB_MAX_OVERFLOW', '10')),
                 pool_timeout=int(os.getenv('DB_POOL_TIMEOUT', '30')),
@@ -53,6 +59,25 @@ class DatabaseConfigManager:
     def get_config(self) -> DatabaseConfig:
         """获取数据库配置（单例模式）"""
         return self.load_config()
+
+    def is_configured(self) -> bool:
+        """检查数据库是否已正确配置"""
+        try:
+            config = self.load_config()
+            # 检查必要的配置项是否存在且不为空
+            return (
+                config.host and
+                config.database and
+                config.user and
+                config.password and
+                config.host.strip() != '' and
+                config.database.strip() != '' and
+                config.user.strip() != '' and
+                config.password.strip() != ''
+            )
+        except Exception as e:
+            print(f"配置检查错误: {e}")
+            return False
 
 
 # 全局配置管理器实例

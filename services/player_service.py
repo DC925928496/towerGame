@@ -37,6 +37,10 @@ class PlayerService(BaseService):
         except Exception as e:
             self.handle_error(e, "获取玩家信息")
 
+    def get_by_id(self, player_id: int) -> Optional[Dict[str, Any]]:
+        """根据ID获取玩家信息（别名方法）"""
+        return self.get_player(player_id)
+
     def update_player_stats(self, player_id: int, stats: Dict[str, int]) -> bool:
         """更新玩家状态"""
         self.validate_id(player_id, "玩家ID")
@@ -159,6 +163,18 @@ class PlayerService(BaseService):
             return self.player_dao.get_all_players()
         except Exception as e:
             self.handle_error(e, "获取所有玩家")
+
+    def update_player(self, player_id: int, update_data: Dict[str, Any]) -> bool:
+        """更新玩家信息"""
+        self.validate_id(player_id, "玩家ID")
+        if not isinstance(update_data, dict) or not update_data:
+            raise ValueError("更新数据必须是非空字典")
+
+        try:
+            self.log_operation(f"更新玩家信息: 玩家{player_id}")
+            return self.player_dao.update(player_id, update_data)
+        except Exception as e:
+            self.handle_error(e, "更新玩家信息")
 
     def delete_player(self, player_id: int) -> bool:
         """删除玩家"""

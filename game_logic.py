@@ -85,7 +85,7 @@ def calculate_damage_with_attributes(atk: int, defense: int, player_attributes: 
 def calculate_damage(atk: int, defense: int) -> int:
     """
     计算伤害 - 使用配置化的最小伤害值
-    伤害 = max(最小伤害, 攻击方.atk - 防御方.def)
+    伤害 = max(最小伤害, 攻击方.attack - 防御方.defense)
 
     Args:
         atk: 攻击力

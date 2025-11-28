@@ -9,6 +9,123 @@ from utils.game_utils import GameUtils
 from config.game_config import config_manager
 
 
+# ==================== 武器属性系统 ====================
+
+@dataclass
+class WeaponAttribute:
+    """武器随机属性类"""
+    attribute_type: str  # 'attack_boost', 'damage_mult', 'armor_pen', 'life_steal', 'gold_bonus', 'critical_chance'
+    value: float
+    description: str
+    level: int = 0  # 锻造等级，每级+10%效果
+
+    def to_dict(self) -> dict:
+        """转换为字典格式"""
+        return {
+            'attribute_type': self.attribute_type,
+            'value': self.value,
+            'description': self.description,
+            'level': self.level
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'WeaponAttribute':
+        """从字典创建属性对象"""
+        return cls(
+            attribute_type=data['attribute_type'],
+            value=data['value'],
+            description=data['description'],
+            level=data.get('level', 0)
+        )
+
+    def get_enhanced_value(self) -> float:
+        """获取锻造强化后的数值"""
+        return self.value * (1.0 + self.level * 0.1)  # 每级+10%
+
+
+# 属性类型配置
+ATTRIBUTE_TYPES = {
+    'attack_boost': {
+        'name': '攻击力',
+        'weight': 0.25,
+        'base_value': 5,
+        'scale': 0.5,
+        'description': '攻击力+{value}'
+    },
+    'damage_mult': {
+        'name': '伤害倍率',
+        'weight': 0.15,
+        'base_value': 0.1,
+        'scale': 0.01,
+        'description': '最终伤害+{value*100}%'
+    },
+    'armor_pen': {
+        'name': '防御穿透',
+        'weight': 0.15,
+        'base_value': 3,
+        'scale': 0.2,
+        'description': '防御穿透+{value}'
+    },
+    'life_steal': {
+        'name': '生命偷取',
+        'weight': 0.15,
+        'base_value': 0.05,
+        'scale': 0.003,
+        'description': '吸血率+{value*100}%'
+    },
+    'gold_bonus': {
+        'name': '金币加成',
+        'weight': 0.15,
+        'base_value': 0.2,
+        'scale': 0.01,
+        'description': '金币获取+{value*100}%'
+    },
+    'critical_chance': {
+        'name': '暴击率',
+        'weight': 0.15,
+        'base_value': 0.03,
+        'scale': 0.002,
+        'description': '暴击率+{value*100}%'
+    }
+}
+
+# 稀有度配置
+RARITY_CONFIG = {
+    'common': {
+        'name': '普通',
+        'color': '#ffffff',  # 白色
+        'attr_count': 2,
+        'probability': 0.5,
+        'multiplier': 1.0,
+        'prefixes': ['普通的']
+    },
+    'rare': {
+        'name': '稀有',
+        'color': '#0080ff',  # 蓝色
+        'attr_count': 3,
+        'probability': 0.3,
+        'multiplier': 1.0,
+        'prefixes': ['精良的', '锐利的']
+    },
+    'epic': {
+        'name': '史诗',
+        'color': '#800080',  # 紫色
+        'attr_count': 4,
+        'probability': 0.15,
+        'multiplier': 1.3,
+        'prefixes': ['史诗的', '强大的', '远古的']
+    },
+    'legendary': {
+        'name': '传说',
+        'color': '#ffd700',  # 金色
+        'attr_count': 5,
+        'probability': 0.05,
+        'multiplier': 1.8,
+        'prefixes': ['传说的', '神圣的', '不朽的']
+    }
+}
+
+
 # ==================== 基础数据类 ====================
 
 # Position 类现在从 utils.position_utils 导入
@@ -70,19 +187,72 @@ class Item:
     position: Position
     item_id: Optional[str] = None
 
+    # 新增字段：随机属性系统
+    rarity: str = 'common'  # common, rare, epic, legendary
+    attributes: List[WeaponAttribute] = None
+    base_name: Optional[str] = None  # 原始武器名称（用于生成新名称）
+
     def __post_init__(self):
         if self.item_id is None:
             self.item_id = f"item_{random.randint(1000, 9999)}"
+        if self.attributes is None:
+            self.attributes = []
+        if self.base_name is None:
+            self.base_name = self.name
 
     def to_dict(self) -> dict:
         """将Item对象转换为可JSON序列化的字典"""
-        return {
+        result = {
             'symbol': self.symbol,
             'name': self.name,
             'effect_type': self.effect_type,
             'effect_value': self.effect_value,
-            'item_id': self.item_id
+            'item_id': self.item_id,
+            'rarity': self.rarity,
+            'attributes': [attr.to_dict() for attr in self.attributes],
+            'base_name': self.base_name
         }
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Item':
+        """从字典创建Item对象（用于存档加载）"""
+        attributes = []
+        if 'attributes' in data:
+            attributes = [WeaponAttribute.from_dict(attr_data) for attr_data in data['attributes']]
+
+        return cls(
+            symbol=data['symbol'],
+            name=data['name'],
+            effect_type=data['effect_type'],
+            effect_value=data['effect_value'],
+            position=Position(0, 0),  # 位置将在加载时设置
+            item_id=data.get('item_id'),
+            rarity=data.get('rarity', 'common'),
+            attributes=attributes,
+            base_name=data.get('base_name', data.get('name', ''))
+        )
+
+    def get_display_color(self) -> str:
+        """获取稀有度对应的颜色"""
+        if self.effect_type != 'weapon':
+            return '#ffffff'  # 非武器物品保持白色
+
+        return RARITY_CONFIG.get(self.rarity, RARITY_CONFIG['common'])['color']
+
+    def get_rarity_name(self) -> str:
+        """获取稀有度中文名称"""
+        if self.effect_type != 'weapon':
+            return ''  # 非武器物品不显示稀有度
+
+        return RARITY_CONFIG.get(self.rarity, RARITY_CONFIG['common'])['name']
+
+    def get_attribute_descriptions(self) -> List[str]:
+        """获取所有属性的描述文本"""
+        if not self.attributes:
+            return []
+
+        return [attr.description.format(value=attr.get_enhanced_value()) for attr in self.attributes]
 
 
 class Monster:
@@ -115,7 +285,7 @@ class Player:
     def __init__(self):
         self.hp = 500
         self.max_hp = 500
-        self.atk = 50
+        self.attack = 50  # 修改字段名以匹配数据库
         self.defense = 20
         self.exp = 0
         self.level = 1
@@ -125,6 +295,8 @@ class Player:
         # 装备
         self.weapon_atk = 0
         self.weapon_name = None
+        self.weapon_attributes: List[WeaponAttribute] = []  # 新增：武器随机属性
+        self.weapon_rarity = 'common'  # 新增：武器稀有度
         self.armor_def = 0
         self.armor_name = None
 
@@ -133,8 +305,141 @@ class Player:
 
     @property
     def total_atk(self) -> int:
-        """总攻击力 = 基础 + 武器加成"""
-        return self.atk + self.weapon_atk
+        """总攻击力 = 基础 + 武器加成 + 属性加成"""
+        base_atk = self.attack + self.weapon_atk  # 修改字段名引用
+
+        # 计算武器属性的攻击力加成
+        attack_boost = 0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'attack_boost':
+                attack_boost += attr.get_enhanced_value()
+
+        return base_atk + int(attack_boost)
+
+    def get_damage_multiplier(self) -> float:
+        """获取武器属性提供的伤害倍率"""
+        multiplier = 1.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'damage_mult':
+                multiplier += attr.get_enhanced_value()
+        return multiplier
+
+    def get_armor_penetration(self) -> int:
+        """获取武器属性提供的防御穿透"""
+        armor_pen = 0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'armor_pen':
+                armor_pen += attr.get_enhanced_value()
+        return int(armor_pen)
+
+    def get_life_steal_rate(self) -> float:
+        """获取武器属性提供的吸血率"""
+        life_steal = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'life_steal':
+                life_steal += attr.get_enhanced_value()
+        return life_steal
+
+    def get_gold_bonus_rate(self) -> float:
+        """获取武器属性提供的金币加成率"""
+        gold_bonus = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'gold_bonus':
+                gold_bonus += attr.get_enhanced_value()
+        return gold_bonus
+
+    def get_critical_chance(self) -> float:
+        """获取武器属性提供的暴击率（基础暴击率从配置读取）"""
+        base_crit_chance = config_manager.get_config().CRITICAL_HIT_CHANCE
+        crit_bonus = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'critical_chance':
+                crit_bonus += attr.get_enhanced_value()
+        return base_crit_chance + crit_bonus
+
+    def equip_weapon(self, weapon_item: 'Item') -> List[str]:
+        """装备武器，返回装备日志"""
+        logs = []
+
+        # 保存旧武器信息用于掉落
+        old_weapon_name = self.weapon_name
+        old_weapon_atk = self.weapon_atk
+        old_weapon_attributes = self.weapon_attributes.copy()
+        old_weapon_rarity = self.weapon_rarity
+
+        # 装备新武器
+        self.weapon_name = weapon_item.name
+        self.weapon_atk = weapon_item.effect_value
+        self.weapon_attributes = weapon_item.attributes.copy() if weapon_item.attributes else []
+        self.weapon_rarity = weapon_item.rarity
+
+        logs.append(f"装备了 {weapon_item.name}")
+
+        # 显示属性信息
+        if self.weapon_attributes:
+            attr_descs = weapon_item.get_attribute_descriptions()
+            logs.append(f"武器属性: {', '.join(attr_descs)}")
+
+        # 处理旧武器掉落逻辑在game_logic中进行
+        # 这里只需要返回日志，由调用者处理旧武器
+        return {
+            'logs': logs,
+            'old_weapon': {
+                'name': old_weapon_name,
+                'atk': old_weapon_atk,
+                'attributes': old_weapon_attributes,
+                'rarity': old_weapon_rarity
+            }
+        }
+
+    def forge_weapon_attribute(self, attribute_index: int) -> Optional[str]:
+        """锻造强化指定的武器属性，返回日志消息"""
+        if not self.weapon_attributes:
+            return "当前没有装备武器"
+
+        if attribute_index < 0 or attribute_index >= len(self.weapon_attributes):
+            return "无效的属性索引"
+
+        # 检查金币
+        forge_cost = self.calculate_forge_cost(attribute_index)
+        if self.gold < forge_cost:
+            return f"金币不足！需要 {forge_cost} 金币"
+
+        # 检查等级上限
+        target_attr = self.weapon_attributes[attribute_index]
+        if target_attr.level >= 5:
+            return f"该属性已达到最高强化等级 (+5)"
+
+        # 执行强化
+        self.gold -= forge_cost
+        target_attr.level += 1
+
+        # 获取属性描述
+        attr_name = ATTRIBUTE_TYPES[target_attr.attribute_type]['name']
+        enhanced_value = target_attr.get_enhanced_value()
+
+        return f"强化成功！{attr_name} 提升到 +{enhanced_value:.1f} (Lv.{target_attr.level})"
+
+    def calculate_forge_cost(self, attribute_index: int) -> int:
+        """计算强化指定属性的金币消耗"""
+        if not self.weapon_attributes or attribute_index < 0 or attribute_index >= len(self.weapon_attributes):
+            return 0
+
+        target_attr = self.weapon_attributes[attribute_index]
+        base_cost = 100  # 基础费用
+        level_cost = target_attr.level * 50  # 每级+50金币
+
+        # 稀有度加成
+        rarity_multiplier = {
+            'common': 1.0,
+            'rare': 1.2,
+            'epic': 1.5,
+            'legendary': 2.0
+        }
+
+        cost_multiplier = rarity_multiplier.get(self.weapon_rarity, 1.0)
+
+        return int(base_cost * cost_multiplier + level_cost)
 
     @property
     def total_def(self) -> int:
@@ -178,10 +483,10 @@ class Player:
         self.level += 1
         self.max_hp += 50
         self.hp = self.max_hp  # 回满血
-        self.atk += 5
+        self.attack += 5
         self.defense += 3
 
-        logs.append(f"升级了！Lv.{self.level}，max_hp+50，atk+5，def+3")
+        logs.append(f"升级了！Lv.{self.level}，max_hp+50，attack+5，def+3")
 
     def use_item(self, item_name: str) -> Optional[str]:
         """使用背包道具，返回日志消息"""

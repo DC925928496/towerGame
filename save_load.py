@@ -1,7 +1,7 @@
 import json
 import os
 from typing import Dict, Any, Optional
-from game_model import Player, Floor, Monster, Item, Position
+from game_model import Player, Floor, Monster, Item, Position, WeaponAttribute
 from map_generator import generate_floor
 
 
@@ -26,7 +26,7 @@ def save_game(player: Player, floor: Floor, floor_level: int) -> bool:
             'player': {
                 'hp': player.hp,
                 'max_hp': player.max_hp,
-                'atk': player.atk,
+                'attack': player.attack,
                 'defense': player.defense,
                 'exp': player.exp,
                 'level': player.level,
@@ -34,6 +34,8 @@ def save_game(player: Player, floor: Floor, floor_level: int) -> bool:
                 'position': {'x': player.position.x, 'y': player.position.y},
                 'weapon_atk': player.weapon_atk,
                 'weapon_name': player.weapon_name,
+                'weapon_rarity': player.weapon_rarity,
+                'weapon_attributes': [attr.to_dict() for attr in player.weapon_attributes],
                 'armor_def': player.armor_def,
                 'armor_name': player.armor_name,
                 'inventory': player.inventory
@@ -73,7 +75,8 @@ def load_player(data: Dict[str, Any]) -> Player:
     player = Player()
     player.hp = data['hp']
     player.max_hp = data['max_hp']
-    player.atk = data['atk']
+    # 兼容旧版本存档（字段名从 atk 改为 attack）
+    player.attack = data.get('attack', data.get('atk', 50))
     player.defense = data['defense']
     player.exp = data['exp']
     player.level = data['level']
@@ -81,9 +84,24 @@ def load_player(data: Dict[str, Any]) -> Player:
     player.position = Position(data['position']['x'], data['position']['y'])
     player.weapon_atk = data.get('weapon_atk', 0)
     player.weapon_name = data.get('weapon_name')
+    player.weapon_rarity = data.get('weapon_rarity', 'common')  # 默认普通稀有度
     player.armor_def = data.get('armor_def', 0)
     player.armor_name = data.get('armor_name')
     player.inventory = data['inventory']
+
+    # 处理武器属性（兼容旧版本存档）
+    weapon_attributes_data = data.get('weapon_attributes', [])
+    player.weapon_attributes = []
+
+    for attr_data in weapon_attributes_data:
+        # 重建WeaponAttribute对象
+        attribute = WeaponAttribute(
+            attribute_type=attr_data['attribute_type'],
+            value=attr_data['value'],
+            description=attr_data['description'],
+            level=attr_data.get('level', 0)
+        )
+        player.weapon_attributes.append(attribute)
 
     return player
 

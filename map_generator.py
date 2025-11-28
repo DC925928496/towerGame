@@ -3,7 +3,8 @@ from typing import List, Optional, Dict
 
 from game_model import (
     Floor, Room, Position, Cell, CellType,
-    Monster, Item, FINAL_BOSS, Merchant, MerchantItem
+    Monster, Item, FINAL_BOSS, Merchant, MerchantItem,
+    WeaponAttribute, ATTRIBUTE_TYPES, RARITY_CONFIG
 )
 
 # 导入新的工具类和配置
@@ -169,6 +170,81 @@ def is_valid_guard_position(floor: Floor, pos: Position, existing_guards: List[P
             return False
 
     return True
+
+# ==================== 武器随机属性生成 ====================
+
+def generate_weapon_attributes(floor_level: int, rarity: str) -> List[WeaponAttribute]:
+    """为武器生成随机属性列表"""
+    if rarity not in RARITY_CONFIG:
+        rarity = 'common'
+
+    attr_count = RARITY_CONFIG[rarity]['attr_count']
+
+    # 随机选择属性类型（不重复）
+    available_types = list(ATTRIBUTE_TYPES.keys())
+    selected_types = random.sample(available_types, min(attr_count, len(available_types)))
+
+    attributes = []
+    for attr_type in selected_types:
+        attr_config = ATTRIBUTE_TYPES[attr_type]
+
+        # 基于楼层和稀有度计算数值
+        base_value = attr_config['base_value'] + floor_level * attr_config['scale']
+        rarity_multiplier = RARITY_CONFIG[rarity]['multiplier']
+        final_value = base_value * rarity_multiplier
+
+        # 创建属性 - 处理特殊格式化字符串
+        description = attr_config['description']
+        if '{value*100}' in description:
+            # 对于百分比格式，需要先计算乘积再格式化
+            description = description.replace('{value*100}', f'{final_value*100:.1f}')
+        else:
+            description = description.format(value=final_value)
+
+        attribute = WeaponAttribute(
+            attribute_type=attr_type,
+            value=final_value,
+            description=description,
+            level=0
+        )
+        attributes.append(attribute)
+
+    return attributes
+
+def generate_weapon_name(floor_level: int, rarity: str, attributes: List[WeaponAttribute]) -> str:
+    """为武器生成动态名称"""
+    # 获取稀有度前缀
+    rarity_config = RARITY_CONFIG[rarity]
+    prefix = random.choice(rarity_config['prefixes'])
+
+    # 根据主要属性选择后缀
+    if not attributes:
+        base_name = "短剑"
+    else:
+        # 选择数值最高的属性作为武器特性
+        main_attr = max(attributes, key=lambda a: a.value)
+        attr_names = {
+            'attack_boost': '力量',
+            'damage_mult': '狂暴',
+            'armor_pen': '穿透',
+            'life_steal': '吸血',
+            'gold_bonus': '财富',
+            'critical_chance': '致命'
+        }
+        base_name = attr_names.get(main_attr.attribute_type, '神兵')
+
+    return f"{prefix}{base_name}"
+
+def generate_rarity() -> str:
+    """随机生成稀有度"""
+    # 使用加权随机选择
+    weights = []
+    rarities = []
+    for rarity, config in RARITY_CONFIG.items():
+        weights.append(config['probability'])
+        rarities.append(rarity)
+
+    return random.choices(rarities, weights=weights)[0]
 
 # ==================== 生成函数 ====================
 
@@ -376,24 +452,43 @@ def generate_item(floor_level: int, position: Position) -> Item:
         effect_value = 100 + floor_level * 20
         name = f"血瓶"
         symbol = '+'
+        return Item(
+            symbol=symbol,
+            name=name,
+            effect_type=item_type,
+            effect_value=effect_value,
+            position=position
+        )
     elif item_type == 'weapon':
-        # 武器：攻击加成随层数增长
-        effect_value = floor_level * 5
-        name = f"长剑+{effect_value}"
-        symbol = '↑'
+        # 生成随机稀有度武器
+        rarity = generate_rarity()
+        attributes = generate_weapon_attributes(floor_level, rarity)
+        weapon_name = generate_weapon_name(floor_level, rarity, attributes)
+        attack_value = floor_level * 5
+
+        return Item(
+            symbol='↑',
+            name=weapon_name,
+            effect_type='weapon',
+            effect_value=attack_value,
+            position=position,
+            rarity=rarity,
+            attributes=attributes,
+            base_name=weapon_name
+        )
     else:  # armor
-        # 防具：防御加成随层数增长
+        # 防具：防御加成随层数增长（防具暂不支持随机属性）
         effect_value = floor_level * 3
         name = f"铠甲+{effect_value}"
         symbol = '◆'
 
-    return Item(
-        symbol=symbol,
-        name=name,
-        effect_type=item_type,
-        effect_value=effect_value,
-        position=position
-    )
+        return Item(
+            symbol=symbol,
+            name=name,
+            effect_type=item_type,
+            effect_value=effect_value,
+            position=position
+        )
 
 
 def connect_rooms(room1: Room, room2: Room, floor: Floor):

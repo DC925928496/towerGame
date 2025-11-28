@@ -98,18 +98,25 @@ towerGame/
 ├── map_generator.py   # 地图生成系统
 ├── save_load.py      # 存档系统（JSON兼容）
 ├── database/           # 数据库层
-│   ├── connection_pool.py    # 数据库连接池
+│   ├── simple_connection_pool.py    # 简化数据库连接池
 │   ├── dao/                  # 数据访问对象层
 │   │   ├── base_dao.py       # DAO基类
 │   │   ├── player_dao.py     # 玩家数据访问
+│   │   ├── session_dao.py    # 会话数据访问
+│   │   ├── login_log_dao.py  # 登录日志访问
 │   │   ├── game_save_dao.py  # 存档数据访问
+│   │   ├── equipment_dao.py  # 装备数据访问
+│   │   ├── inventory_dao.py  # 背包数据访问
 │   │   ├── merchant_dao.py   # 商人数据访问
 │   │   └── ...               # 其他DAO类
-│   └── schema.sql            # 数据库表结构
+│   └── .env.example         # 数据库配置模板
 ├── services/           # 业务服务层
 │   ├── base_service.py       # 服务基类
 │   ├── player_service.py     # 玩家服务
+│   ├── auth_service.py       # 用户认证服务
 │   ├── game_save_service.py  # 存档服务
+│   ├── equipment_service.py  # 装备管理服务
+│   ├── inventory_service.py  # 背包道具服务
 │   ├── merchant_service.py   # 商人服务
 │   └── __init__.py           # 服务管理器
 ├── config/             # 配置管理
@@ -124,12 +131,13 @@ towerGame/
 ### 数据库架构
 ```
 MySQL数据库表结构：
-├── players            # 玩家基本信息
-├── weapon_attributes  # 武器属性（锻造系统）
-├── game_saves         # 游戏存档
-├── saved_floors       # 保存的楼层
-├── floor_items        # 楼层物品
-├── player_equipment   # 玩家装备
+├── players            # 玩家基本信息和游戏数据
+├── user_sessions      # 用户会话管理
+├── login_logs         # 登录活动日志
+├── weapon_attributes  # 武器锻造词条属性
+├── game_saves         # 游戏存档记录
+├── player_equipment   # 玩家装备（武器/防具）
+├── player_inventory   # 玩家背包道具
 ├── floor_merchants    # 楼层商人
 └── merchant_inventories # 商人库存
 ```
@@ -267,19 +275,61 @@ python -m py_compile *.py utils/*.py config/*.py
 ```
 
 ### 版本信息
-**当��版本：v2.1**
-- MySQL数据库持久化系统
-- 三层架构（DAO层、服务层、游戏逻辑层）
-- 连接池和事务管理
-- 向后兼容JSON存档
-- 配置安全管理
-- 完整的测试套件
-- 武器防具掉落系统修复
-- 拾取逻辑优化和错误修复
+**当前版本：v2.2**
+- 用户认证与会话管理系统
+- 完整的存档加载系统（支持装备、道具、武器词条）
+- 优化的自动保存策略（仅关键节点保存）
+- 服务层架构完善（认证、装备、道具服务）
+- 数据库连接池优化
+- 装备和道具数据持久化
+- 武器词条完整支持
+- 代码清理和优化
 
 ---
 
-## 🎮 新版本亮点 (v2.1)
+## 🎮 新版本亮点 (v2.2)
+
+### 用户认证系统 🆕
+- **JWT令牌认证**：安全的用户登录和会话管理
+- **会话持久化**：自动登录，跨会话保持登录状态
+- **安全防护**：密码哈希、登录次数限制、账户锁定机制
+- **登录日志**：完整的用户活动记录和安全审计
+
+### 完整存档系统 🔄
+- **装备数据持久化**：武器和防具信息完整保存和加载
+- **道具系统持久化**：背包道具数量和类型完整支持
+- **武器词条支持**：锻造词条等级和属性完整持久化
+- **智能存档管理**：覆盖式保存，避免数据冗余
+- **一键登录恢复**：登录后自动恢复完整游戏进度
+
+### 优化自动保存策略 ⚡
+- **关键节点保存**：仅在上楼和通关时保存，减少数据库压力
+- **性能提升**：减少80%的自动保存调用
+- **数据安全**：重要进度节点仍然受到保护
+- **存储优化**：避免重复数据，数据库更整洁
+
+### 服务层架构完善 🏗️
+- **AuthService**：用户注册、登录、会话管理
+- **EquipmentService**：装备管理和持久化
+- **InventoryService**：背包道具管理
+- **BaseService增强**：添加validate_positive等验证方法
+
+### 数据库架构升级 💾
+- **player_equipment表**：装备数据完整存储
+- **player_inventory表**：道具背包数据持久化
+- **user_sessions表**：用户会话管理
+- **login_logs表**：登录活动审计
+- **连接池优化**：SimpleDatabaseConnectionPool替代复杂池系统
+
+### 代码清理和优化 🧹
+- **移除手动上楼**：统一自动上楼机制
+- **删除冗余代码**：清理不再使用的功能模块
+- **导入优化**：移除无用的导入和依赖
+- **架构统一**：简化代码结构，提高可维护性
+
+---
+
+## 🎮 旧版本亮点 (v2.1)
 
 ### 武器防具掉落系统修复 🆕
 - **装备掉落显示修复**：拾取新装备后，旧装备正确掉落在地上并可见显示
@@ -380,5 +430,5 @@ MIT License - 可自由使用、修改和分发
 
 ---
 
-*核心特色：怪物威胁区域 + MySQL持久化 + 装备掉落系统*
-*版本：v2.1 - 装备掉落修复 + 拾取逻辑优化*
+*核心特色：用户认证 + 完整存档系统 + 自动保存优化 + 武器词条支持*
+*版本：v2.2 - 用户认证系统 + 存档加载修复 + 性能优化*

@@ -43,6 +43,11 @@ class BaseService:
         if not isinstance(value, (int, float)) or value < 0:
             raise ValueError(f"{field_name}必须是非负数")
 
+    def validate_positive(self, value: Union[int, float], field_name: str = "数值") -> None:
+        """验证正数"""
+        if not isinstance(value, (int, float)) or value <= 0:
+            raise ValueError(f"{field_name}必须是正数")
+
     def create_response(self, success: bool, data: Any = None, message: str = "", error: str = "") -> Dict[str, Any]:
         """创建统一响应格式"""
         response = {

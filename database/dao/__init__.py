@@ -10,6 +10,9 @@ from .floor_dao import FloorDAO
 from .item_dao import ItemDAO
 from .merchant_dao import MerchantDAO
 from .merchant_inventory_dao import MerchantInventoryDAO
+from .session_dao import SessionDAO
+from .login_log_dao import LoginLogDAO
+from .inventory_dao import InventoryDAO
 
 
 class DAOManager:
@@ -25,6 +28,9 @@ class DAOManager:
         self.item_dao = ItemDAO()
         self.merchant_dao = MerchantDAO()
         self.merchant_inventory_dao = MerchantInventoryDAO()
+        self.session_dao = SessionDAO()
+        self.login_log_dao = LoginLogDAO()
+        self.inventory_dao = InventoryDAO()
 
     # 玩家相关DAO
     @property
@@ -74,6 +80,24 @@ class DAOManager:
         """商人库存DAO"""
         return self.merchant_inventory_dao
 
+    # 会话相关DAO
+    @property
+    def session(self) -> SessionDAO:
+        """会话DAO"""
+        return self.session_dao
+
+    # 登录日志相关DAO
+    @property
+    def login_log(self) -> LoginLogDAO:
+        """登录日志DAO"""
+        return self.login_log_dao
+
+    # 背包道具相关DAO
+    @property
+    def inventory(self) -> InventoryDAO:
+        """背包道具DAO"""
+        return self.inventory_dao
+
     def get_all_daos(self):
         """获取所有DAO实例"""
         return {
@@ -84,7 +108,10 @@ class DAOManager:
             'floor': self.floor_dao,
             'item': self.item_dao,
             'merchant': self.merchant_dao,
-            'merchant_inventory': self.merchant_inventory_dao
+            'merchant_inventory': self.merchant_inventory_dao,
+            'session': self.session_dao,
+            'login_log': self.login_log_dao,
+            'inventory': self.inventory_dao
         }
 
     def close_all_connections(self):
@@ -108,6 +135,9 @@ __all__ = [
     'ItemDAO',
     'MerchantDAO',
     'MerchantInventoryDAO',
+    'SessionDAO',
+    'LoginLogDAO',
+    'InventoryDAO',
     'DAOManager',
     'dao_manager'
 ]

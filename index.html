@@ -316,6 +316,238 @@
             transform: translateX(3px);
         }
 
+        /* 锻造对话框 */
+        .forge-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+            border: 2px solid #FF6B35;
+            padding: 25px;
+            border-radius: 15px;
+            z-index: 1000;
+            min-width: 90vw;
+            max-width: 95vw;
+            width: 800px;
+            height: 80vh;
+            max-height: 85vh;
+            box-shadow: 0 0 40px rgba(255, 107, 53, 0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 锻造对话框响应式设计 */
+        @media (max-width: 768px) {
+            .forge-dialog {
+                min-width: 95vw;
+                max-width: 98vw;
+                height: 85vh;
+                max-height: 90vh;
+                padding: 15px;
+            }
+        }
+
+        .forge-dialog h3 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .forge-info-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .forge-weapon-info {
+            background: linear-gradient(135deg, #333 0%, #444 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #FF6B35;
+        }
+
+        .forge-weapon-name {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .forge-weapon-rarity {
+            color: #FFD700;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .forge-attributes-list {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #555;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+        }
+
+        .forge-attribute-item {
+            margin: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+            border-radius: 12px;
+            border-left: 5px solid #FF6B35;
+            transition: all 0.3s ease;
+        }
+
+        .forge-attribute-item:hover {
+            background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .forge-attr-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .forge-attr-description {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .forge-attr-level {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8F65 100%);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            margin-left: 10px;
+        }
+
+        .forge-attr-details {
+            color: #cccccc;
+            font-size: 13px;
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .forge-attr-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #555;
+        }
+
+        .forge-attr-cost {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .forge-attr-success-rate {
+            color: #4CAF50;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .forge-attr-button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8F65 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 80px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .forge-attr-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #FF8F65 0%, #FF6B35 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+        }
+
+        .forge-attr-button:disabled {
+            background: linear-gradient(135deg, #666 0%, #555 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .forge-player-gold {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 18px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .forge-instructions {
+            background: linear-gradient(135deg, #333 0%, #444 100%);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #ddd;
+            text-align: center;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .forge-instructions div {
+            margin: 2px 0;
+            padding: 2px 0;
+            transition: all 0.2s ease;
+        }
+
+        .forge-instructions div:hover {
+            color: #FF6B35;
+            transform: scale(1.02);
+        }
+
+        .forge-dialog .close-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+
+        .forge-dialog .close-btn:hover {
+            background: linear-gradient(135deg, #da190b 0%, #b71c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+        }
+
+        .forge-dialog .close-btn:active {
+            transform: translateY(0);
+        }
+
         /* 商人对话框 */
         .merchant-dialog {
             position: fixed;
@@ -631,15 +863,404 @@
             box-shadow: 0 2px 6px rgba(76, 175, 80, 0.4);
             border: 2px solid white;
         }
+
+        /* ============ 登录界面样式 ============ */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(26, 32, 44, 0.98) 0%, rgba(45, 55, 72, 0.98) 100%);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .login-container {
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border: 2px solid #4a5568;
+            border-radius: 15px;
+            padding: 30px;
+            min-width: 400px;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #68d391;
+            font-size: 32px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(104, 211, 145, 0.3);
+        }
+
+        .login-header p {
+            color: #9ca3af;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .login-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #4a5568;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #68d391;
+            border-bottom-color: #68d391;
+            background: linear-gradient(90deg, rgba(104, 211, 145, 0.1) 0%, transparent 100%);
+        }
+
+        .tab-btn:hover {
+            color: #e2e8f0;
+        }
+
+        .login-form h2, .register-form h2 {
+            color: #68d391;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(104, 211, 145, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+            border: 2px solid #4b5563;
+            border-radius: 8px;
+            color: #e5e7eb;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #68d391;
+            box-shadow: 0 0 15px rgba(104, 211, 145, 0.3);
+            background: linear-gradient(145deg, #374151 0%, #1a202c 100%);
+        }
+
+        .input-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .login-btn, .register-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(104, 211, 145, 0.3);
+            margin-top: 10px;
+        }
+
+        .login-btn:hover, .register-btn:hover {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(104, 211, 145, 0.4);
+        }
+
+        .login-btn:active, .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled, .register-btn:disabled {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-message, .register-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .login-message.error, .register-message.error {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: #f87171;
+        }
+
+        .login-message.success, .register-message.success {
+            background: rgba(104, 211, 145, 0.1);
+            border: 1px solid rgba(104, 211, 145, 0.3);
+            color: #68d391;
+        }
+
+        /* 记住我选项样式 */
+        .remember-me-group {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 0 5px;
+        }
+
+        .remember-me-checkbox {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            accent-color: #68d391;
+            cursor: pointer;
+        }
+
+        .remember-me-label {
+            color: #e5e7eb;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+
+        .remember-me-label:hover {
+            color: #68d391;
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #4a5568;
+        }
+
+        .login-footer p {
+            color: #9ca3af;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* 昵称修改按钮样式 */
+        .nickname-btn {
+            background: transparent;
+            border: 1px solid #68d391;
+            color: #68d391;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nickname-btn:hover {
+            background: #68d391;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* 昵称修改模态框 */
+        .nickname-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nickname-modal-content {
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border: 2px solid #4a5568;
+            border-radius: 12px;
+            padding: 25px;
+            min-width: 300px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .nickname-modal h3 {
+            color: #68d391;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .nickname-input {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+            border: 2px solid #4b5563;
+            border-radius: 6px;
+            color: #e5e7eb;
+            font-size: 14px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .nickname-input:focus {
+            outline: none;
+            border-color: #68d391;
+            box-shadow: 0 0 10px rgba(104, 211, 145, 0.3);
+        }
+
+        .nickname-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .nickname-btn-modal {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nickname-btn-confirm {
+            background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
+            color: white;
+        }
+
+        .nickname-btn-confirm:hover {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .nickname-btn-cancel {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            color: #e5e7eb;
+        }
+
+        .nickname-btn-cancel:hover {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        }
+
+        /* 隐藏登录界面时的主容器样式 */
+        body.logged-in .login-overlay {
+            display: none;
+        }
+
+        body.logged-in .main-container {
+            opacity: 1;
+        }
+
+        body:not(.logged-in) .main-container {
+            opacity: 0.3;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
+    <!-- 登录界面 -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🏰 爬塔游戏</h1>
+                <p>Tower Climbing Adventure</p>
+            </div>
+
+            <div class="login-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">登录</button>
+                <button class="tab-btn" onclick="switchTab('register')">注册</button>
+            </div>
+
+            <!-- 登录表单 -->
+            <div class="login-form" id="login-form">
+                <h2>欢迎回来</h2>
+                <div class="input-group">
+                    <input type="text" id="login-username" placeholder="用户名" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="login-password" placeholder="密码" required>
+                </div>
+                <div class="remember-me-group">
+                    <input type="checkbox" id="remember-me" class="remember-me-checkbox">
+                    <label for="remember-me" class="remember-me-label">记住登录状态</label>
+                </div>
+                <button class="login-btn" onclick="handleLogin()">登录游戏</button>
+                <div class="login-message" id="login-message"></div>
+            </div>
+
+            <!-- 注册表单 -->
+            <div class="register-form" id="register-form" style="display: none;">
+                <h2>创建新账户</h2>
+                    <div class="input-group">
+                        <input type="text" id="register-username" placeholder="用户名 (3-20字符，字母数字下划线)" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="register-nickname" placeholder="昵称 (1-50字符)" maxlength="50" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="register-password" placeholder="密码 (至少6位，包含字母和数字)" required>
+                    </div>
+                <div class="input-group">
+                    <input type="password" id="register-confirm-password" placeholder="确认密码" required>
+                </div>
+                <button class="register-btn" onclick="handleRegister()">注册账户</button>
+                <div class="register-message" id="register-message"></div>
+            </div>
+
+            <div class="login-footer">
+                <p>💡 提示：游戏进度会自动保存到您的账户中</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 昵称修改模态框 -->
+    <div class="nickname-modal" id="nickname-modal" style="display: none;">
+        <div class="nickname-modal-content">
+            <h3>修改昵称</h3>
+            <input type="text" class="nickname-input" id="nickname-input" placeholder="输入新昵称（最多50字符）" maxlength="50">
+            <div class="nickname-buttons">
+                <button class="nickname-btn-modal nickname-btn-cancel" onclick="hideNicknameModal()">取消</button>
+                <button class="nickname-btn-modal nickname-btn-confirm" onclick="updateNickname()">确认</button>
+            </div>
+        </div>
+    </div>
+
     <div class="main-container">
         <div class="left-panel">
             <h3>游戏信息</h3>
             <div class="info-item">
                 <span>楼层:</span>
                 <span id="floor">1</span>
+            </div>
+            <div class="info-item">
+                <span>昵称:</span>
+                <span id="nickname">gamer</span>
+                <button class="nickname-btn" onclick="showNicknameModal()" title="修改昵称">✏️</button>
+                <button class="nickname-btn" onclick="handleLogout()" title="登出">🚪</button>
             </div>
 
             <div class="separator"></div>
@@ -710,9 +1331,10 @@
                 <div class="legend-item"># 墙</div>
 
                 <h4 style="margin-top: 10px;">操作</h4>
+                <div class="legend-item">E 与商人交易</div>
+                <div class="legend-item">F 打开锻造界面</div>
                 <div class="legend-item">↑↓←→ 或 WASD 移动</div>
                 <div class="legend-item">1-9 使用背包道具</div>
-                <div class="legend-item">E 与商人交易</div>
             </div>
         </div>
     </div>
@@ -736,6 +1358,446 @@
     </div>
 
     <script>
+        // ============ 登录系统变量 ============
+        let isAuthenticated = false;
+        let pendingRegisterCredentials = null;
+        let currentUser = null;
+        let sessionToken = null;
+
+        // ============ 登录系统函数 ============
+
+        // 切换登录/注册标签
+        function switchTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+
+            // 清除消息
+            document.getElementById('login-message').textContent = '';
+            document.getElementById('login-message').className = 'login-message';
+            document.getElementById('register-message').textContent = '';
+            document.getElementById('register-message').className = 'register-message';
+
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                tabBtns[0].classList.add('active');
+                tabBtns[1].classList.remove('active');
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                tabBtns[0].classList.remove('active');
+                tabBtns[1].classList.add('active');
+            }
+        }
+
+        // 处理登录
+        async function handleLogin() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const messageDiv = document.getElementById('login-message');
+            const loginBtn = document.querySelector('.login-btn');
+
+            // 验证输入
+            if (!username || !password) {
+                showMessage(messageDiv, '请填写用户名和密码', 'error');
+                return;
+            }
+
+            // 禁用按钮，显示加载状态
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            messageDiv.textContent = '';
+            messageDiv.className = 'login-message';
+
+            try {
+                const authMessage = {
+                    type: 'auth',
+                    action: 'login',
+                    username: username,
+                    password: password
+                };
+
+                // 发送认证消息
+                ws.send(JSON.stringify(authMessage));
+
+            } catch (error) {
+                showMessage(messageDiv, '登录失败: ' + error.message, 'error');
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录游戏';
+            }
+        }
+
+        // 处理注册
+        async function handleRegister() {
+            const username = document.getElementById('register-username').value.trim();
+            const nickname = document.getElementById('register-nickname').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const messageDiv = document.getElementById('register-message');
+            const registerBtn = document.querySelector('.register-btn');
+
+            // 验证输入
+            const validationError = validateRegistrationInput(username, nickname, password, confirmPassword);
+            if (validationError) {
+                showMessage(messageDiv, validationError, 'error');
+                return;
+            }
+
+            // 禁用按钮，显示加载状态
+            registerBtn.disabled = true;
+            registerBtn.textContent = '注册中...';
+            messageDiv.textContent = '';
+            messageDiv.className = 'register-message';
+
+            try {
+                const registerMessage = {
+                    type: 'auth',
+                    action: 'register',
+                    username: username,
+                    nickname: nickname,
+                    password: password
+                };
+
+                // 发送注册消息
+                pendingRegisterCredentials = {username, password};
+                ws.send(JSON.stringify(registerMessage));
+
+            } catch (error) {
+                showMessage(messageDiv, '注册失败: ' + error.message, 'error');
+                registerBtn.disabled = false;
+                registerBtn.textContent = '注册账户';
+            }
+        }
+
+        // 验证注册输入
+        function validateRegistrationInput(username, nickname, password, confirmPassword) {
+            if (!username || !nickname || !password || !confirmPassword) {
+                return '请填写所有字段';
+            }
+
+            // 用户名验证：3-20字符，字母数字下划线，以字母开头
+            if (!/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(username)) {
+                return '用户名必须为3-20字符，以字母开头，只能包含字母、数字和下划线';
+            }
+
+            if (nickname.length === 0 || nickname.length > 50) {
+                return '昵称长度需要在1-50之间';
+            }
+
+            // 密码验证
+            if (password.length < 6) {
+                return '密码至少需要6位字符';
+            }
+
+            if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+                return '密码必须包含字母和数字';
+            }
+
+            if (password !== confirmPassword) {
+                return '两次输入的密码不一致';
+            }
+
+            return null;
+        }
+
+        // 显示消息
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = element.className.replace(/success|error/g, '').trim() + ' ' + type;
+        }
+
+        // 登录成功处理
+        function handleLoginSuccess(data) {
+            isAuthenticated = true;
+            currentUser = data;
+            sessionToken = data.session_token;
+
+            // 检查是否需要记住登录状态
+            const rememberMe = document.getElementById('remember-me').checked;
+            console.log('=== 登录成功处理 ===');
+            console.log('Remember me checked:', rememberMe);
+            console.log('Login data received:', data);
+
+            if (rememberMe) {
+                // 保存登录信息到 localStorage
+                const loginData = {
+                    sessionToken: data.session_token,
+                    userId: data.player_id || data.id,
+                    username: data.username,
+                    nickname: data.nickname,
+                    loginTime: new Date().getTime()
+                };
+                console.log('准备保存的登录数据:', loginData);
+                localStorage.setItem('towerGameLoginData', JSON.stringify(loginData));
+                console.log('登录数据已保存到localStorage');
+            } else {
+                // 如果不记住，清除可能存在的旧数据
+                localStorage.removeItem('towerGameLoginData');
+                console.log('未勾选记住登录，已清除localStorage');
+            }
+
+            // 隐藏登录界面
+            document.body.classList.add('logged-in');
+
+            // 设置昵称显示
+            const nicknameElement = document.getElementById('nickname');
+            if (nicknameElement) {
+                nicknameElement.textContent = data.nickname || 'gamer';
+            }
+
+            // 添加欢迎消息到游戏日志
+            if (typeof addLog === 'function') {
+                addLog(`欢迎回来，${data.nickname || data.username}！`);
+            }
+
+            console.log('登录成功:', data);
+        }
+
+        // 处理登录错误
+        function handleLoginError(message) {
+            const messageDiv = document.getElementById('login-message');
+            showMessage(messageDiv, message, 'error');
+
+            // 恢复按钮状态
+            const loginBtn = document.querySelector('.login-btn');
+            loginBtn.disabled = false;
+            loginBtn.textContent = '登录游戏';
+        }
+
+        // 检查并恢复登录状态
+        function checkAndRestoreLoginState() {
+            try {
+                console.log('=== 开始检查登录状态 ===');
+                const savedLoginData = localStorage.getItem('towerGameLoginData');
+                if (!savedLoginData) {
+                    console.log('未找到保存的登录数据');
+                    return;
+                }
+
+                console.log('找到保存的登录数据:', savedLoginData);
+                const loginData = JSON.parse(savedLoginData);
+                console.log('解析后的登录数据:', loginData);
+
+                // 检查token是否过期（简单的时间检查，24小时有效期）
+                const maxAge = 24 * 60 * 60 * 1000; // 24小时
+                const now = new Date().getTime();
+                const age = now - loginData.loginTime;
+                console.log(`登录数据年龄: ${Math.round(age / 1000 / 60)} 分钟，最大允许: ${Math.round(maxAge / 1000 / 60)} 分钟`);
+
+                if (age > maxAge) {
+                    console.log('登录数据已过期，清除保存的数据');
+                    localStorage.removeItem('towerGameLoginData');
+                    return;
+                }
+
+                // 恢复登录状态变量
+                sessionToken = loginData.sessionToken;
+                currentUser = {
+                    player_id: loginData.userId,
+                    username: loginData.username,
+                    nickname: loginData.nickname
+                };
+
+                console.log('发现有效的登录数据，准备自动恢复登录状态');
+                console.log('Session token:', sessionToken);
+                console.log('Current user:', currentUser);
+
+                // 标记为待验证状态
+                window.pendingLoginRestore = true;
+
+            } catch (error) {
+                console.error('检查登录状态时出错:', error);
+                localStorage.removeItem('towerGameLoginData');
+            }
+        }
+
+        // 验证并恢复登录状态
+        function verifyAndRestoreLogin() {
+            if (!window.pendingLoginRestore || !sessionToken) {
+                return false;
+            }
+
+            try {
+                // 发送验证请求到服务器
+                const verifyMessage = {
+                    type: 'auth',
+                    action: 'verify_token',
+                    session_token: sessionToken
+                };
+
+                console.log('发送登录状态验证请求');
+                ws.send(JSON.stringify(verifyMessage));
+
+                // 标记验证请求已发送
+                window.verifyRequestSent = true;
+                return true;
+
+            } catch (error) {
+                console.error('验证登录状态失败:', error);
+                clearSavedLoginData();
+                return false;
+            }
+        }
+
+        // 清除保存的登录数据
+        function clearSavedLoginData() {
+            localStorage.removeItem('towerGameLoginData');
+            sessionToken = null;
+            currentUser = null;
+            isAuthenticated = false;
+            window.pendingLoginRestore = false;
+            window.verifyRequestSent = false;
+        }
+
+        // 处理token验证成功
+        function handleTokenVerifySuccess(userInfo) {
+            console.log('Token验证成功，自动登录:', userInfo);
+
+            // 设置登录状态
+            isAuthenticated = true;
+
+            // 更新用户信息（可能包含更新的昵称等信息）
+            currentUser = userInfo;
+
+            // 更新localStorage中的用户信息
+            try {
+                const savedLoginData = localStorage.getItem('towerGameLoginData');
+                if (savedLoginData) {
+                    const loginData = JSON.parse(savedLoginData);
+                    loginData.nickname = userInfo.nickname;
+                    loginData.loginTime = new Date().getTime(); // 更新登录时间
+                    localStorage.setItem('towerGameLoginData', JSON.stringify(loginData));
+                }
+            } catch (error) {
+                console.error('更新localStorage数据失败:', error);
+            }
+
+            // 清除验证标志
+            window.pendingLoginRestore = false;
+            window.verifyRequestSent = false;
+
+            // 隐藏登录界面
+            document.body.classList.add('logged-in');
+
+            // 设置昵称显示
+            const nicknameElement = document.getElementById('nickname');
+            if (nicknameElement) {
+                nicknameElement.textContent = userInfo.nickname || 'gamer';
+            }
+
+            // 添加欢迎消息到游戏日志
+            if (typeof addLog === 'function') {
+                addLog(`欢迎回来，${userInfo.nickname || userInfo.username}！（自动登录）`);
+            }
+        }
+
+        // 处理token验证失败
+        function handleTokenVerifyError(message) {
+            console.log('Token验证失败:', message);
+
+            // 清除验证标志和保存的数据
+            window.pendingLoginRestore = false;
+            window.verifyRequestSent = false;
+            clearSavedLoginData();
+
+            // 显示错误消息
+            if (typeof addLog === 'function') {
+                addLog('登录状态已失效，请重新登录', 'error');
+            }
+        }
+
+        // 处理登出
+        function handleLogout() {
+            if (confirm('确定要登出吗？')) {
+                // 清除所有登录状态
+                clearSavedLoginData();
+
+                // 通知服务器登出（可选）
+                try {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        const logoutMessage = {
+                            type: 'auth',
+                            action: 'logout'
+                        };
+                        ws.send(JSON.stringify(logoutMessage));
+                    }
+                } catch (error) {
+                    console.error('发送登出消息失败:', error);
+                }
+
+                // 显示登录界面
+                document.body.classList.remove('logged-in');
+
+                // 添加登出消息
+                if (typeof addLog === 'function') {
+                    addLog('已成功登出');
+                }
+
+                console.log('用户已登出');
+            }
+        }
+
+        // 处理注册成功
+        function handleRegisterSuccess(message) {
+            const messageDiv = document.getElementById('register-message');
+            showMessage(messageDiv, message || '注册成功，正在自动登录...', 'success');
+
+            // 恢复按钮状态
+            const registerBtn = document.querySelector('.register-btn');
+            registerBtn.disabled = false;
+            registerBtn.textContent = '注册账户';
+
+            if (!autoLoginAfterRegister()) {
+                setTimeout(() => {
+                    switchTab('login');
+                    messageDiv.textContent = '';
+                    messageDiv.className = 'register-message';
+                }, 1500);
+            }
+        }
+
+        // 处理注册错误
+        function handleRegisterError(message) {
+            const messageDiv = document.getElementById('register-message');
+            showMessage(messageDiv, message, 'error');
+
+            // 恢复按钮状态
+            const registerBtn = document.querySelector('.register-btn');
+            registerBtn.disabled = false;
+            registerBtn.textContent = '注册账户';
+            pendingRegisterCredentials = null;
+        }
+
+        function autoLoginAfterRegister() {
+            if (!pendingRegisterCredentials) {
+                return false;
+            }
+
+            const {username, password} = pendingRegisterCredentials;
+            const loginUsernameInput = document.getElementById('login-username');
+            const loginPasswordInput = document.getElementById('login-password');
+
+            if (loginUsernameInput) {
+                loginUsernameInput.value = username;
+            }
+            if (loginPasswordInput) {
+                loginPasswordInput.value = password;
+            }
+
+            pendingRegisterCredentials = null;
+            switchTab('login');
+
+            const loginMessageDiv = document.getElementById('login-message');
+            if (loginMessageDiv) {
+                showMessage(loginMessageDiv, '注册成功，正在自动登录...', 'success');
+            }
+
+            handleLogin();
+            return true;
+        }
+
+        // ============ 原有游戏代码 ============
         // 画布设置
         const canvas = document.getElementById('game');
         const ctx = canvas.getContext('2d');
@@ -833,7 +1895,38 @@
                 // 只有当装备名称不包含+时才添加属性值
                 weaponText = `${data.weapon_name} (+${data.weapon_atk})`;
             }
-            document.getElementById('weapon').textContent = weaponText;
+
+            // 添加稀有度颜色显示
+            if (data.weapon_name && data.weapon_rarity) {
+                const rarityColors = {
+                    'common': '#ffffff',    // 白色
+                    'rare': '#0080ff',      // 蓝色
+                    'epic': '#800080',      // 紫色
+                    'legendary': '#ffd700'    // 金色
+                };
+                const color = rarityColors[data.weapon_rarity] || '#ffffff';
+                weaponText = `<span style="color: ${color}">${weaponText}</span>`;
+
+                // 显示稀有度名称
+                const rarityNames = {
+                    'common': '',
+                    'rare': '稀有',
+                    'epic': '史诗',
+                    'legendary': '传说'
+                };
+                const rarityName = rarityNames[data.weapon_rarity];
+                if (rarityName) {
+                    weaponText += ` <span style="color: ${color}; font-size: 11px;">[${rarityName}]</span>`;
+                }
+            }
+
+            // 显示武器属性
+            if (data.weapon_attributes && data.weapon_attributes.length > 0) {
+                const attrTexts = data.weapon_attributes.map(attr => attr.description).join(', ');
+                weaponText += `<div style="font-size: 11px; color: #b0b0b0; margin-top: 3px; line-height: 1.2;">${attrTexts}</div>`;
+            }
+
+            document.getElementById('weapon').innerHTML = weaponText;
 
             let armorText = data.armor_name || '无';
             if (data.armor_name && data.armor_def > 0 && !data.armor_name.includes('+')) {
@@ -907,10 +2000,24 @@
                 ws = new WebSocket('ws://localhost:8080');
 
                 ws.onopen = function() {
-                    console.log('已连接到服务器');
+                    console.log('=== WebSocket连接已建立 ===');
+                    console.log('pendingLoginRestore:', window.pendingLoginRestore);
+                    console.log('verifyRequestSent:', window.verifyRequestSent);
+                    console.log('sessionToken:', sessionToken);
+
                     connected = true;
                     document.getElementById('connection-status').textContent = '已连接';
                     document.getElementById('connection-status').className = 'connected';
+
+                    // 如果有待恢复的登录状态，发送验证请求
+                    if (window.pendingLoginRestore && !window.verifyRequestSent) {
+                        console.log('检测到待恢复的登录状态，发送验证请求');
+                        setTimeout(() => {
+                            verifyAndRestoreLogin();
+                        }, 100); // 稍微延迟确保连接稳定
+                    } else {
+                        console.log('无需恢复登录状态或验证请求已发送');
+                    }
                 };
 
                 ws.onmessage = function(event) {
@@ -941,12 +2048,68 @@
             console.log('收到消息:', message);
 
             switch (message.type) {
+                // ============ 认证相关消息处理 ============
+                case 'auth_success':
+                    // 如果是token验证成功，则恢复登录状态
+                    if (window.verifyRequestSent && window.pendingLoginRestore) {
+                        console.log('Token验证成功，恢复登录状态');
+                        handleTokenVerifySuccess(message.user_info);
+                    } else {
+                        handleLoginSuccess(message.user_info);
+                    }
+                    break;
+
+                case 'auth_error':
+                    // 如果是token验证失败，则清除保存的登录数据
+                    if (window.verifyRequestSent && window.pendingLoginRestore) {
+                        console.log('Token验证失败:', message.message);
+                        handleTokenVerifyError(message.message);
+                    } else {
+                        handleLoginError(message.message);
+                    }
+                    break;
+
+                case 'token_verify_success':
+                    handleTokenVerifySuccess(message.user_info);
+                    break;
+
+                case 'token_verify_error':
+                    handleTokenVerifyError(message.message);
+                    break;
+
+                case 'register_success':
+                    handleRegisterSuccess(message.message);
+                    break;
+
+                case 'register_error':
+                    handleRegisterError(message.message);
+                    break;
+
+                case 'nickname_update_success':
+                    handleNicknameUpdateSuccess(message.nickname);
+                    break;
+
+                case 'nickname_update_error':
+                    handleNicknameUpdateError(message.message);
+                    break;
+
+                // ============ 游戏消息处理（需要认证） ============
                 case 'map':
+                    // 只有登录成功后才处理游戏消息
+                    if (!isAuthenticated) {
+                        console.warn('未认证，忽略游戏消息');
+                        return;
+                    }
                     currentGrid = message.grid;
                     renderGame();
                     break;
 
                 case 'info':
+                    // 只有登录成功后才处理游戏消息
+                    if (!isAuthenticated) {
+                        console.warn('未认证，忽略游戏消息');
+                        return;
+                    }
                     updateInfoPanel(message);
                     break;
 
@@ -989,6 +2152,33 @@
                     addLog(message.message);
                     break;
 
+                case 'forge_info':
+                    // 显示锻造信息
+                    console.log('锻造信息数据:', message); // 调试日志
+                    if (message.has_weapon) {
+                        showForgeDialog(message);
+                    } else {
+                        addLog(message.message);
+                    }
+                    break;
+
+                case 'forge_success':
+                    // 锻造成功
+                    addLog(message.message);
+                    closeForgeDialog();
+                    break;
+
+                case 'forge_failure':
+                    // 锻造失败
+                    addLog(message.message);
+                    updateForgeDialog(message); // 更新锻造界面显示
+                    break;
+
+                case 'forge_error':
+                    // 锻造错误
+                    addLog(message.message);
+                    break;
+
                 default:
                     console.warn('未知的消息类型:', message.type);
             }
@@ -1010,6 +2200,110 @@
             } else {
                 addLog('未连接到服务器');
             }
+        }
+
+        // 锻造界面函数
+        function showForgeDialog(forgeData) {
+            // 创建对话框背景遮罩
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            overlay.id = 'forge-overlay';
+
+            // 创建锻造对话框
+            const dialog = document.createElement('div');
+            dialog.className = 'forge-dialog';
+            dialog.innerHTML = `
+                <h3>武器锻造</h3>
+                <div class="forge-info-container">
+                    <div class="forge-weapon-info">
+                        <div class="forge-weapon-name">${forgeData.weapon_name}</div>
+                        <div class="forge-weapon-rarity">${forgeData.weapon_rarity || '普通'}</div>
+                    </div>
+                    <div class="forge-attributes-list">
+                        ${forgeData.attributes.map((attr, index) => `
+                            <div class="forge-attribute-item">
+                                <div class="forge-attr-header">
+                                    <div class="forge-attr-description">${attr.description}</div>
+                                    <div class="forge-attr-level">Lv.${attr.level + 1}</div>
+                                </div>
+                                <div class="forge-attr-details">
+                                    当前效果: ${attr.enhanced_value}
+                                    ${attr.base_value ? `(基础: ${attr.base_value})` : ''}
+                                </div>
+                                <div class="forge-attr-stats">
+                                    <div class="forge-attr-cost">${attr.forge_cost}金币</div>
+                                    <div class="forge-attr-success-rate">成功率: ${(attr.success_rate * 100).toFixed(1)}%</div>
+                                </div>
+                                <button class="forge-attr-button" onclick="forgeAttribute(${index})" data-index="${index}">
+                                    强化
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="forge-player-gold">你的金币: <span id="player-gold-forge">0</span></div>
+                <div class="forge-instructions">
+                    <div>点击 [强化] 按钮或按数字键 [1-9] 强化对应词条</div>
+                    <div>按 [F] 键关闭锻造界面</div>
+                </div>
+                <button class="close-btn" onclick="closeForgeDialog()">关闭 [F]</button>
+            `;
+
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+
+            // 显示玩家金币
+            const playerGoldSpan = document.getElementById('player-gold-forge');
+            if (playerGoldSpan) {
+                playerGoldSpan.textContent = forgeData.gold || 0;
+            }
+        }
+
+        function closeForgeDialog() {
+            const overlay = document.getElementById('forge-overlay');
+            if (overlay) {
+                document.body.removeChild(overlay);
+            }
+        }
+
+        function updateForgeDialog(message) {
+            // 更新锻造界面显示（通常用于锻造失败后）
+            const overlay = document.getElementById('forge-overlay');
+            if (overlay) {
+                // 更新金币显示
+                const playerGoldSpan = document.getElementById('player-gold-forge');
+                if (playerGoldSpan && message.new_gold !== undefined) {
+                    playerGoldSpan.textContent = message.new_gold;
+                }
+
+                // 如果锻造失败，更新对应词条的显示
+                if (message.attribute_index !== undefined && message.current_level !== undefined) {
+                    const attrButton = overlay.querySelector(`[data-index="${message.attribute_index}"]`);
+                    if (attrButton) {
+                        const attrItem = attrButton.closest('.forge-attribute-item');
+                        const levelDiv = attrItem.querySelector('.forge-attr-level');
+                        levelDiv.textContent = `Lv.${message.current_level + 1}`;
+
+                        // 更新金币显示（如果需要）
+                        // 可以根据服务器的响应更新其他信息
+                    }
+                }
+            }
+        }
+
+        function forgeAttribute(attributeIndex) {
+            sendMessage({cmd: 'forge', attribute_index: attributeIndex});
         }
 
         // 商人交易界面函数
@@ -1119,6 +2413,20 @@
 
         // 键盘事件处理
         document.addEventListener('keydown', function(event) {
+            const target = event.target;
+            const tagName = target && target.tagName ? target.tagName.toLowerCase() : '';
+            const isEditableElement = target && (target.isContentEditable || target.getAttribute('contenteditable') === 'true');
+
+            // 输入表单时不触发全局按键
+            if (tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isEditableElement) {
+                return;
+            }
+
+            // 未登录状态不响应移动按键
+            if (!document.body.classList.contains('logged-in')) {
+                return;
+            }
+
             if (!connected || document.getElementById('game-over-overlay').style.display === 'flex') {
                 return;
             }
@@ -1127,6 +2435,41 @@
 
             // 先检查商人界面是否打开，如果打开则处理商人界面的特殊按键
             const merchantOverlay = document.getElementById('merchant-overlay');
+            const forgeOverlay = document.getElementById('forge-overlay');
+
+            // 锻造界面打开时的特殊按键处理
+            if (forgeOverlay) {
+                switch (event.key) {
+                    case 'f':
+                    case 'F':
+                    case 'Escape':
+                    case 'Esc':
+                        closeForgeDialog();
+                        event.preventDefault();
+                        return; // 直接返回，不执行后续逻辑
+
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        // 数字键强化词条
+                        const attrIndex = parseInt(event.key) - 1;
+                        const attrButton = forgeOverlay.querySelector(`[data-index="${attrIndex}"]`);
+                        if (attrButton && !attrButton.disabled) {
+                            forgeAttribute(attrIndex);
+                        }
+                        event.preventDefault();
+                        return; // 直接返回，不执行后续逻辑
+                }
+                // 锻造界面打开时，其他按键不处理
+                return;
+            }
+
             if (merchantOverlay) {
                 // 商人界面打开时的特殊按键处理
                 switch (event.key) {
@@ -1202,6 +2545,12 @@
                 case 'D':
                     command = {cmd: 'move', dir: 'right'};
                     break;
+                // 添加锻造按键
+                case 'f':
+                case 'F':
+                    command = {cmd: 'forge_info'};
+                    break;
+
                 // 添加商人交互按键
                 case 'e':
                 case 'E':
@@ -1232,10 +2581,103 @@
             }
         });
 
+        // ============ 昵称修改功能 ============
+
+        // 显示昵称修改弹窗
+        function showNicknameModal() {
+            const modal = document.getElementById('nickname-modal');
+            const input = document.getElementById('nickname-input');
+            const currentNickname = document.getElementById('nickname').textContent;
+
+            input.value = currentNickname;
+            modal.style.display = 'flex';
+            input.focus();
+            input.select();
+        }
+
+        // 隐藏昵称修改弹窗
+        function hideNicknameModal() {
+            document.getElementById('nickname-modal').style.display = 'none';
+        }
+
+        // 更新昵称
+        function updateNickname() {
+            const input = document.getElementById('nickname-input');
+            const newNickname = input.value.trim();
+
+            if (!newNickname) {
+                showMessage('昵称不能为空');
+                return;
+            }
+
+            if (newNickname.length > 50) {
+                showMessage('昵称长度不能超过50个字符');
+                return;
+            }
+
+            // 发送昵称更新请求到服务器
+            const message = {
+                type: 'update_nickname',
+                nickname: newNickname
+            };
+
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify(message));
+            } else {
+                showMessage('连接已断开，请重新登录');
+            }
+        }
+
+        // 昵称修改成功处理
+        function handleNicknameUpdateSuccess(newNickname) {
+            document.getElementById('nickname').textContent = newNickname;
+            hideNicknameModal();
+            showMessage(`昵称已更新为: ${newNickname}`);
+        }
+
+        // 昵称修改失败处理
+        function handleNicknameUpdateError(message) {
+            showMessage(message);
+        }
+
         // 初始化连接
         window.onload = function() {
-            setTimeout(connect, 500); // 延迟连接，确保服务器已启动
+            // 检查是否有保存的登录状态
+            checkAndRestoreLoginState();
+
+            // 确保登录界面可见
+            document.body.classList.remove('logged-in');
+
+            // 延迟连接，确保服务器已启动
+            setTimeout(connect, 500);
             addLog('正在连接到服务器...');
+
+            // 添加回车键支持
+            document.getElementById('login-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+
+            document.getElementById('register-confirm-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleRegister();
+                }
+            });
+
+            // 昵称输入框事件监听
+            const nicknameInput = document.getElementById('nickname-input');
+            if (nicknameInput) {
+                nicknameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        updateNickname();
+                    } else if (e.key === 'Escape') {
+                        hideNicknameModal();
+                    }
+                });
+            }
+
+            console.log('登录系统初始化完成');
         };
     </script>
 </body>

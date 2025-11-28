@@ -107,6 +107,11 @@ class PlayerDAO(BaseDAO):
         """
         return self.execute_update(query, (password_hash, salt, player_id)) > 0
 
+    def verify_email(self, player_id: int) -> bool:
+        """验证邮箱"""
+        query = "UPDATE players SET is_verified = TRUE WHERE id = %s"
+        return self.execute_update(query, (player_id,)) > 0
+
     def get_active_sessions_count(self, player_id: int) -> int:
         """获取用户的活跃会话数量"""
         query = """
@@ -118,8 +123,8 @@ class PlayerDAO(BaseDAO):
         return result[0]['session_count'] if result else 0
 
     def create_player_with_auth(self, name: str, password_hash: str, salt: str, nickname: str = 'gamer',
-                              hp: int = 500, max_hp: int = 500, attack: int = 50,
-                              defense: int = 20, level: int = 1, exp: int = 0,
+                              health: int = 500, max_health: int = 500, attack: int = 50,
+                              defense: int = 20, level: int = 1, experience: int = 0,
                               gold: int = 0) -> int:
         """创建带认证信息的玩家记录"""
         data = {
@@ -127,12 +132,12 @@ class PlayerDAO(BaseDAO):
             'password_hash': password_hash,
             'salt': salt,
             'nickname': nickname,
-            'hp': hp,
-            'max_hp': max_hp,
+            'health': health,
+            'max_health': max_health,
             'attack': attack,
             'defense': defense,
             'level': level,
-            'exp': exp,
+            'experience': experience,
             'gold': gold
         }
         return self.create(data)
@@ -187,10 +192,11 @@ class PlayerDAO(BaseDAO):
         update_data = {
             'hp': player_data.get('hp'),
             'max_hp': player_data.get('max_hp'),
-            'attack': player_data.get('attack'),  # 修复字段名
+            'atk': player_data.get('atk'),
             'defense': player_data.get('defense'),
             'level': player_data.get('level'),
             'exp': player_data.get('exp'),
+            'exp_needed': player_data.get('exp_needed'),
             'gold': player_data.get('gold'),
             'weapon_name': player_data.get('weapon_name'),
             'weapon_atk': player_data.get('weapon_atk'),
@@ -220,3 +226,91 @@ class PlayerDAO(BaseDAO):
         result = self.execute_query(query, (player_id,))
         return result[0] if result else None
 
+    # ============ 用户认��相关方法 ============
+
+    def exists_by_name(self, name: str) -> bool:
+        """检查用户名是否已存在"""
+        query = "SELECT id FROM players WHERE name = %s LIMIT 1"
+        result = self.execute_query(query, (name,))
+        return len(result) > 0
+
+    def get_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """根据用户名获取玩家信息"""
+        query = "SELECT * FROM players WHERE name = %s LIMIT 1"
+        result = self.execute_query(query, (username,))
+        return result[0] if result else None
+
+    def get_by_nickname(self, nickname: str) -> Optional[Dict[str, Any]]:
+        """根据昵称获取玩家信息"""
+        query = "SELECT * FROM players WHERE nickname = %s LIMIT 1"
+        result = self.execute_query(query, (nickname,))
+        return result[0] if result else None
+
+    def update_last_login(self, player_id: int) -> bool:
+        """更新最后登录时间"""
+        query = "UPDATE players SET last_login = NOW() WHERE id = %s"
+        return self.execute_update(query, (player_id,)) > 0
+
+    def increment_login_attempts(self, player_id: int) -> bool:
+        """增加登录失败次数"""
+        query = "UPDATE players SET login_attempts = login_attempts + 1 WHERE id = %s"
+        return self.execute_update(query, (player_id,)) > 0
+
+    def reset_login_attempts(self, player_id: int) -> bool:
+        """重置登录失败次数"""
+        query = "UPDATE players SET login_attempts = 0, locked_until = NULL WHERE id = %s"
+        return self.execute_update(query, (player_id,)) > 0
+
+    def lock_account(self, player_id: int, lock_hours: int = 1) -> bool:
+        """锁定账户"""
+        query = "UPDATE players SET locked_until = DATE_ADD(NOW(), INTERVAL %s HOUR) WHERE id = %s"
+        return self.execute_update(query, (lock_hours, player_id)) > 0
+
+    def update_password(self, player_id: int, password_hash: str, salt: str) -> bool:
+        """更新用户密码"""
+        query = """
+        UPDATE players
+        SET password_hash = %s, salt = %s, updated_at = NOW()
+        WHERE id = %s
+        """
+        return self.execute_update(query, (password_hash, salt, player_id)) > 0
+
+    def verify_email(self, player_id: int) -> bool:
+        """验证邮箱"""
+        query = "UPDATE players SET is_verified = TRUE WHERE id = %s"
+        return self.execute_update(query, (player_id,)) > 0
+
+    def get_active_sessions_count(self, player_id: int) -> int:
+        """获取用户的活跃会话数量"""
+        query = """
+        SELECT COUNT(*) as session_count
+        FROM user_sessions
+        WHERE player_id = %s AND is_active = TRUE AND expires_at > NOW()
+        """
+        result = self.execute_query(query, (player_id,))
+        return result[0]['session_count'] if result else 0
+
+    def create_player_with_auth(self, name: str, password_hash: str, salt: str, nickname: str = 'gamer',
+                              health: int = 500, max_health: int = 500, attack: int = 50,
+                              defense: int = 20, level: int = 1, experience: int = 0,
+                              gold: int = 0) -> int:
+        """创建带认证信息的玩家记录"""
+        data = {
+            'name': name,
+            'password_hash': password_hash,
+            'salt': salt,
+            'nickname': nickname,
+            'health': health,
+            'max_health': max_health,
+            'attack': attack,
+            'defense': defense,
+            'level': level,
+            'experience': experience,
+            'gold': gold
+        }
+        return self.create(data)
+
+    def update_nickname(self, player_id: int, nickname: str) -> bool:
+        """更新玩家昵称"""
+        query = "UPDATE players SET nickname = %s, updated_at = NOW() WHERE id = %s"
+        return self.execute_update(query, (nickname, player_id)) > 0
