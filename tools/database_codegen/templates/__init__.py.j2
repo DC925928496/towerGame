@@ -1,0 +1,15 @@
+"""
+自动生成的包初始化文件
+生成时间: {{ generation_time }}
+工具版本: {{ tool_version }}
+"""
+
+{% for class_name in class_names %}
+from .{{ class_name.lower() }} import {{ class_name }}
+{% endfor %}
+
+__all__ = [
+{% for class_name in class_names %}
+    '{{ class_name }}',
+{% endfor %}
+]

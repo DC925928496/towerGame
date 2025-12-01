@@ -4,6 +4,7 @@
 """
 from typing import List, Dict, Any, Optional
 from database.dao.base_dao import BaseDAO
+from database.models import PlayerInventoryModel
 import logging
 
 logger = logging.getLogger(__name__)

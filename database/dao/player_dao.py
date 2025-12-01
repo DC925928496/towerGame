@@ -4,6 +4,7 @@
 """
 from typing import List, Dict, Any, Optional
 from database.dao.base_dao import BaseDAO
+from database.models import PlayerModel
 from datetime import datetime
 import json
 
@@ -219,4 +220,66 @@ class PlayerDAO(BaseDAO):
         """
         result = self.execute_query(query, (player_id,))
         return result[0] if result else None
+
+
+
+    # ========== PlayerModel 集成方法 ==========
+
+    def create_from_model(self, player: PlayerModel) -> int:
+        """
+        从PlayerModel创建玩家记录
+
+        Args:
+            player: PlayerModel实例
+
+        Returns:
+            新创建的玩家ID
+        """
+        # 验证PlayerModel
+        if not player.is_valid():
+            errors = player.validate()
+            raise ValueError(f"PlayerModel验证失败: {errors}")
+
+        # 转换为字典
+        player_data = player.to_dict()
+
+        # 移除不应该插入的字段（如id、时间戳等）
+        if 'id' in player_data:
+            del player_data['id']
+        if 'created_at' in player_data:
+            del player_data['created_at']
+        if 'updated_at' in player_data:
+            del player_data['updated_at']
+
+        return self.create(player_data)
+
+    def get_by_model(self, player_id: int) -> Optional[PlayerModel]:
+        """
+        获取PlayerModel实例
+
+        Args:
+            player_id: 玩家ID
+
+        Returns:
+            PlayerModel实例或None
+        """
+        player_data = self.get_by_id(player_id)
+        if not player_data:
+            return None
+
+        return PlayerModel.from_dict(player_data)
+
+    def list_all_as_models(self, limit: int = 100, offset: int = 0) -> List[PlayerModel]:
+        """
+        获取所有玩家的PlayerModel列表
+
+        Args:
+            limit: 限制数量
+            offset: 偏移量
+
+        Returns:
+            PlayerModel列表
+        """
+        players_data = self.list_all(limit=limit, offset=offset)
+        return [PlayerModel.from_dict(player_data) for player_data in players_data]
 

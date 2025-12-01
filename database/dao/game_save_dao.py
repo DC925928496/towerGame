@@ -4,6 +4,7 @@
 """
 from typing import List, Dict, Any, Optional
 from database.dao.base_dao import BaseDAO
+from database.models import GameSaveModel
 from datetime import datetime
 import logging
 
@@ -143,3 +144,104 @@ class GameSaveDAO(BaseDAO):
         ORDER BY gs.floor_level DESC, gs.updated_at DESC
         """
         return self.execute_query(query, (min_floor, max_floor))
+
+    # ========== GameSaveModel 集成方法 ==========
+
+    def create_from_model(self, game_save: GameSaveModel) -> int:
+        """
+        从GameSaveModel创建存档记录
+
+        Args:
+            game_save: GameSaveModel实例
+
+        Returns:
+            新创建的存档ID
+        """
+        # 验证GameSaveModel
+        if not game_save.is_valid():
+            errors = game_save.validate()
+            raise ValueError(f"GameSaveModel验证失败: {errors}")
+
+        # 转换为字典
+        save_data = game_save.to_dict()
+
+        # 移除不应该插入的字段
+        if 'id' in save_data:
+            del save_data['id']
+        if 'created_at' in save_data:
+            del save_data['created_at']
+        if 'updated_at' in save_data:
+            del save_data['updated_at']
+
+        return self.create(save_data)
+
+    def get_by_model(self, save_id: int) -> Optional[GameSaveModel]:
+        """
+        获取GameSaveModel实例
+
+        Args:
+            save_id: 存档ID
+
+        Returns:
+            GameSaveModel实例或None
+        """
+        save_data = self.get_by_id(save_id)
+        if not save_data:
+            return None
+
+        return GameSaveModel.from_dict(save_data)
+
+    def get_by_player_as_model(self, player_id: int) -> List[GameSaveModel]:
+        """
+        获取指定玩家的所有存档
+
+        Args:
+            player_id: 玩家ID
+
+        Returns:
+            GameSaveModel列表
+        """
+        saves_data = self.get_by_player(player_id)
+        return [GameSaveModel.from_dict(save_data) for save_data in saves_data]
+
+    def get_active_save_as_model(self, player_id: int) -> Optional[GameSaveModel]:
+        """
+        获取玩家的活跃存档
+
+        Args:
+            player_id: 玩家ID
+
+        Returns:
+            活跃的GameSaveModel或None
+        """
+        save_data = self.get_active_save(player_id)
+        if not save_data:
+            return None
+
+        return GameSaveModel.from_dict(save_data)
+
+    def validate_game_save_model(self, game_save: GameSaveModel, skip_foreign_keys: bool = False) -> bool:
+        """
+        验证GameSaveModel
+
+        Args:
+            game_save: 要验证的GameSaveModel实例
+            skip_foreign_keys: 是否跳过外键验证
+
+        Returns:
+            是否验证通过
+        """
+        return game_save.is_valid(skip_foreign_keys=skip_foreign_keys)
+
+    def get_save_validation_summary(self, game_save: GameSaveModel) -> Dict[str, Any]:
+        """
+        获取GameSaveModel验证摘要
+
+        Args:
+            game_save: GameSaveModel实例
+
+        Returns:
+            验证摘要信息
+        """
+        return game_save.get_validation_summary()
+
