@@ -36,11 +36,9 @@ class GameState:
         try:
             if config_manager.is_configured():
                 self.db_enabled = True
-                print("数据库连接已启用")
             else:
-                print("数据库未配置，使用内存模式")
+                self.db_enabled = False
         except Exception as e:
-            print(f"数据库初始化失败: {e}")
             self.db_enabled = False
 
     def new_game(self):
@@ -181,9 +179,7 @@ class GameState:
                         self.update_merchant_attempt_count(self.current_floor, self.floor_level - 1)
 
                         # 自动上楼后自动保存
-                        print(f"准备自动上楼保存 - db_enabled={self.db_enabled}, player_id={self.player_id}, floor={self.floor_level}")
                         self.auto_save()
-                        print("自动上楼保存完成")
 
                         # 发送新楼层地图
                         messages.append({
@@ -314,17 +310,10 @@ class GameState:
         """更新商人楼层尝试计数器"""
         if new_floor.is_merchant_floor:
             # 触发了商人楼层，重置计数器
-            if self.merchant_attempt_count > 0:
-                print(f"调试：第{previous_level}层触发商人楼层，重置尝试计数器")
-            else:
-                print(f"调试：第{previous_level}层触发固定的商人楼层")
             self.merchant_attempt_count = 0
         elif previous_level > 10 and previous_level % 10 == 0 and previous_level < 100:
             # 是候选楼层（第20,30,40...）但没有触发，增加计数器
             self.merchant_attempt_count += 1
-            print(f"调试：第{previous_level}层未触发商人楼层，尝试次数增加到{self.merchant_attempt_count}")
-        elif previous_level == 10:
-            print(f"调试：第{previous_level}层固定触发商人楼层，无需重置计数器")
 
     def merchant_info(self) -> List[Dict]:
         """处理获取商人信息命令"""
@@ -412,13 +401,10 @@ class GameState:
 
     def save_game(self) -> bool:
         """保存游戏状态到数据库"""
-        print(f"save_game开始 - db_enabled={self.db_enabled}, player存在={bool(self.player)}, player_id={self.player_id}")
         if not self.db_enabled or not self.player or not self.player_id:
-            print("保存条件不满足，退出保存")
             return False
 
         try:
-            print("开始保存玩家数据...")
             # 更新玩家信息（玩家记录应该已经存在）
             player_data = {
                 'hp': self.player.hp,
@@ -448,29 +434,20 @@ class GameState:
             # 保存游戏状态（覆盖最新存档或创建新存档）
             self._save_game_state()
 
-            print(f"游戏已保存 - 玩家ID: {self.player_id}, 存档ID: {self.save_id}")
             return True
         except Exception as e:
-            print(f"保存游戏失败: {e}")
             return False
 
     def auto_save(self):
         """自动保存游戏（在关键事件后调用）"""
-        print(f"auto_save被调用 - db_enabled={self.db_enabled}")
         if self.db_enabled:
-            print("开始执行save_game")
             self.save_game()
-            print("save_game执行完成")
-        else:
-            print("数据库未启用，跳过保存")
 
     def _save_game_state(self):
         """保存游戏状态，优先更新最新存档"""
         try:
-            print("开始保存游戏状态...")
             # 尝试获取最新存档
             latest_save = service_manager.game_save.get_latest_save(self.player_id)
-            print(f"获取最新存档: {latest_save}")
 
             if latest_save:
                 # 更新现有存档
@@ -493,7 +470,6 @@ class GameState:
                 )
 
         except Exception as e:
-            print(f"保存游戏状态失败: {e}")
             # 如果更新失败，创建新存档作为备选
             self.save_id = service_manager.game_save.create_save(
                 self.player_id,
@@ -510,7 +486,6 @@ class GameState:
             # 获取用户最新存档
             saves = service_manager.game_save.get_player_saves(self.player_id)
             if not saves:
-                print(f"用户 {self.player_id} 没有存档，开始新游戏")
                 return False
 
             # 获取最新存档
@@ -521,7 +496,6 @@ class GameState:
             # 从数据库加载玩家数据
             player_info = service_manager.player.get_by_id(self.player_id)
             if not player_info:
-                print(f"无法获取玩家 {self.player_id} 的数据")
                 return False
 
             # 初始化玩家对象
@@ -562,13 +536,9 @@ class GameState:
                 # 如果位置无效，使用默认起始位置
                 self.player.position = self.current_floor.player_start_pos
 
-            print(f"加载存档成功 - 玩家ID: {self.player_id}, 楼层: {self.floor_level}")
-            print(f"玩家状态: HP={self.player.hp}/{self.player.max_hp}, Lv={self.player.level}, 金币={self.player.gold}")
-            print(f"装备: 武器={self.player.weapon_name}, 防具={self.player.armor_name}")
             return True
 
         except Exception as e:
-            print(f"加载存档失败: {e}")
             return False
 
     def _load_equipment(self):
@@ -598,10 +568,8 @@ class GameState:
                         self.player.armor_name = item_name
                         self.player.armor_def = defense_value
 
-            print(f"装备加载完成: 武器={self.player.weapon_name}, 防具={self.player.armor_name}")
-
         except Exception as e:
-            print(f"加载装备失败: {e}")
+            pass
 
     def _load_weapon_attributes(self):
         """加载武器词条"""
@@ -622,15 +590,7 @@ class GameState:
                 )
                 self.player.weapon_attributes.append(weapon_attr)
 
-            if self.player.weapon_attributes:
-                print(f"武器词条加载完成: 共{len(self.player.weapon_attributes)}个词条")
-                for i, attr in enumerate(self.player.weapon_attributes):
-                    print(f"  词条{i+1}: {attr.description}")
-            else:
-                print("武器无词条")
-
         except Exception as e:
-            print(f"加载武器词条失败: {e}")
             self.player.weapon_attributes = []
 
     def _load_inventory(self):
@@ -646,10 +606,8 @@ class GameState:
                 quantity = item['quantity']
                 self.player.inventory[item_name] = quantity
 
-            print(f"道具加载完成: 共{len(self.player.inventory)}种道具")
-
         except Exception as e:
-            print(f"加载道具失败: {e}")
+            pass
 
     def _save_weapon_attributes(self):
         """保存武器词条"""
@@ -669,12 +627,9 @@ class GameState:
                     })
 
                 dao_manager.weapon_attribute.create_player_attributes(self.player_id, attrs_data)
-                print(f"武器词条保存完成: 共{len(self.player.weapon_attributes)}个词条")
-            else:
-                print("武器无词条，跳过保存")
 
         except Exception as e:
-            print(f"保存武器词条失败: {e}")
+            pass
 
     def _save_equipment(self):
         """保存玩家装备信息"""
@@ -703,10 +658,8 @@ class GameState:
                     rarity_level='common'  # 防具稀有度暂时使用默认值
                 )
 
-            print(f"装备保存完成: 武器={self.player.weapon_name}, 防具={self.player.armor_name}")
-
         except Exception as e:
-            print(f"保存装备失败: {e}")
+            pass
 
     def _save_inventory(self):
         """保存玩家道具信息"""
@@ -720,10 +673,9 @@ class GameState:
                     service_manager.inventory.add_item(self.player_id, item_name, quantity)
 
             total_items = sum(self.player.inventory.values())
-            print(f"道具保存完成: 共{len(self.player.inventory)}种道具，{total_items}个物品")
 
         except Exception as e:
-            print(f"保存道具失败: {e}")
+            pass
 
 
 async def handle_auth_message(websocket, data: Dict, game: GameState, session_id: str):
@@ -745,7 +697,6 @@ async def handle_auth_message(websocket, data: Dict, game: GameState, session_id
                 'message': '无效的认证操作'
             }))
     except Exception as e:
-        print(f"认证处理错误: {e}")
         await websocket.send(json.dumps({
             'type': 'auth_error',
             'message': f'认证处理失败: {str(e)}'
@@ -788,8 +739,6 @@ async def handle_login(websocket, data: Dict, game: GameState, session_id: str):
                 }
             }))
 
-            print(f"用户 {auth_result['data']['username']} 登录成功 (session: {session_id})")
-
             # 检查是否有存档并开始游戏
             await start_game_for_user(websocket, game)
 
@@ -805,7 +754,6 @@ async def handle_login(websocket, data: Dict, game: GameState, session_id: str):
             'message': str(e)
         }))
     except Exception as e:
-        print(f"登录处理错误: {e}")
         await websocket.send(json.dumps({
             'type': 'auth_error',
             'message': '登录失败，请稍后重试'
@@ -828,8 +776,6 @@ async def handle_register(websocket, data: Dict, game: GameState):
                 'message': '注册成功！正在自动登录...'
             }))
 
-            print(f"用户 {username} 注册成功")
-
         else:
             await websocket.send(json.dumps({
                 'type': 'register_error',
@@ -842,7 +788,6 @@ async def handle_register(websocket, data: Dict, game: GameState):
             'message': str(e)
         }))
     except Exception as e:
-        print(f"注册处理错误: {e}")
         await websocket.send(json.dumps({
             'type': 'register_error',
             'message': '注册失败，请稍后重试'
@@ -852,14 +797,10 @@ async def handle_register(websocket, data: Dict, game: GameState):
 async def handle_token_verify(websocket, data: Dict, game: GameState, session_id: str):
     """处理token验证"""
     session_token = data.get('session_token')
-    print(f"=== 收到Token验证请求 ===")
-    print(f"Session Token: {session_token}")
-    print(f"Session ID: {session_id}")
 
     try:
         # 验证会话token
         session_info = service_manager.auth.validate_session(session_token, session_id)
-        print(f"Session info: {session_info}")
 
         if session_info:
             # 获取用户信息
@@ -886,8 +827,6 @@ async def handle_token_verify(websocket, data: Dict, game: GameState, session_id
                     }
                 }))
 
-                print(f"用户 {player_info['name']} token验证成功，自动登录")
-
                 # 启动游戏
                 await start_game_for_user(websocket, game)
             else:
@@ -902,7 +841,6 @@ async def handle_token_verify(websocket, data: Dict, game: GameState, session_id
             }))
 
     except Exception as e:
-        print(f"Token验证处理错误: {e}")
         await websocket.send(json.dumps({
             'type': 'auth_error',
             'message': 'Token验证失败'
@@ -926,10 +864,7 @@ async def handle_logout(websocket, data: Dict, game: GameState, session_id: str)
             'message': '登出成功'
         }))
 
-        print("用户已登出")
-
     except Exception as e:
-        print(f"登出处理错误: {e}")
         await websocket.send(json.dumps({
             'type': 'auth_error',
             'message': '登出失败'
@@ -969,8 +904,6 @@ async def handle_nickname_update(websocket, data: Dict, game: GameState):
                 'nickname': new_nickname
             }))
 
-            print(f"用户 {game.player_id} 昵称更新为: {new_nickname}")
-
         else:
             await websocket.send(json.dumps({
                 'type': 'nickname_update_error',
@@ -983,7 +916,6 @@ async def handle_nickname_update(websocket, data: Dict, game: GameState):
             'message': str(e)
         }))
     except Exception as e:
-        print(f"昵称更新处理错误: {e}")
         await websocket.send(json.dumps({
             'type': 'nickname_update_error',
             'message': '昵称更新失败，请稍后重试'
@@ -1037,7 +969,6 @@ async def start_game_for_user(websocket, game: GameState):
             }))
 
     except Exception as e:
-        print(f"开始游戏失败: {e}")
         await websocket.send(json.dumps({
             'type': 'auth_error',
             'message': '游戏启动失败，请重新登录'
@@ -1054,8 +985,6 @@ async def handle_client(websocket):
     session_id = str(id(websocket))
     game = GameState()
     games[session_id] = game
-
-    print(f"客户端 {session_id} 已连接")
 
     try:
         # 等待认证消息
@@ -1097,10 +1026,6 @@ async def handle_client(websocket):
                     direction = data.get('dir')
                     response_messages = game.move(direction)
 
-                # 移除手动拾取和下楼命令，改为自动交互
-                # elif cmd == 'pickup':
-                #     response_messages = game.pickup()
-
                 elif cmd == 'use_item':
                     item_name = data.get('item_name')
                     response_messages = game.use_item(item_name)
@@ -1138,14 +1063,13 @@ async def handle_client(websocket):
                     'message': '无效的JSON格式'
                 }))
             except Exception as e:
-                print(f"处理消息时出错: {e}")
                 await websocket.send(json.dumps({
                     'type': 'log',
                     'message': f'服务器错误: {str(e)}'
                 }))
 
     except websockets.exceptions.ConnectionClosed:
-        print(f"客户端 {session_id} 断开连接")
+        pass
     finally:
         # 清理游戏状态
         if session_id in games:
@@ -1154,9 +1078,6 @@ async def handle_client(websocket):
 
 async def main():
     """启动WebSocket服务器"""
-    print("启动爬塔游戏服务器...")
-    print("监听地址: ws://localhost:8080")
-
     async with websockets.serve(handle_client, "localhost", 8080):
         await asyncio.Future()  # 永久运行
 
@@ -1165,4 +1086,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n服务器已关闭")
+        pass

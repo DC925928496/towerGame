@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>爬塔游戏 - Tower Climbing</title>
+
+    <!-- Font Awesome 图标字体 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
     <style>
         * {
             margin: 0;
@@ -36,6 +43,14 @@
             align-items: center;
             flex: 1;
             min-width: 0; /* 允许收缩 */
+        }
+
+        .game-canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            line-height: 0; /* 移除内联间距 */
+            max-width: 100%;
+            max-height: 100%;
         }
 
         /* 左侧信息面板 */
@@ -82,6 +97,57 @@
             max-height: 100%;
             width: auto;
             height: auto;
+        }
+
+        /* 图标字体样式 */
+        .game-icon {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            transition: all 0.2s ease-in-out;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .game-icon:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        /* 图标颜色配置 */
+        .icon-player { color: #2196F3; }
+        .icon-monster { color: #f44336; }
+        .icon-stairs { color: #FFC107; }
+        .icon-potion { color: #4CAF50; }
+        .icon-weapon { color: #9C27B0; }
+        .icon-armor { color: #00BCD4; }
+        .icon-merchant { color: #FF9800; }
+        .icon-wall { color: #555555; }
+        .icon-empty { color: #222222; }
+
+        /* 图标动画效果 */
+        @keyframes icon-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .icon-pulse {
+            animation: icon-pulse 2s infinite ease-in-out;
+        }
+
+        /* 稀有度光效 */
+        .rare-glow {
+            filter: drop-shadow(0 0 8px rgba(0, 128, 255, 0.8));
+        }
+
+        .epic-glow {
+            filter: drop-shadow(0 0 12px rgba(128, 0, 128, 0.8));
+        }
+
+        .legendary-glow {
+            filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.9));
+            animation: icon-pulse 1.5s infinite ease-in-out;
         }
 
         /* 响应式设计 */
@@ -297,23 +363,109 @@
         /* 图例 */
         .legend {
             margin-top: 15px;
+            font-size: 12px;
+            background: linear-gradient(145deg, rgba(74, 85, 104, 0.18) 0%, rgba(45, 55, 72, 0.08) 100%);
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(74, 85, 104, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .legend h4 {
+            margin: 0;
+            font-size: 13px;
+            color: #fbd38d;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-note {
             font-size: 11px;
-            background: linear-gradient(145deg, rgba(74, 85, 104, 0.1) 0%, rgba(45, 55, 72, 0.05) 100%);
-            padding: 12px;
+            color: #a0aec0;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .legend-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid rgba(104, 125, 156, 0.3);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .legend-entry:hover {
+            transform: translateX(4px);
+            border-color: rgba(247, 250, 252, 0.6);
+        }
+
+        .legend-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(18, 24, 38, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .legend-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.3;
+        }
+
+        .legend-name {
+            font-weight: 600;
+        }
+
+        .legend-symbol {
+            font-size: 11px;
+            color: #a0aec0;
+        }
+
+        .legend-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            border: none;
+        }
+
+        .legend-hotkeys {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .legend-hotkeys li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(104, 125, 156, 0.3);
+            background: rgba(10, 14, 20, 0.5);
+        }
+
+        .hotkey {
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            padding: 2px 8px;
             border-radius: 6px;
-            border: 1px solid rgba(74, 85, 104, 0.2);
-        }
-
-        .legend-item {
-            margin: 3px 0;
-            padding: 2px 0;
-            transition: all 0.2s ease;
-            border-radius: 4px;
-        }
-
-        .legend-item:hover {
-            background: rgba(74, 85, 104, 0.1);
-            transform: translateX(3px);
+            background: rgba(104, 211, 145, 0.15);
+            border: 1px solid rgba(104, 211, 145, 0.4);
+            color: #9ae6b4;
         }
 
         /* 锻造对话框 */
@@ -1293,7 +1445,9 @@
         </div>
 
         <div class="game-area">
-            <canvas id="game" width="700" height="700"></canvas>
+            <div class="game-canvas-wrapper">
+                <canvas id="game" width="700" height="700"></canvas>
+            </div>
         </div>
 
         <div class="right-panel">
@@ -1320,21 +1474,93 @@
             <div class="separator"></div>
 
             <div class="legend">
-                <h4>图例</h4>
-                <div class="legend-item">@ 玩家</div>
-                <div class="legend-item">M 怪物</div>
-                <div class="legend-item">> 楼梯</div>
-                <div class="legend-item">+ 血瓶</div>
-                <div class="legend-item">↑ 武器</div>
-                <div class="legend-item">◆ 防具</div>
-                <div class="legend-item">$ 商人</div>
-                <div class="legend-item"># 墙</div>
+                <div>
+                    <h4>图例</h4>
+                    <div class="legend-note">图标与 ASCII 符号对应</div>
+                </div>
+                <div class="legend-grid">
+                    <div class="legend-entry">
+                        <i class="fas fa-user-ninja game-icon icon-player legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">玩家</span>
+                            <span class="legend-symbol">@</span>
+                        </div>
+                    </div>
+                    <div class="legend-entry">
+                        <i class="fas fa-ghost game-icon icon-monster legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">怪物</span>
+                            <span class="legend-symbol">M</span>
+                        </div>
+                    </div>
+                    <div class="legend-entry">
+                        <i class="fas fa-stairs game-icon icon-stairs legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">楼梯</span>
+                            <span class="legend-symbol">&gt;</span>
+                        </div>
+                    </div>
+                    <div class="legend-entry">
+                        <i class="fas fa-heart game-icon icon-potion legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">血瓶</span>
+                            <span class="legend-symbol">+</span>
+                        </div>
+                    </div>
+                    <div class="legend-entry">
+                        <i class="fas fa-hammer game-icon icon-weapon legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">武器</span>
+                            <span class="legend-symbol">↑</span>
+                        </div>
+                    </div>
+                    <div class="legend-entry">
+                        <i class="fas fa-shield-alt game-icon icon-armor legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">防具</span>
+                            <span class="legend-symbol">◆</span>
+                        </div>
+                    </div>
+                    <div class="legend-entry">
+                        <i class="fas fa-store game-icon icon-merchant legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">商人</span>
+                            <span class="legend-symbol">$</span>
+                        </div>
+                    </div>
+                    <div class="legend-entry">
+                        <i class="fas fa-square game-icon icon-wall legend-icon"></i>
+                        <div class="legend-text">
+                            <span class="legend-name">墙体</span>
+                            <span class="legend-symbol">#</span>
+                        </div>
+                    </div>
+                </div>
 
-                <h4 style="margin-top: 10px;">操作</h4>
-                <div class="legend-item">E 与商人交易</div>
-                <div class="legend-item">F 打开锻造界面</div>
-                <div class="legend-item">↑↓←→ 或 WASD 移动</div>
-                <div class="legend-item">1-9 使用背包道具</div>
+                <hr class="legend-divider" />
+
+                <div>
+                    <h4>操作</h4>
+                    <div class="legend-note">快速上手键位</div>
+                </div>
+                <ul class="legend-hotkeys">
+                    <li>
+                        <span class="hotkey">E</span>
+                        <span>与商人交易</span>
+                    </li>
+                    <li>
+                        <span class="hotkey">F</span>
+                        <span>打开锻造界面</span>
+                    </li>
+                    <li>
+                        <span class="hotkey">↑↓←→ / WASD</span>
+                        <span>移动</span>
+                    </li>
+                    <li>
+                        <span class="hotkey">1-9</span>
+                        <span>使用背包道具</span>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -1515,9 +1741,6 @@
 
             // 检查是否需要记住登录状态
             const rememberMe = document.getElementById('remember-me').checked;
-            console.log('=== 登录成功处理 ===');
-            console.log('Remember me checked:', rememberMe);
-            console.log('Login data received:', data);
 
             if (rememberMe) {
                 // 保存登录信息到 localStorage
@@ -1528,13 +1751,10 @@
                     nickname: data.nickname,
                     loginTime: new Date().getTime()
                 };
-                console.log('准备保存的登录数据:', loginData);
                 localStorage.setItem('towerGameLoginData', JSON.stringify(loginData));
-                console.log('登录数据已保存到localStorage');
             } else {
                 // 如果不记住，清除可能存在的旧数据
                 localStorage.removeItem('towerGameLoginData');
-                console.log('未勾选记住登录，已清除localStorage');
             }
 
             // 隐藏登录界面
@@ -1550,8 +1770,6 @@
             if (typeof addLog === 'function') {
                 addLog(`欢迎回来，${data.nickname || data.username}！`);
             }
-
-            console.log('登录成功:', data);
         }
 
         // 处理登录错误
@@ -1568,25 +1786,19 @@
         // 检查并恢复登录状态
         function checkAndRestoreLoginState() {
             try {
-                console.log('=== 开始检查登录状态 ===');
                 const savedLoginData = localStorage.getItem('towerGameLoginData');
                 if (!savedLoginData) {
-                    console.log('未找到保存的登录数据');
                     return;
                 }
 
-                console.log('找到保存的登录数据:', savedLoginData);
                 const loginData = JSON.parse(savedLoginData);
-                console.log('解析后的登录数据:', loginData);
 
                 // 检查token是否过期（简单的时间检查，24小时有效期）
                 const maxAge = 24 * 60 * 60 * 1000; // 24小时
                 const now = new Date().getTime();
                 const age = now - loginData.loginTime;
-                console.log(`登录数据年龄: ${Math.round(age / 1000 / 60)} 分钟，最大允许: ${Math.round(maxAge / 1000 / 60)} 分钟`);
 
                 if (age > maxAge) {
-                    console.log('登录数据已过期，清除保存的数据');
                     localStorage.removeItem('towerGameLoginData');
                     return;
                 }
@@ -1599,15 +1811,10 @@
                     nickname: loginData.nickname
                 };
 
-                console.log('发现有效的登录数据，准备自动恢复登录状态');
-                console.log('Session token:', sessionToken);
-                console.log('Current user:', currentUser);
-
                 // 标记为待验证状态
                 window.pendingLoginRestore = true;
 
             } catch (error) {
-                console.error('检查登录状态时出错:', error);
                 localStorage.removeItem('towerGameLoginData');
             }
         }
@@ -1626,7 +1833,6 @@
                     session_token: sessionToken
                 };
 
-                console.log('发送登录状态验证请求');
                 ws.send(JSON.stringify(verifyMessage));
 
                 // 标记验证请求已发送
@@ -1634,7 +1840,6 @@
                 return true;
 
             } catch (error) {
-                console.error('验证登录状态失败:', error);
                 clearSavedLoginData();
                 return false;
             }
@@ -1652,7 +1857,6 @@
 
         // 处理token验证成功
         function handleTokenVerifySuccess(userInfo) {
-            console.log('Token验证成功，自动登录:', userInfo);
 
             // 设置登录状态
             isAuthenticated = true;
@@ -1670,7 +1874,7 @@
                     localStorage.setItem('towerGameLoginData', JSON.stringify(loginData));
                 }
             } catch (error) {
-                console.error('更新localStorage数据失败:', error);
+                // localStorage更新失败，忽略
             }
 
             // 清除验证标志
@@ -1694,7 +1898,6 @@
 
         // 处理token验证失败
         function handleTokenVerifyError(message) {
-            console.log('Token验证失败:', message);
 
             // 清除验证标志和保存的数据
             window.pendingLoginRestore = false;
@@ -1720,10 +1923,10 @@
                             type: 'auth',
                             action: 'logout'
                         };
-                        ws.send(JSON.stringify(logoutMessage));
+                    ws.send(JSON.stringify(logoutMessage));
                     }
                 } catch (error) {
-                    console.error('发送登出消息失败:', error);
+                    // 发送登出消息失败，忽略
                 }
 
                 // 显示登录界面
@@ -1733,8 +1936,6 @@
                 if (typeof addLog === 'function') {
                     addLog('已成功登出');
                 }
-
-                console.log('用户已登出');
             }
         }
 
@@ -1822,7 +2023,12 @@
             // 保存到全局变量
             window.currentCellSize = newCellSize;
 
-            console.log(`画布大小: ${maxSize}x${maxSize}px, 单元格大小: ${newCellSize}px`);
+            // 更新图标覆盖层大小
+            const iconOverlay = document.getElementById('icon-overlay');
+            if (iconOverlay) {
+                iconOverlay.style.width = `${maxSize}px`;
+                iconOverlay.style.height = `${maxSize}px`;
+            }
 
             // 如果有游戏数据，重新渲染
             if (currentGrid && currentGrid.length > 0) {
@@ -1845,19 +2051,23 @@
         // 游戏状态
         let currentGrid = [];
         let playerPos = {x: 7, y: 7};
+        let iconOverlayElement = null;
+        let renderScheduled = false;
 
-        // 颜色配置
-        const colors = {
-            '@': '#2196F3',    // 玩家 - 蓝色
-            'M': '#f44336',    // 怪物 - 红色
-            '>': '#FFC107',    // 楼梯 - 黄色
-            '+': '#4CAF50',    // 血瓶 - 绿色
-            '↑': '#9C27B0',    // 武器 - 紫色
-            '◆': '#00BCD4',    // 防具 - 青色
-            '$': '#FF9800',    // 商人 - 橙色
-            '#': '#555555',    // 墙 - 深灰
-            '.': '#222222'     // 空地 - 黑色
+        // 图标字体和颜色配置
+        const iconConfig = {
+            '@': { icon: 'fa-user-ninja', color: '#2196F3', class: 'icon-player' },      // 玩家 - 蓝色
+            'M': { icon: 'fa-ghost', color: '#f44336', class: 'icon-monster' },         // 怪物 - 红色
+            '>': { icon: 'fa-stairs', color: '#FFC107', class: 'icon-stairs' },         // 楼梯 - 黄色
+            '+': { icon: 'fa-heart', color: '#4CAF50', class: 'icon-potion' },          // 血瓶 - 绿色
+            '↑': { icon: 'fa-hammer', color: '#9C27B0', class: 'icon-weapon' },          // 武器 - 紫色
+            '◆': { icon: 'fa-shield-alt', color: '#00BCD4', class: 'icon-armor' },      // 防具 - 青色
+            '$': { icon: 'fa-store', color: '#FF9800', class: 'icon-merchant' },        // 商人 - 橙色
+            '#': { icon: 'fa-square', color: '#555555', class: 'icon-wall' },            // 墙 - 深灰
+            '.': { icon: '', color: '#222222', class: 'icon-empty' }                     // 空地 - 黑色
         };
+
+        const canvasBackgroundColor = '#050505'; // 统一的棋盘背景
 
         // 日志系统
         function addLog(message) {
@@ -1954,31 +2164,26 @@
         function renderGame() {
             if (!currentGrid || currentGrid.length === 0) return;
 
-            // 使用动态单元格大小
+            if (renderScheduled) return;
+            renderScheduled = true;
+
+            requestAnimationFrame(() => {
+                renderScheduled = false;
+                drawGameFrame();
+            });
+        }
+
+        function drawGameFrame() {
             const cellSize = window.currentCellSize || 46.67;
 
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
 
-            for (let x = 0; x < gridSize; x++) {
-                for (let y = 0; y < gridSize; y++) {
-                    const cell = currentGrid[x][y];
+            ctx.fillStyle = canvasBackgroundColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    // 设置颜色
-                    ctx.fillStyle = colors[cell] || '#222222';
-                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-
-                    // 绘制符号
-                    if (cell !== '.' && cell !== '#') {
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = `bold ${Math.max(16, cellSize * 0.6)}px monospace`;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(cell, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
-                    }
-                }
-            }
-
-            // 绘制网格线
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 0.5;
             for (let i = 0; i <= gridSize; i++) {
@@ -1992,6 +2197,110 @@
                 ctx.lineTo(gridSize * cellSize, i * cellSize);
                 ctx.stroke();
             }
+
+            const iconCount = updateIconOverlay(cellSize);
+
+        }
+
+        function updateIconOverlay(cellSize) {
+            const overlay = ensureIconOverlay();
+            if (!overlay) {
+                return 0;
+            }
+
+            overlay.style.width = `${canvas.width}px`;
+            overlay.style.height = `${canvas.height}px`;
+            overlay.innerHTML = '';
+
+            const fragment = document.createDocumentFragment();
+            let iconCount = 0;
+
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    const cell = currentGrid[x][y];
+                    const iconData = iconConfig[cell];
+                    if (iconData && iconData.icon) {
+                        iconCount++;
+                        fragment.appendChild(createIconElement(cell, iconData, x, y, cellSize));
+                    }
+                }
+            }
+
+            if (iconCount > 0) {
+                overlay.appendChild(fragment);
+                overlay.style.display = 'block';
+            } else {
+                overlay.style.display = 'none';
+            }
+
+            return iconCount;
+        }
+
+        function ensureIconOverlay() {
+            const canvas = document.getElementById('game');
+            if (!canvas) return null;
+
+            if (!iconOverlayElement) {
+                iconOverlayElement = document.createElement('div');
+                iconOverlayElement.id = 'icon-overlay';
+                iconOverlayElement.style.position = 'absolute';
+                iconOverlayElement.style.top = '0';
+                iconOverlayElement.style.left = '0';
+                iconOverlayElement.style.pointerEvents = 'none';
+                iconOverlayElement.style.zIndex = '10';
+            }
+
+            const wrapper = canvas.parentNode;
+            if (!wrapper) return null;
+
+            if (iconOverlayElement.parentNode !== wrapper) {
+                wrapper.style.position = 'relative';
+                wrapper.appendChild(iconOverlayElement);
+            }
+
+            return iconOverlayElement;
+        }
+
+        // 创建图标元素
+        function createIconElement(cellType, iconData, x, y, cellSize) {
+            const iconElement = document.createElement('i');
+            iconElement.className = `fas ${iconData.icon} game-icon ${iconData.class} game-cell-icon`;
+            iconElement.style.position = 'absolute';
+            iconElement.style.left = `${x * cellSize}px`;
+            iconElement.style.top = `${y * cellSize}px`;
+            iconElement.style.width = `${cellSize}px`;
+            iconElement.style.height = `${cellSize}px`;
+            iconElement.style.fontSize = `${Math.max(16, cellSize * 0.6)}px`;
+            iconElement.style.lineHeight = `${cellSize}px`;
+            iconElement.style.textAlign = 'center';
+            iconElement.style.display = 'flex';
+            iconElement.style.alignItems = 'center';
+            iconElement.style.justifyContent = 'center';
+            iconElement.style.pointerEvents = 'none';
+            iconElement.style.color = iconData.color; // 确保设置颜色
+
+            // 武器图标不需要特殊背景色
+            if (cellType === '↑') {
+                // 如果FontAwesome未加载，显示文字备用
+                setTimeout(() => {
+                    const styles = window.getComputedStyle(iconElement);
+                    const fontFamily = styles.fontFamily || '';
+
+                    if (!fontFamily.includes('Font Awesome') && !fontFamily.includes('fa')) {
+                        iconElement.textContent = '⚔'; // 剑的unicode符号
+                        iconElement.style.fontSize = `${Math.max(12, cellSize * 0.5)}px`;
+                        iconElement.className = ''; // 移除FontAwesome类
+                    }
+                }, 100);
+            }
+
+            if ((cellType === '↑' || cellType === '◆') && Math.random() < 0.3) {
+                const rarityEffects = ['rare-glow', 'epic-glow', 'legendary-glow'];
+                const randomRarity = rarityEffects[Math.floor(Math.random() * rarityEffects.length)];
+                iconElement.classList.add(randomRarity);
+            }
+
+            return iconElement;
         }
 
         // 连接到WebSocket服务器
@@ -2000,10 +2309,6 @@
                 ws = new WebSocket('ws://localhost:8080');
 
                 ws.onopen = function() {
-                    console.log('=== WebSocket连接已建立 ===');
-                    console.log('pendingLoginRestore:', window.pendingLoginRestore);
-                    console.log('verifyRequestSent:', window.verifyRequestSent);
-                    console.log('sessionToken:', sessionToken);
 
                     connected = true;
                     document.getElementById('connection-status').textContent = '已连接';
@@ -2011,12 +2316,9 @@
 
                     // 如果有待恢复的登录状态，发送验证请求
                     if (window.pendingLoginRestore && !window.verifyRequestSent) {
-                        console.log('检测到待恢复的登录状态，发送验证请求');
                         setTimeout(() => {
                             verifyAndRestoreLogin();
                         }, 100); // 稍微延迟确保连接稳定
-                    } else {
-                        console.log('无需恢复登录状态或验证请求已发送');
                     }
                 };
 
@@ -2026,33 +2328,28 @@
                 };
 
                 ws.onclose = function() {
-                    console.log('与服务器断开连接');
                     connected = false;
                     document.getElementById('connection-status').textContent = '已断开';
                     document.getElementById('connection-status').className = 'disconnected';
                 };
 
                 ws.onerror = function(error) {
-                    console.error('WebSocket错误:', error);
                     addLog('连接错误，请确保服务器已启动');
                 };
 
             } catch (e) {
-                console.error('连接失败:', e);
                 addLog('无法连接到服务器，请确保服务器已启动');
             }
         }
 
         // 处理接收到的消息
         function handleMessage(message) {
-            console.log('收到消息:', message);
 
             switch (message.type) {
                 // ============ 认证相关消息处理 ============
                 case 'auth_success':
                     // 如果是token验证成功，则恢复登录状态
                     if (window.verifyRequestSent && window.pendingLoginRestore) {
-                        console.log('Token验证成功，恢复登录状态');
                         handleTokenVerifySuccess(message.user_info);
                     } else {
                         handleLoginSuccess(message.user_info);
@@ -2062,7 +2359,6 @@
                 case 'auth_error':
                     // 如果是token验证失败，则清除保存的登录数据
                     if (window.verifyRequestSent && window.pendingLoginRestore) {
-                        console.log('Token验证失败:', message.message);
                         handleTokenVerifyError(message.message);
                     } else {
                         handleLoginError(message.message);
@@ -2101,13 +2397,13 @@
                         return;
                     }
                     currentGrid = message.grid;
+
                     renderGame();
                     break;
 
                 case 'info':
                     // 只有登录成功后才处理游戏消息
                     if (!isAuthenticated) {
-                        console.warn('未认证，忽略游戏消息');
                         return;
                     }
                     updateInfoPanel(message);
@@ -2133,7 +2429,6 @@
 
                 case 'merchant_info':
                     // 显示商人信息
-                    console.log('商人信息数据:', message); // 调试日志
                     if (message.has_merchant) {
                         showMerchantDialog(message);
                     } else {
@@ -2154,7 +2449,6 @@
 
                 case 'forge_info':
                     // 显示锻造信息
-                    console.log('锻造信息数据:', message); // 调试日志
                     if (message.has_weapon) {
                         showForgeDialog(message);
                     } else {
@@ -2180,7 +2474,7 @@
                     break;
 
                 default:
-                    console.warn('未知的消息类型:', message.type);
+                    // 未知消息类型，忽略
             }
         }
 
@@ -2325,7 +2619,6 @@
             overlay.id = 'merchant-overlay';
 
             // 创建商人对话框
-            console.log('创建商人对话框，数据:', merchantData); // 调试日志
             const dialog = document.createElement('div');
             dialog.className = 'merchant-dialog';
             dialog.innerHTML = `
@@ -2621,8 +2914,8 @@
                 nickname: newNickname
             };
 
-            if (websocket && websocket.readyState === WebSocket.OPEN) {
-                websocket.send(JSON.stringify(message));
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(message));
             } else {
                 showMessage('连接已断开，请重新登录');
             }
@@ -2676,8 +2969,6 @@
                     }
                 });
             }
-
-            console.log('登录系统初始化完成');
         };
     </script>
 </body>

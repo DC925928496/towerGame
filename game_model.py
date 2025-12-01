@@ -128,24 +128,6 @@ RARITY_CONFIG = {
 
 # ==================== 基础数据类 ====================
 
-# Position 类现在从 utils.position_utils 导入
-# @dataclass
-# class Position:
-#     """二维坐标"""
-#     x: int
-#     y: int
-#
-#     def __add__(self, other: 'Position') -> 'Position':
-#         return Position(self.x + other.x, self.y + other.y)
-#
-#     def __eq__(self, other: 'Position') -> bool:
-#         return self.x == other.x and self.y == other.y
-#
-#     def __hash__(self):
-#         return hash((self.x, self.y))
-#
-#     def __repr__(self):
-#         return f"Position({self.x}, {self.y})"
 
 
 class CellType(Enum):
@@ -764,44 +746,6 @@ class Floor:
             return False
 
         return True
-
-    def debug_monster_threat_detection(self, target_pos: Position, context: str = ""):
-        """
-        详细的威胁检测调试方法
-
-        Args:
-            target_pos: 要检查的目标位置
-            context: 调用时的上下文（拾取道具/上楼梯等）
-        """
-        print(f"\n=== 怪物威胁检测调试 {context} ===")
-        print(f"目标位置: {target_pos}")
-        print(f"地图边界: 0-14, 0-14")
-        print(f"怪物总数: {len(self.monsters)}")
-
-        if not (0 <= target_pos.x < self.width and 0 <= target_pos.y < self.height):
-            print(f"❌ 目标位置超出地图范围!")
-            return
-
-        print(f"\n怪物详情:")
-        monster_index = 1
-        for monster_id, monster in self.monsters.items():
-            distance = abs(monster.position.x - target_pos.x) + abs(monster.position.y - target_pos.y)
-            status = "存活" if monster.is_alive() else "死亡"
-            threat_status = "✅威胁" if (monster.is_alive() and distance <= 3) else "❌不威胁"
-
-            print(f"  {monster_index}. {monster.name} (ID: {monster_id})")
-            print(f"     位置: {monster.position}")
-            print(f"     状态: {status} (HP: {monster.hp})")
-            print(f"     距离目标: {distance}")
-            print(f"     威胁状态: {threat_status}")
-            if monster.is_alive() and distance <= 3:
-                print(f"     🚫 这只怪物阻止了{context}!")
-            monster_index += 1
-
-        # 最终结论
-        is_blocked = self.is_item_or_stairs_blocked_by_monster(target_pos)
-        print(f"\n🔍 最终结论: {context} {'被阻止' if is_blocked else '可进行'}")
-        print("=" * 50)
 
     def is_item_or_stairs_blocked_by_monster(self, target_pos: Position) -> bool:
         """

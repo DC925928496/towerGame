@@ -54,11 +54,9 @@ def save_game(player: Player, floor: Floor, floor_level: int) -> bool:
         with open(SAVE_FILE, 'w', encoding='utf-8') as f:
             json.dump(save_data, f, ensure_ascii=False, indent=2)
 
-        print(f"游戏已保存到 {SAVE_FILE}")
         return True
 
     except Exception as e:
-        print(f"保存游戏失败: {e}")
         return False
 
 
@@ -115,7 +113,6 @@ def load_game() -> Optional[Dict[str, Any]]:
         如果加载失败返回None
     """
     if not os.path.exists(SAVE_FILE):
-        print("存档文件不存在")
         return None
 
     try:
@@ -139,8 +136,6 @@ def load_game() -> Optional[Dict[str, Any]]:
             player_data['position']['y']
         )
 
-        print(f"游戏已从 {SAVE_FILE} 加载 (第{floor_level}层)")
-
         return {
             'player': player,
             'current_floor': current_floor,
@@ -148,7 +143,6 @@ def load_game() -> Optional[Dict[str, Any]]:
         }
 
     except Exception as e:
-        print(f"加载游戏失败: {e}")
         return None
 
 
@@ -162,11 +156,9 @@ def delete_save() -> bool:
     try:
         if os.path.exists(SAVE_FILE):
             os.remove(SAVE_FILE)
-            print(f"存档文件已删除")
             return True
         return False
     except Exception as e:
-        print(f"删除存档失败: {e}")
         return False
 
 def archive_exists() -> bool:

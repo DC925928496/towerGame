@@ -9,7 +9,6 @@ try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
-    print("警告: 未安装python-dotenv，将使用系统环境变量")
     pass
 
 
@@ -76,7 +75,6 @@ class DatabaseConfigManager:
                 config.password.strip() != ''
             )
         except Exception as e:
-            print(f"配置检查错误: {e}")
             return False
 
 

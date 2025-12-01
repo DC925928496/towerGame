@@ -76,12 +76,10 @@ def find_nearest_valid_position(floor: Floor, target_pos: Position) -> Position:
             if floor.grid[pos.x][pos.y].passable:
                 has_entity = (floor.get_monster_at(pos) or floor.get_item_at(pos))
                 if not has_entity:
-                    print(f"警告：在目标位置附近找不到可用位置，使用随机位置 {pos}")
                     return pos
 
     # 如果还是找不到（极端情况），返回地图中心位置
     default_pos = Position(floor.width // 2, floor.height // 2)
-    print(f"极端情况：找不到任何可用位置，返回中心位置 {default_pos}")
     return default_pos
 
 
@@ -610,7 +608,6 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
         pass  # 继续生成普通楼层
     elif level == 10:
         # 第10层固定触发商人楼层
-        print(f"调试：第{level}层固定触发商人楼层")
         return generate_merchant_floor(level)
     elif level > 10 and level % 10 == 0 and level < 100:
         # 11层起，每10层累积概率机制
@@ -618,10 +615,8 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
         base_probability = 0.1  # 基础概率10%
         increment = 0.05  # 每次增加5%
         probability = min(base_probability + merchant_attempt_count * increment, 1.0)  # 最高100%
-        print(f"调试：第{level}层检查商人楼层，概率为{probability:.2f}，尝试次数{merchant_attempt_count}")
 
         if random.random() < probability:
-            print(f"调试：第{level}层触发商人楼层，概率为{probability:.2f}，尝试次数{merchant_attempt_count}")
             # 触发商人楼层，重置计数器
             return generate_merchant_floor(level)
 
@@ -687,11 +682,9 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
                 else:
                     # 有实体时寻找最近可用位置
                     floor.player_start_pos = find_nearest_valid_position(floor, potential_start_pos)
-                    print(f"警告：楼梯位置 {potential_start_pos} 已有实体，调整为 {floor.player_start_pos}")
             else:
                 # 楼梯位置不可通达时寻找最近可用位置
                 floor.player_start_pos = find_nearest_valid_position(floor, potential_start_pos)
-                print(f"警告：楼梯位置 {potential_start_pos} 不可通达，调整为 {floor.player_start_pos}")
         else:
             # 第一层：选取第一个房间中心并验证可用性
             potential_center = rooms[0].center
@@ -701,7 +694,6 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
                 floor.player_start_pos = potential_center
             else:
                 floor.player_start_pos = find_nearest_valid_position(floor, potential_center)
-                print(f"警告：房间中心 {potential_center} 不可用，调整为 {floor.player_start_pos}")
 
         # 楼梯位置（不能与玩家同房间）
         if level < 100:
@@ -776,28 +768,3 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
                         key_items.append(item)
 
     return floor
-
-
-if __name__ == "__main__":
-    # 测试楼层生成
-    print("生成第1层...")
-    floor1 = generate_floor(1)
-    print(f"房间数: {len([c for row in floor1.grid for c in row if c.type == CellType.EMPTY]) // (4*4)}")
-    print(f"怪物数: {len(floor1.monsters)}")
-    print(f"道具数: {len(floor1.items)}")
-    print(f"玩家出生点: {floor1.player_start_pos}")
-    print(f"楼梯位置: {floor1.stairs_pos}")
-
-    print("\n生成第50层...")
-    floor50 = generate_floor(50)
-    print(f"怪物数: {len(floor50.monsters)}")
-    print(f"道具数: {len(floor50.items)}")
-    sample_monster = list(floor50.monsters.values())[0]
-    print(f"示例怪物属性: hp={sample_monster.hp}, atk={sample_monster.atk}, def={sample_monster.defense}")
-
-    print("\n生成第100层（Boss层）...")
-    floor100 = generate_floor(100)
-    print(f"怪物数: {len(floor100.monsters)}")
-    if floor100.monsters:
-        boss = list(floor100.monsters.values())[0]
-        print(f"Boss: {boss.name}, hp={boss.hp}, atk={boss.atk}, def={boss.defense}")

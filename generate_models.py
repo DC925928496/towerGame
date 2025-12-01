@@ -25,19 +25,12 @@ import tools.database_codegen as codegen
 def main():
     """主入口函数"""
     try:
-        # 显示工具信息
-        print(f"数据库实体类自动生成工具 v{codegen.__version__}")
-        print(f"作者: {codegen.__author__}")
-        print()
-
         # 调用CLI
         cli()
 
     except KeyboardInterrupt:
-        print("\n操作被用户中断")
         sys.exit(1)
     except Exception as e:
-        print(f"程序执行出错: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':

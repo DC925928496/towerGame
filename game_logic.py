@@ -513,7 +513,6 @@ def descend_floor(player: Player, floor: Floor, current_floor_level: int) -> Dic
         result['logs'].append("怪物距离楼梯太近，无法上楼！")
         return result
 
-    result['logs'].append(f"调试：成功检测到楼梯位置！")
 
     # 检查是否是最后一层
     if current_floor_level >= 100:
