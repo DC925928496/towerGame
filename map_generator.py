@@ -520,6 +520,30 @@ def connect_rooms(room1: Room, room2: Room, floor: Floor):
                 floor.grid[x][y2] = Cell(CellType.EMPTY, passable=True)
 
 
+def carve_corridor_between_positions(start: Position, end: Position, floor: Floor):
+    """
+    在玩家出生点与楼梯之间补一条简单走廊，确保连通性
+    使用与 connect_rooms 相同的L型挖掘策略，避免破坏已有通路
+    """
+    if not start or not end:
+        return
+
+    x1, y1 = start.x, start.y
+    x2, y2 = end.x, end.y
+
+    # 先水平后垂直
+    min_x, max_x = min(x1, x2), max(x1, x2)
+    for x in range(min_x, max_x + 1):
+        cell = floor.grid[x][y1]
+        if cell.type == CellType.WALL:
+            floor.grid[x][y1] = Cell(CellType.EMPTY, passable=True)
+
+    min_y, max_y = min(y1, y2), max(y1, y2)
+    for y in range(min_y, max_y + 1):
+        cell = floor.grid[x2][y]
+        if cell.type == CellType.WALL:
+            floor.grid[x2][y] = Cell(CellType.EMPTY, passable=True)
+
 # ==================== 商人楼层生成 ====================
 
 def generate_merchant(floor_level: int) -> Merchant:
@@ -706,6 +730,12 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
             floor.grid[floor.stairs_pos.x][floor.stairs_pos.y] = Cell(
                 CellType.STAIRS, passable=True
             )
+
+            # 初步确保出生点与楼梯连通（此时尚未放置怪物/道具）
+            if floor.player_start_pos:
+                connected_area = floor.get_connected_area(floor.player_start_pos)
+                if floor.stairs_pos not in connected_area:
+                    carve_corridor_between_positions(floor.player_start_pos, floor.stairs_pos, floor)
 
         # === 新的战略性放置系统 ===
 

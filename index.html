@@ -108,6 +108,7 @@
             line-height: 1;
             transition: all 0.2s ease-in-out;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            font-family: "Segoe UI Emoji", "Noto Color Emoji", "Microsoft YaHei", sans-serif;
         }
 
         .game-icon:hover {
@@ -134,20 +135,6 @@
 
         .icon-pulse {
             animation: icon-pulse 2s infinite ease-in-out;
-        }
-
-        /* 稀有度光效 */
-        .rare-glow {
-            filter: drop-shadow(0 0 8px rgba(0, 128, 255, 0.8));
-        }
-
-        .epic-glow {
-            filter: drop-shadow(0 0 12px rgba(128, 0, 128, 0.8));
-        }
-
-        .legendary-glow {
-            filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.9));
-            animation: icon-pulse 1.5s infinite ease-in-out;
         }
 
         /* 响应式设计 */
@@ -1480,56 +1467,56 @@
                 </div>
                 <div class="legend-grid">
                     <div class="legend-entry">
-                        <i class="fas fa-user-ninja game-icon icon-player legend-icon"></i>
+                        <span class="game-icon icon-player legend-icon">🤺</span>
                         <div class="legend-text">
                             <span class="legend-name">玩家</span>
                             <span class="legend-symbol">@</span>
                         </div>
                     </div>
                     <div class="legend-entry">
-                        <i class="fas fa-ghost game-icon icon-monster legend-icon"></i>
+                        <span class="game-icon icon-monster legend-icon">👾</span>
                         <div class="legend-text">
                             <span class="legend-name">怪物</span>
                             <span class="legend-symbol">M</span>
                         </div>
                     </div>
                     <div class="legend-entry">
-                        <i class="fas fa-stairs game-icon icon-stairs legend-icon"></i>
+                        <span class="game-icon icon-stairs legend-icon">🪜</span>
                         <div class="legend-text">
                             <span class="legend-name">楼梯</span>
                             <span class="legend-symbol">&gt;</span>
                         </div>
                     </div>
                     <div class="legend-entry">
-                        <i class="fas fa-heart game-icon icon-potion legend-icon"></i>
+                        <span class="game-icon icon-potion legend-icon">🧪</span>
                         <div class="legend-text">
                             <span class="legend-name">血瓶</span>
                             <span class="legend-symbol">+</span>
                         </div>
                     </div>
                     <div class="legend-entry">
-                        <i class="fas fa-hammer game-icon icon-weapon legend-icon"></i>
+                        <span class="game-icon icon-weapon legend-icon">🗡</span>
                         <div class="legend-text">
                             <span class="legend-name">武器</span>
                             <span class="legend-symbol">↑</span>
                         </div>
                     </div>
                     <div class="legend-entry">
-                        <i class="fas fa-shield-alt game-icon icon-armor legend-icon"></i>
+                        <span class="game-icon icon-armor legend-icon">🛡</span>
                         <div class="legend-text">
                             <span class="legend-name">防具</span>
                             <span class="legend-symbol">◆</span>
                         </div>
                     </div>
                     <div class="legend-entry">
-                        <i class="fas fa-store game-icon icon-merchant legend-icon"></i>
+                        <span class="game-icon icon-merchant legend-icon">🛍️</span>
                         <div class="legend-text">
                             <span class="legend-name">商人</span>
                             <span class="legend-symbol">$</span>
                         </div>
                     </div>
                     <div class="legend-entry">
-                        <i class="fas fa-square game-icon icon-wall legend-icon"></i>
+                        <span class="game-icon icon-wall legend-icon">⬛</span>
                         <div class="legend-text">
                             <span class="legend-name">墙体</span>
                             <span class="legend-symbol">#</span>
@@ -2056,15 +2043,15 @@
 
         // 图标字体和颜色配置
         const iconConfig = {
-            '@': { icon: 'fa-user-ninja', color: '#2196F3', class: 'icon-player' },      // 玩家 - 蓝色
-            'M': { icon: 'fa-ghost', color: '#f44336', class: 'icon-monster' },         // 怪物 - 红色
-            '>': { icon: 'fa-stairs', color: '#FFC107', class: 'icon-stairs' },         // 楼梯 - 黄色
-            '+': { icon: 'fa-heart', color: '#4CAF50', class: 'icon-potion' },          // 血瓶 - 绿色
-            '↑': { icon: 'fa-hammer', color: '#9C27B0', class: 'icon-weapon' },          // 武器 - 紫色
-            '◆': { icon: 'fa-shield-alt', color: '#00BCD4', class: 'icon-armor' },      // 防具 - 青色
-            '$': { icon: 'fa-store', color: '#FF9800', class: 'icon-merchant' },        // 商人 - 橙色
-            '#': { icon: 'fa-square', color: '#555555', class: 'icon-wall' },            // 墙 - 深灰
-            '.': { icon: '', color: '#222222', class: 'icon-empty' }                     // 空地 - 黑色
+            '@': { symbol: '\u{1F93A}', color: '#2196F3', class: 'icon-player' },      // 玩家 - 蓝色
+            'M': { symbol: '\u{1F47E}', color: '#f44336', class: 'icon-monster' },     // 怪物 - 红色
+            '>': { symbol: '\u{1FA9C}', color: '#FFC107', class: 'icon-stairs' },      // 楼梯 - 黄色
+            '+': { symbol: '\u{1F9EA}', color: '#4CAF50', class: 'icon-potion' },      // 血瓶 - 绿色
+            '↑': { symbol: '\u{1F5E1}', color: '#9C27B0', class: 'icon-weapon' },      // 武器 - 紫色
+            '◆': { symbol: '\u{1F6E1}', color: '#00BCD4', class: 'icon-armor' },       // 防具 - 青色
+            '$': { symbol: '\u{1F6CD}', color: '#FF9800', class: 'icon-merchant' },    // 商人 - 橙色
+            '#': { symbol: '\u{2B1B}', color: '#555555', class: 'icon-wall' },          // 墙 - 深灰
+            '.': { symbol: '', color: '#222222', class: 'icon-empty' }                  // 空地 - 黑色
         };
 
         const canvasBackgroundColor = '#050505'; // 统一的棋盘背景
@@ -2219,7 +2206,7 @@
                 for (let y = 0; y < gridSize; y++) {
                     const cell = currentGrid[x][y];
                     const iconData = iconConfig[cell];
-                    if (iconData && iconData.icon) {
+                    if (iconData && iconData.symbol) {
                         iconCount++;
                         fragment.appendChild(createIconElement(cell, iconData, x, y, cellSize));
                     }
@@ -2263,8 +2250,8 @@
 
         // 创建图标元素
         function createIconElement(cellType, iconData, x, y, cellSize) {
-            const iconElement = document.createElement('i');
-            iconElement.className = `fas ${iconData.icon} game-icon ${iconData.class} game-cell-icon`;
+            const iconElement = document.createElement('div');
+            iconElement.className = `game-icon ${iconData.class} game-cell-icon`;
             iconElement.style.position = 'absolute';
             iconElement.style.left = `${x * cellSize}px`;
             iconElement.style.top = `${y * cellSize}px`;
@@ -2277,28 +2264,9 @@
             iconElement.style.alignItems = 'center';
             iconElement.style.justifyContent = 'center';
             iconElement.style.pointerEvents = 'none';
-            iconElement.style.color = iconData.color; // 确保设置颜色
-
-            // 武器图标不需要特殊背景色
-            if (cellType === '↑') {
-                // 如果FontAwesome未加载，显示文字备用
-                setTimeout(() => {
-                    const styles = window.getComputedStyle(iconElement);
-                    const fontFamily = styles.fontFamily || '';
-
-                    if (!fontFamily.includes('Font Awesome') && !fontFamily.includes('fa')) {
-                        iconElement.textContent = '⚔'; // 剑的unicode符号
-                        iconElement.style.fontSize = `${Math.max(12, cellSize * 0.5)}px`;
-                        iconElement.className = ''; // 移除FontAwesome类
-                    }
-                }, 100);
-            }
-
-            if ((cellType === '↑' || cellType === '◆') && Math.random() < 0.3) {
-                const rarityEffects = ['rare-glow', 'epic-glow', 'legendary-glow'];
-                const randomRarity = rarityEffects[Math.floor(Math.random() * rarityEffects.length)];
-                iconElement.classList.add(randomRarity);
-            }
+            iconElement.style.color = iconData.color; // 设置颜色
+            iconElement.style.fontFamily = '"Segoe UI Emoji", "Noto Color Emoji", "Microsoft YaHei", sans-serif';
+            iconElement.textContent = iconData.symbol || '';
 
             return iconElement;
         }
