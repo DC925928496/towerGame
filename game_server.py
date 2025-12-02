@@ -13,7 +13,8 @@ from game_logic import (
     forge_weapon_attribute, get_forge_info
 )
 from services import service_manager
-from config.database_config import config_manager
+from config.database_config import config_manager as db_config_manager
+from config.game_config import config_manager as game_config_manager
 from database.dao import dao_manager
 
 
@@ -38,7 +39,7 @@ class GameState:
 
         # 尝试初始化数据库连接
         try:
-            if config_manager.is_configured():
+            if db_config_manager.is_configured():
                 self.db_enabled = True
             else:
                 self.db_enabled = False
@@ -341,11 +342,10 @@ class GameState:
     
     def update_merchant_attempt_count(self, new_floor: Floor, previous_level: int):
         """更新商人楼层尝试计数器"""
+        config = game_config_manager.get_config()
         if new_floor.is_merchant_floor:
-            # 触发了商人楼层，重置计数器
             self.merchant_attempt_count = 0
-        elif previous_level > 10 and previous_level % 10 == 0 and previous_level < 100:
-            # 是候选楼层（第20,30,40...）但没有触发，增加计数器
+        elif previous_level >= config.MERCHANT_FIRST_FLOOR:
             self.merchant_attempt_count += 1
 
     def merchant_info(self) -> List[Dict]:

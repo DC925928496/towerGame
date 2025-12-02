@@ -17,30 +17,53 @@ class GameConfig:
     GRID_SIZE: int = 15
     ROOM_COUNT_MIN: int = 4
     ROOM_COUNT_MAX: int = 6
-
-    # 怪物配置
-    MONSTER_COUNT_BASE: int = 3
-    MONSTER_COUNT_FORMULA: str = "floor // 5"  # 每增加5层增加1只怪物
-    MONSTER_SCALING_RATE: float = 1.15
-    MONSTER_BASE_HP: int = 100
-    MONSTER_BASE_ATK: int = 10
-    MONSTER_BASE_DEF: int = 5
-    MONSTER_BASE_VALUE: int = 50
-
-    # 地图生成配置
     ROOM_SIZE_MIN: int = 3
     ROOM_SIZE_MAX: int = 6
-    CORRIDOR_WIDTH: int = 1
-    WALL_SYMBOL: str = "#"
-    FLOOR_SYMBOL: str = "."
-    PLAYER_SYMBOL: str = "@"
-    STAIR_SYMBOL: str = ">"
+    GRID_CELL_PIXEL: int = 30
+    CANVAS_WIDTH: int = None
+    CANVAS_HEIGHT: int = None
+
+    # 玩家初始属性/背包
+    PLAYER_BASE_HP: int = 500
+    PLAYER_BASE_ATK: int = 50
+    PLAYER_BASE_DEF: int = 20
+    PLAYER_BASE_GOLD: int = 0
+    PLAYER_START_POTION_HEAL: int = 200
+    PLAYER_START_POTION_COUNT: int = 3
+    POTION_NAME: str = "血瓶"
+    POTION_NAME_DELIMITER: str = "+"
+
+    # 怪物配置
+    MONSTER_BASE_HP: int = 80
+    MONSTER_HP_PER_FLOOR: int = 20
+    MONSTER_HP_VARIANCE: float = 0.2
+    MONSTER_BASE_ATK: int = 25
+    MONSTER_ATK_PER_FLOOR: int = 5
+    MONSTER_ATK_VARIANCE: float = 0.2
+    MONSTER_BASE_DEF: int = 12
+    MONSTER_DEF_PER_FLOOR: int = 2
+    MONSTER_DEF_VARIANCE: float = 0.2
+    MONSTER_BASE_EXP: int = 20
+    MONSTER_EXP_PER_FLOOR: int = 5
+    MONSTER_BASE_GOLD: int = 14
+    MONSTER_GOLD_PER_FLOOR: int = 4
+    MONSTER_GOLD_VARIANCE: float = 0.15
+    MONSTER_COUNT_BASE: int = 3
+    MONSTER_COUNT_DIVISOR: int = 5
+
+    # 道具/装备生成
+    POTION_BASE_HEAL: int = 120
+    POTION_HEAL_PER_FLOOR: int = 18
+    WEAPON_BASE_ATK: int = 5
+    WEAPON_ATK_PER_FLOOR: int = 5
+    ARMOR_BASE_DEF: int = 2
+    ARMOR_DEF_PER_FLOOR: int = 3
 
     # 物品生成权重
     ITEM_WEIGHTS: Dict[str, float] = None
     WEAPON_WEIGHT: float = 0.4
-    ARMOR_WEIGHT: float = 0.4
-    POTION_WEIGHT: float = 0.2
+    ARMOR_WEIGHT: float = 0.35
+    POTION_WEIGHT: float = 0.25
     STAIR_WEIGHT: float = 0.3
 
     # 守卫系统配置
@@ -54,24 +77,36 @@ class GameConfig:
     CRITICAL_HIT_CHANCE: float = 0.05
     CRITICAL_HIT_MULTIPLIER: float = 2.0
 
-    # 前端显示配置
-    GRID_CELL_PIXEL: int = 30
-    CANVAS_WIDTH: int = None  # 自动计算
-    CANVAS_HEIGHT: int = None  # 自动计算
+    # 商人楼层概率配置
+    MERCHANT_FIRST_FLOOR: int = 10
+    MERCHANT_BASE_CHANCE: float = 0.04
+    MERCHANT_CHANCE_INCREMENT: float = 0.04
+    MERCHANT_FORCE_INTERVAL: int = 15
 
-    # 日志配置
-    MAX_LOG_ENTRIES: int = 100
-
-    # 商人楼层配置
-    MERCHANT_FLOOR_INTERVAL: int = 10
-    MERCHANT_FLOOR_CHANCE: float = 0.2  # 基础概率20%
-    MERCHANT_BASE_PRICE: int = 10
-    MERCHANT_PRICE_SCALING: int = 5
-
-    # 商人库存配置
+    # 商人物价配置
+    MERCHANT_BASE_PRICE: int = 30
+    MERCHANT_PRICE_PER_FLOOR: int = 4
+    MERCHANT_POTION_PRICE_MULTIPLIER: float = 1.0
+    MERCHANT_WEAPON_PRICE_MULTIPLIER: float = 2.0
+    MERCHANT_ARMOR_PRICE_MULTIPLIER: float = 1.6
     MERCHANT_POTION_RANGE: tuple = (3, 4)
     MERCHANT_WEAPON_RANGE: tuple = (2, 3)
     MERCHANT_ARMOR_RANGE: tuple = (2, 3)
+
+    # 战略投放
+    HIGH_VALUE_ITEM_INTERVAL: int = 10
+
+    # 锻造配置
+    FORGE_BASE_COST: int = 120
+    FORGE_LEVEL_COST: int = 80
+    FORGE_RARITY_COST_MULTIPLIER: Dict[str, float] = None
+    FORGE_BASE_SUCCESS: float = 0.85
+    FORGE_SUCCESS_DECAY: float = 0.1
+    FORGE_MIN_SUCCESS: float = 0.25
+    FORGE_RARITY_SUCCESS_BONUS: Dict[str, float] = None
+
+    # 稀有度配置
+    RARITY_SETTINGS: Dict[str, Dict[str, Any]] = None
 
     def __post_init__(self):
         """初始化后处理，设置默认值和计算属性"""
@@ -80,6 +115,58 @@ class GameConfig:
                 'weapon': self.WEAPON_WEIGHT,
                 'armor': self.ARMOR_WEIGHT,
                 'potion': self.POTION_WEIGHT
+            }
+
+        if self.FORGE_RARITY_COST_MULTIPLIER is None:
+            self.FORGE_RARITY_COST_MULTIPLIER = {
+                'common': 1.0,
+                'rare': 1.15,
+                'epic': 1.35,
+                'legendary': 1.6
+            }
+
+        if self.FORGE_RARITY_SUCCESS_BONUS is None:
+            self.FORGE_RARITY_SUCCESS_BONUS = {
+                'common': 0.0,
+                'rare': 0.05,
+                'epic': 0.1,
+                'legendary': 0.15
+            }
+
+        if self.RARITY_SETTINGS is None:
+            self.RARITY_SETTINGS = {
+                'common': {
+                    'name': '普通',
+                    'color': '#ffffff',
+                    'attr_count': 1,
+                    'probability': 0.5,
+                    'multiplier': 1.0,
+                    'prefixes': ['普通的']
+                },
+                'rare': {
+                    'name': '稀有',
+                    'color': '#0080ff',
+                    'attr_count': 2,
+                    'probability': 0.3,
+                    'multiplier': 1.15,
+                    'prefixes': ['精良的', '锐利的']
+                },
+                'epic': {
+                    'name': '史诗',
+                    'color': '#800080',
+                    'attr_count': 3,
+                    'probability': 0.15,
+                    'multiplier': 1.35,
+                    'prefixes': ['史诗的', '强大的', '远古的']
+                },
+                'legendary': {
+                    'name': '传说',
+                    'color': '#ffd700',
+                    'attr_count': 4,
+                    'probability': 0.05,
+                    'multiplier': 1.6,
+                    'prefixes': ['传说的', '神圣的', '不朽的']
+                }
             }
 
         # 自动计算画布尺寸

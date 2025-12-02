@@ -89,41 +89,8 @@ ATTRIBUTE_TYPES = {
     }
 }
 
-# 稀有度配置
-RARITY_CONFIG = {
-    'common': {
-        'name': '普通',
-        'color': '#ffffff',  # 白色
-        'attr_count': 2,
-        'probability': 0.5,
-        'multiplier': 1.0,
-        'prefixes': ['普通的']
-    },
-    'rare': {
-        'name': '稀有',
-        'color': '#0080ff',  # 蓝色
-        'attr_count': 3,
-        'probability': 0.3,
-        'multiplier': 1.0,
-        'prefixes': ['精良的', '锐利的']
-    },
-    'epic': {
-        'name': '史诗',
-        'color': '#800080',  # 紫色
-        'attr_count': 4,
-        'probability': 0.15,
-        'multiplier': 1.3,
-        'prefixes': ['史诗的', '强大的', '远古的']
-    },
-    'legendary': {
-        'name': '传说',
-        'color': '#ffd700',  # 金色
-        'attr_count': 5,
-        'probability': 0.05,
-        'multiplier': 1.8,
-        'prefixes': ['传说的', '神圣的', '不朽的']
-    }
-}
+# 稀有度配置（统一由GameConfig驱动）
+RARITY_CONFIG = config_manager.get_config().RARITY_SETTINGS
 
 
 # ==================== 基础数据类 ====================
@@ -265,13 +232,14 @@ class Monster:
 class Player:
     """玩家类"""
     def __init__(self):
-        self.hp = 500
-        self.max_hp = 500
-        self.attack = 50  # 修改字段名以匹配数据库
-        self.defense = 20
+        config = config_manager.get_config()
+        self.hp = config.PLAYER_BASE_HP
+        self.max_hp = config.PLAYER_BASE_HP
+        self.attack = config.PLAYER_BASE_ATK
+        self.defense = config.PLAYER_BASE_DEF
         self.exp = 0
         self.level = 1
-        self.gold = 0
+        self.gold = config.PLAYER_BASE_GOLD
         self.position = Position(7, 7)
 
         # 装备
@@ -283,7 +251,9 @@ class Player:
         self.armor_name = None
 
         # 背包：{道具名: 数量}
-        self.inventory = {"小血瓶": 3}
+        start_potion_heal = config.PLAYER_START_POTION_HEAL
+        potion_key = f"{config.POTION_NAME}{config.POTION_NAME_DELIMITER}{start_potion_heal}"
+        self.inventory = {potion_key: config.PLAYER_START_POTION_COUNT}
 
     @property
     def total_atk(self) -> int:
@@ -374,55 +344,6 @@ class Player:
             }
         }
 
-    def forge_weapon_attribute(self, attribute_index: int) -> Optional[str]:
-        """锻造强化指定的武器属性，返回日志消息"""
-        if not self.weapon_attributes:
-            return "当前没有装备武器"
-
-        if attribute_index < 0 or attribute_index >= len(self.weapon_attributes):
-            return "无效的属性索引"
-
-        # 检查金币
-        forge_cost = self.calculate_forge_cost(attribute_index)
-        if self.gold < forge_cost:
-            return f"金币不足！需要 {forge_cost} 金币"
-
-        # 检查等级上限
-        target_attr = self.weapon_attributes[attribute_index]
-        if target_attr.level >= 5:
-            return f"该属性已达到最高强化等级 (+5)"
-
-        # 执行强化
-        self.gold -= forge_cost
-        target_attr.level += 1
-
-        # 获取属性描述
-        attr_name = ATTRIBUTE_TYPES[target_attr.attribute_type]['name']
-        enhanced_value = target_attr.get_enhanced_value()
-
-        return f"强化成功！{attr_name} 提升到 +{enhanced_value:.1f} (Lv.{target_attr.level})"
-
-    def calculate_forge_cost(self, attribute_index: int) -> int:
-        """计算强化指定属性的金币消耗"""
-        if not self.weapon_attributes or attribute_index < 0 or attribute_index >= len(self.weapon_attributes):
-            return 0
-
-        target_attr = self.weapon_attributes[attribute_index]
-        base_cost = 100  # 基础费用
-        level_cost = target_attr.level * 50  # 每级+50金币
-
-        # 稀有度加成
-        rarity_multiplier = {
-            'common': 1.0,
-            'rare': 1.2,
-            'epic': 1.5,
-            'legendary': 2.0
-        }
-
-        cost_multiplier = rarity_multiplier.get(self.weapon_rarity, 1.0)
-
-        return int(base_cost * cost_multiplier + level_cost)
-
     @property
     def total_def(self) -> int:
         """总防御力 = 基础 + 防具加成"""
@@ -475,18 +396,36 @@ class Player:
         if item_name not in self.inventory or self.inventory[item_name] <= 0:
             return None
 
-        if item_name == "小血瓶":
-            healed = self.heal(200)
+        potion_heal = self._parse_potion_heal_value(item_name)
+        if potion_heal > 0:
+            healed = self.heal(potion_heal)
             self.inventory[item_name] -= 1
             if self.inventory[item_name] == 0:
                 del self.inventory[item_name]
-            return f"使用了小血瓶，回复了 {healed} 点生命值"
+            return f"使用了{item_name}，回复了 {healed} 点生命值"
 
         return None
 
     def get_inventory_list(self) -> List[tuple]:
         """获取背包列表，格式: [(道具名, 数量), ...]"""
         return list(self.inventory.items())
+
+    def _parse_potion_heal_value(self, item_name: str) -> int:
+        """根据道具名称解析血瓶回复量"""
+        config = config_manager.get_config()
+        base_name = config.POTION_NAME
+        delimiter = config.POTION_NAME_DELIMITER
+
+        if not item_name.startswith(base_name):
+            return 0
+
+        if delimiter not in item_name:
+            return config.POTION_BASE_HEAL
+
+        try:
+            return int(item_name.split(delimiter, 1)[1])
+        except (ValueError, IndexError):
+            return config.POTION_BASE_HEAL
 
 
 class Room:
@@ -519,6 +458,9 @@ class MerchantItem:
     effect_type: str  # potion/weapon/armor
     effect_value: int
     price: int
+    rarity: Optional[str] = None
+    attributes: Optional[List[WeaponAttribute]] = None
+    base_name: Optional[str] = None
 
 
 class Merchant:

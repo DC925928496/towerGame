@@ -10,7 +10,7 @@ from game_model import (
 # 导入新的工具类和配置
 from utils.position_utils import PositionUtils
 from utils.game_utils import GameUtils
-from config.game_config import config_manager, ITEM_CONFIGS
+from config.game_config import config_manager
 
 
 # ==================== 怪物名称库 ====================
@@ -248,19 +248,19 @@ def generate_rarity() -> str:
 
 def generate_monster(floor_level: int, position: Position) -> Monster:
     """生成怪物，属性随层数指数增长"""
-    # 基础属性随层数增长
-    base_hp = 80 + floor_level * 20
-    base_atk = 25 + floor_level * 5
-    base_def = 12 + floor_level * 2
-    base_exp = 20 + floor_level * 5
-    base_gold = 10 + floor_level * 3
+    config = config_manager.get_config()
 
-    # 添加随机因子（±20%）
-    hp = int(base_hp * random.uniform(0.8, 1.2))
-    atk = int(base_atk * random.uniform(0.8, 1.2))
-    defense = int(base_def * random.uniform(0.8, 1.2))
-    exp = int(base_exp * random.uniform(0.8, 1.2))
-    gold = int(base_gold * random.uniform(0.8, 1.2))
+    base_hp = config.MONSTER_BASE_HP + floor_level * config.MONSTER_HP_PER_FLOOR
+    base_atk = config.MONSTER_BASE_ATK + floor_level * config.MONSTER_ATK_PER_FLOOR
+    base_def = config.MONSTER_BASE_DEF + floor_level * config.MONSTER_DEF_PER_FLOOR
+    base_exp = config.MONSTER_BASE_EXP + floor_level * config.MONSTER_EXP_PER_FLOOR
+    base_gold = config.MONSTER_BASE_GOLD + floor_level * config.MONSTER_GOLD_PER_FLOOR
+
+    hp = int(base_hp * random.uniform(1 - config.MONSTER_HP_VARIANCE, 1 + config.MONSTER_HP_VARIANCE))
+    atk = int(base_atk * random.uniform(1 - config.MONSTER_ATK_VARIANCE, 1 + config.MONSTER_ATK_VARIANCE))
+    defense = int(base_def * random.uniform(1 - config.MONSTER_DEF_VARIANCE, 1 + config.MONSTER_DEF_VARIANCE))
+    exp = int(base_exp)
+    gold = int(base_gold * random.uniform(1 - config.MONSTER_GOLD_VARIANCE, 1 + config.MONSTER_GOLD_VARIANCE))
 
     # 如果是最终Boss（第100层）
     if floor_level == 100:
@@ -410,7 +410,7 @@ def place_remaining_monsters(floor: Floor, rooms: List[Room], guard_positions: L
 
             attempts += 1
 
-def place_strategic_item(floor: Floor, rooms: List[Room], key_items: List[Item]) -> Optional[Item]:
+def place_strategic_item(floor: Floor, rooms: List[Room], key_items: List[Item], item_type: Optional[str] = None) -> Optional[Item]:
     """战略性地放置道具，优先放置高价值道具"""
     attempts = 0
     while attempts < 50:
@@ -425,8 +425,7 @@ def place_strategic_item(floor: Floor, rooms: List[Room], key_items: List[Item])
             pos not in [floor.player_start_pos, floor.stairs_pos] and
             floor.is_valid_placement_position(pos)):  # 新增：检查是否与现有实体冲突
 
-            # 生成道具
-            item = generate_item(floor.level, pos)
+            item = generate_item(floor.level, pos, forced_type=item_type)
 
             # 添加到地图
             floor.items[item.item_id] = item
@@ -438,31 +437,34 @@ def place_strategic_item(floor: Floor, rooms: List[Room], key_items: List[Item])
 
     return None
 
-def generate_item(floor_level: int, position: Position) -> Item:
+def generate_item(floor_level: int, position: Position, forced_type: Optional[str] = None) -> Item:
     """生成道具，属性随层数增长"""
-    item_type = random.choices(
-        ['potion', 'weapon', 'armor'],
-        weights=[0.4, 0.3, 0.3]
-    )[0]
+    config = config_manager.get_config()
+    item_weights = config.ITEM_WEIGHTS
+
+    if forced_type:
+        item_type = forced_type
+    else:
+        item_types = list(item_weights.keys())
+        weights = [item_weights[it] for it in item_types]
+        item_type = random.choices(item_types, weights=weights)[0]
 
     if item_type == 'potion':
-        # 血瓶：回复量随层数增长
-        effect_value = 100 + floor_level * 20
-        name = f"血瓶"
+        effect_value = config.POTION_BASE_HEAL + floor_level * config.POTION_HEAL_PER_FLOOR
+        potion_name = f"{config.POTION_NAME}{config.POTION_NAME_DELIMITER}{effect_value}"
         symbol = '+'
         return Item(
             symbol=symbol,
-            name=name,
+            name=potion_name,
             effect_type=item_type,
             effect_value=effect_value,
             position=position
         )
     elif item_type == 'weapon':
-        # 生成随机稀有度武器
         rarity = generate_rarity()
         attributes = generate_weapon_attributes(floor_level, rarity)
         weapon_name = generate_weapon_name(floor_level, rarity, attributes)
-        attack_value = floor_level * 5
+        attack_value = config.WEAPON_BASE_ATK + floor_level * config.WEAPON_ATK_PER_FLOOR
 
         return Item(
             symbol='↑',
@@ -475,8 +477,7 @@ def generate_item(floor_level: int, position: Position) -> Item:
             base_name=weapon_name
         )
     else:  # armor
-        # 防具：防御加成随层数增长（防具暂不支持随机属性）
-        effect_value = floor_level * 3
+        effect_value = config.ARMOR_BASE_DEF + floor_level * config.ARMOR_DEF_PER_FLOOR
         name = f"铠甲+{effect_value}"
         symbol = '◆'
 
@@ -553,29 +554,44 @@ def generate_merchant(floor_level: int) -> Merchant:
 
 def generate_merchant_inventory(floor_level: int) -> List[MerchantItem]:
     """生成商人库存"""
-    inventory = []
-    base_price = 10 + floor_level * 5  # 动态定价基础
+    config = config_manager.get_config()
+    inventory: List[MerchantItem] = []
+    base_price = config.MERCHANT_BASE_PRICE + floor_level * config.MERCHANT_PRICE_PER_FLOOR
 
     # 药水 (3-4个)
-    potion_count = random.randint(3, 4)
+    potion_count = random.randint(*config.MERCHANT_POTION_RANGE)
     for i in range(potion_count):
-        hp = 50 + floor_level * 20
-        price = base_price * 2
-        inventory.append(MerchantItem("血瓶", "potion", hp, price))
+        hp = config.POTION_BASE_HEAL + floor_level * config.POTION_HEAL_PER_FLOOR
+        potion_name = f"{config.POTION_NAME}{config.POTION_NAME_DELIMITER}{hp}"
+        price = int(base_price * config.MERCHANT_POTION_PRICE_MULTIPLIER)
+        inventory.append(MerchantItem(potion_name, "potion", hp, price))
 
     # 武器 (2-3个)
-    weapon_count = random.randint(2, 3)
+    weapon_count = random.randint(*config.MERCHANT_WEAPON_RANGE)
     for i in range(weapon_count):
-        atk = floor_level * 5 + 10
-        price = base_price * 3
-        inventory.append(MerchantItem("长剑", "weapon", atk, price))
+        weapon_item = generate_item(floor_level, Position(0, 0), forced_type='weapon')
+        price = int(base_price * config.MERCHANT_WEAPON_PRICE_MULTIPLIER)
+        inventory.append(MerchantItem(
+            weapon_item.name,
+            "weapon",
+            weapon_item.effect_value,
+            price,
+            rarity=weapon_item.rarity,
+            attributes=weapon_item.attributes.copy(),
+            base_name=weapon_item.base_name
+        ))
 
     # 防具 (2-3个)
-    armor_count = random.randint(2, 3)
+    armor_count = random.randint(*config.MERCHANT_ARMOR_RANGE)
     for i in range(armor_count):
-        defense = floor_level * 3 + 5
-        price = int(base_price * 2.5)
-        inventory.append(MerchantItem("铠甲", "armor", defense, price))
+        armor_item = generate_item(floor_level, Position(0, 0), forced_type='armor')
+        price = int(base_price * config.MERCHANT_ARMOR_PRICE_MULTIPLIER)
+        inventory.append(MerchantItem(
+            armor_item.name,
+            "armor",
+            armor_item.effect_value,
+            price
+        ))
 
     return inventory
 
@@ -626,22 +642,19 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
     """
     config = config_manager.get_config()
 
-    # 商人楼层判断：前十层固定普通，第十层固定商人，之后累积概率
-    if level < 10:
-        # 前9层固定不触发
-        pass  # 继续生成普通楼层
-    elif level == 10:
-        # 第10层固定触发商人楼层
+    merchant_first_floor = config.MERCHANT_FIRST_FLOOR
+    if level == merchant_first_floor:
         return generate_merchant_floor(level)
-    elif level > 10 and level % 10 == 0 and level < 100:
-        # 11层起，每10层累积概率机制
-        # 计算累积概率：基础10% + 每次增加5%
-        base_probability = 0.1  # 基础概率10%
-        increment = 0.05  # 每次增加5%
-        probability = min(base_probability + merchant_attempt_count * increment, 1.0)  # 最高100%
+    elif merchant_first_floor < level < config.MAX_FLOORS:
+        floors_since_last = merchant_attempt_count
+        if floors_since_last >= config.MERCHANT_FORCE_INTERVAL:
+            return generate_merchant_floor(level)
 
-        if random.random() < probability:
-            # 触发商人楼层，重置计数器
+        probability = min(
+            1.0,
+            config.MERCHANT_BASE_CHANCE + floors_since_last * config.MERCHANT_CHANCE_INCREMENT
+        )
+        if floors_since_last > 0 and random.random() < probability:
             return generate_merchant_floor(level)
 
     width, height = config.GRID_SIZE, config.GRID_SIZE
@@ -751,33 +764,29 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
             key_items.append(stairs_item)
 
         # 2. 优先放置高价值道具（武器、防具）
+        high_value_items: List[Item] = []
         if level < 100:
-            high_value_item_count = 1 + level // 10  # 每10层+1个高价值道具
-            high_value_items = []
+            config = config_manager.get_config()
+            high_value_item_count = 1 + level // max(1, config.HIGH_VALUE_ITEM_INTERVAL)
 
-            # 尝试放置武器和防具
             for _ in range(high_value_item_count):
-                # 优先放置武器和防具
-                weapon_armor_weights = [0.0, 0.5, 0.5]  # 血瓶0%，武器50%，防具50%
-                item_type = random.choices(['potion', 'weapon', 'armor'], weights=weapon_armor_weights)[0]
-
-                # 为武器和防具寻找合适位置
-                if item_type in ['weapon', 'armor']:
-                    item = place_strategic_item(floor, rooms, key_items)
-                    if item and item.effect_type in ['weapon', 'armor']:
-                        key_items.append(item)
-                        high_value_items.append(item)
+                item_type = random.choice(['weapon', 'armor'])
+                item = place_strategic_item(floor, rooms, key_items, item_type=item_type)
+                if item:
+                    key_items.append(item)
+                    high_value_items.append(item)
 
         # 3. 在关键物品附近战略性放置守卫怪物
         if key_items:
             guard_positions = place_guard_monsters(floor, rooms, key_items)
-            # 计算还需要放置的随机怪物数量
-            base_monster_count = 3 + level // 5
+            config = config_manager.get_config()
+            base_monster_count = config.MONSTER_COUNT_BASE + level // max(1, config.MONSTER_COUNT_DIVISOR)
             guard_monster_count = len(guard_positions)
             remaining_monster_count = max(0, base_monster_count - guard_monster_count)
         else:
             guard_positions = []
-            remaining_monster_count = 3 + level // 5
+            config = config_manager.get_config()
+            remaining_monster_count = config.MONSTER_COUNT_BASE + level // max(1, config.MONSTER_COUNT_DIVISOR)
 
         # 4. 放置剩余的随机怪物（确保总数达标）
         if level < 100:
@@ -785,16 +794,11 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
 
         # 5. 放置剩余的低价值道具（血瓶）
         if level < 100:
-            # 计算还需要放置的血瓶数量
             total_item_count = 2 + level // 8
-            high_value_count = len([item for item in key_items if item.effect_type in ['weapon', 'armor']])
+            high_value_count = len(high_value_items)
             remaining_potion_count = max(0, total_item_count - high_value_count)
 
             for _ in range(remaining_potion_count):
-                item = place_strategic_item(floor, rooms, key_items)
-                if item and item.effect_type == 'potion':
-                    # 为血瓶也尝试放置守卫（可选）
-                    if random.random() < 0.5:  # 50%概率为血瓶放置守卫
-                        key_items.append(item)
+                place_strategic_item(floor, rooms, key_items, item_type='potion')
 
     return floor

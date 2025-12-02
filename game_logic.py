@@ -559,7 +559,7 @@ def forge_weapon_attribute(player: Player, attribute_index: int) -> Dict[str, An
     current_level = attribute.level
 
     # 计算锻造成本和成功率
-    forge_cost = calculate_forge_cost(current_level)
+    forge_cost = calculate_forge_cost(current_level, player.weapon_rarity, player.level)
     success_rate = calculate_forge_success_rate(current_level, player.weapon_rarity)
 
     # 检查金币
@@ -605,19 +605,23 @@ def forge_weapon_attribute(player: Player, attribute_index: int) -> Dict[str, An
             "is_forge_failure": True  # 标识这是锻造失败（不是其他错误）
         }
 
-def calculate_forge_cost(level: int) -> int:
+def calculate_forge_cost(level: int, rarity: str, player_level: int) -> int:
     """
     计算锻造成本
 
     Args:
         level: 当前词条等级
+        rarity: 武器稀有度
+        player_level: 玩家等级
 
     Returns:
         锻造所需金币
     """
-    # 基础成本随等级指数增长
-    base_cost = 50
-    return int(base_cost * (1.5 ** level))
+    config = config_manager.get_config()
+    base_cost = config.FORGE_BASE_COST + level * config.FORGE_LEVEL_COST
+    level_tax = player_level * 10
+    rarity_multiplier = config.FORGE_RARITY_COST_MULTIPLIER.get(rarity, 1.0)
+    return int((base_cost + level_tax) * rarity_multiplier)
 
 def calculate_forge_success_rate(level: int, rarity: str) -> float:
     """
@@ -630,18 +634,13 @@ def calculate_forge_success_rate(level: int, rarity: str) -> float:
     Returns:
         成功率 (0.0-1.0)
     """
-    # 基础成功率随等级递减
-    base_success_rate = max(0.1, 0.9 - level * 0.1)
-
-    # 稀有度加成
-    rarity_bonus = {
-        'common': 0.0,      # 普通 +0%
-        'rare': 0.1,       # 稀有 +10%
-        'epic': 0.2,       # 史诗 +20%
-        'legendary': 0.3    # 传说 +30%
-    }
-
-    return min(0.95, base_success_rate + rarity_bonus.get(rarity, 0.0))
+    config = config_manager.get_config()
+    base_success_rate = max(
+        config.FORGE_MIN_SUCCESS,
+        config.FORGE_BASE_SUCCESS - level * config.FORGE_SUCCESS_DECAY
+    )
+    rarity_bonus = config.FORGE_RARITY_SUCCESS_BONUS.get(rarity, 0.0)
+    return min(0.95, base_success_rate + rarity_bonus)
 
 def get_forge_info(player: Player) -> Dict[str, Any]:
     """
@@ -667,7 +666,7 @@ def get_forge_info(player: Player) -> Dict[str, Any]:
     }
 
     for i, attr in enumerate(player.weapon_attributes):
-        forge_cost = calculate_forge_cost(attr.level)
+        forge_cost = calculate_forge_cost(attr.level, player.weapon_rarity, player.level)
         success_rate = calculate_forge_success_rate(attr.level, player.weapon_rarity)
         enhanced_value = attr.get_enhanced_value()
 
@@ -709,22 +708,41 @@ def handle_trade_request(player: Player, floor: Floor, item_name: str) -> dict:
     # 执行交易
     player.gold -= merchant_item.price
 
+    equip_message = ""
     # 添加物品到背包或装备
     if merchant_item.effect_type == "potion":
         player.inventory[merchant_item.name] = player.inventory.get(merchant_item.name, 0) + 1
     elif merchant_item.effect_type == "weapon":
-        player.weapon_atk = merchant_item.effect_value
-        player.weapon_name = merchant_item.name
+        purchased_weapon = Item(
+            symbol='↑',
+            name=merchant_item.name,
+            effect_type='weapon',
+            effect_value=merchant_item.effect_value,
+            position=player.position,
+            rarity=merchant_item.rarity or 'common',
+            attributes=merchant_item.attributes.copy() if merchant_item.attributes else [],
+            base_name=merchant_item.base_name or merchant_item.name
+        )
+        equip_result = player.equip_weapon(purchased_weapon)
+        # 商店内不处理旧武器掉落，避免干扰商人布局
+        if equip_result['logs']:
+            # 将第一条装备日志作为额外信息返回
+            equip_message = equip_result['logs'][0]
+        else:
+            equip_message = ""
     elif merchant_item.effect_type == "armor":
         player.armor_def = merchant_item.effect_value
         player.armor_name = merchant_item.name
 
-    return {
+    response = {
         "success": True,
         "message": f"购买了{merchant_item.name}",
         "item": merchant_item,
         "new_gold": player.gold
     }
+    if merchant_item.effect_type == "weapon" and equip_message:
+        response["message"] += f"（{equip_message}）"
+    return response
 
 def get_merchant_info(player: Player, floor: Floor) -> dict:
     """获取商人信息"""
@@ -740,11 +758,14 @@ def get_merchant_info(player: Player, floor: Floor) -> dict:
                     "name": item.name,
                     "type": item.effect_type,
                     "value": item.effect_value,
-                    "price": item.price
+                    "price": item.price,
+                    "rarity": item.rarity,
+                    "attributes": [
+                        attr.to_dict() for attr in (item.attributes or [])
+                    ]
                 }
                 for item in floor.merchant.inventory
             ]
         },
         "gold": player.gold
     }
-
