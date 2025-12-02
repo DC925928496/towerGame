@@ -30,7 +30,7 @@ class GameSaveDAO(BaseDAO):
         query = """
         SELECT gs.*, p.name as player_name, p.level as player_level
         FROM game_saves gs
-        INNER JOIN players p ON gs.id = p.id
+        INNER JOIN players p ON gs.player_id = p.id
         WHERE gs.id = %s
         """
         result = self.execute_query(query, (save_id,))
@@ -244,4 +244,3 @@ class GameSaveDAO(BaseDAO):
             验证摘要信息
         """
         return game_save.get_validation_summary()
-

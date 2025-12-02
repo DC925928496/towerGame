@@ -1217,6 +1217,40 @@
             transition: all 0.3s ease;
         }
 
+.button-row {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-start;
+    margin-top: 4px;
+    padding: 4px 0;
+}
+
+/* 登出按钮样式 - 使用蓝色主题 */
+.logout-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    border-color: #60a5fa !important;
+    color: white !important;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* 自杀重启按钮样式 - 使用红色主题 */
+.suicide-btn {
+    background: linear-gradient(135deg, #f44336 0%, #da190b 100%) !important;
+    border-color: #f87171 !important;
+    color: white !important;
+}
+
+.suicide-btn:hover {
+    background: linear-gradient(135deg, #da190b 0%, #b71c1c 100%) !important;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.4);
+}
+
         .nickname-btn:hover {
             background: #68d391;
             color: white;
@@ -1398,8 +1432,11 @@
             <div class="info-item">
                 <span>昵称:</span>
                 <span id="nickname">gamer</span>
+            </div>
+            <div class="button-row">
                 <button class="nickname-btn" onclick="showNicknameModal()" title="修改昵称">✏️</button>
-                <button class="nickname-btn" onclick="handleLogout()" title="登出">🚪</button>
+                <button class="nickname-btn logout-btn" onclick="handleLogout()" title="登出">🚪</button>
+                <button class="nickname-btn suicide-btn" onclick="suicide()" title="自杀重启">💀</button>
             </div>
 
             <div class="separator"></div>
@@ -1467,60 +1504,52 @@
                 </div>
                 <div class="legend-grid">
                     <div class="legend-entry">
-                        <span class="game-icon icon-player legend-icon">🤺</span>
+                        <span class="game-icon icon-player legend-icon">🟡</span>
                         <div class="legend-text">
                             <span class="legend-name">玩家</span>
-                            <span class="legend-symbol">@</span>
-                        </div>
+                                                    </div>
                     </div>
                     <div class="legend-entry">
                         <span class="game-icon icon-monster legend-icon">👾</span>
                         <div class="legend-text">
                             <span class="legend-name">怪物</span>
-                            <span class="legend-symbol">M</span>
-                        </div>
+                                                    </div>
                     </div>
                     <div class="legend-entry">
                         <span class="game-icon icon-stairs legend-icon">🪜</span>
                         <div class="legend-text">
                             <span class="legend-name">楼梯</span>
-                            <span class="legend-symbol">&gt;</span>
-                        </div>
+                                                    </div>
                     </div>
                     <div class="legend-entry">
                         <span class="game-icon icon-potion legend-icon">🧪</span>
                         <div class="legend-text">
                             <span class="legend-name">血瓶</span>
-                            <span class="legend-symbol">+</span>
-                        </div>
+                                                    </div>
                     </div>
                     <div class="legend-entry">
                         <span class="game-icon icon-weapon legend-icon">🗡</span>
                         <div class="legend-text">
                             <span class="legend-name">武器</span>
-                            <span class="legend-symbol">↑</span>
-                        </div>
+                                                    </div>
                     </div>
                     <div class="legend-entry">
                         <span class="game-icon icon-armor legend-icon">🛡</span>
                         <div class="legend-text">
                             <span class="legend-name">防具</span>
-                            <span class="legend-symbol">◆</span>
-                        </div>
+                                                    </div>
                     </div>
                     <div class="legend-entry">
                         <span class="game-icon icon-merchant legend-icon">🛍️</span>
                         <div class="legend-text">
                             <span class="legend-name">商人</span>
-                            <span class="legend-symbol">$</span>
-                        </div>
+                                                    </div>
                     </div>
                     <div class="legend-entry">
                         <span class="game-icon icon-wall legend-icon">⬛</span>
                         <div class="legend-text">
                             <span class="legend-name">墙体</span>
-                            <span class="legend-symbol">#</span>
-                        </div>
+                                                    </div>
                     </div>
                 </div>
 
@@ -2043,7 +2072,7 @@
 
         // 图标字体和颜色配置
         const iconConfig = {
-            '@': { symbol: '\u{1F93A}', color: '#2196F3', class: 'icon-player' },      // 玩家 - 蓝色
+            '@': { symbol: '\u{1F7E1}', color: '#2196F3', class: 'icon-player' },      // 玩家 - 蓝色
             'M': { symbol: '\u{1F47E}', color: '#f44336', class: 'icon-monster' },     // 怪物 - 红色
             '>': { symbol: '\u{1FA9C}', color: '#FFC107', class: 'icon-stairs' },      // 楼梯 - 黄色
             '+': { symbol: '\u{1F9EA}', color: '#4CAF50', class: 'icon-potion' },      // 血瓶 - 绿色
@@ -2355,6 +2384,14 @@
 
                 case 'nickname_update_error':
                     handleNicknameUpdateError(message.message);
+                    break;
+
+                case 'error':
+                    if (message.message && message.message.includes('自杀重启失败')) {
+                        showMessage(message.message, 'error');
+                    } else {
+                        addLog(message.message);
+                    }
                     break;
 
                 // ============ 游戏消息处理（需要认证） ============
@@ -2901,8 +2938,26 @@
             showMessage(message);
         }
 
+        
+        
         // 初始化连接
-        window.onload = function() {
+        function suicide() {
+    if (confirm('确定要自杀并重启游戏吗？\\n\\n这将结束当前游戏并重新开始！')) {
+        try {
+            // 发送自杀重启请求到服务器
+            ws.send(JSON.stringify({
+                type: 'suicide'
+            }));
+
+            addLog('正在重启游戏...');
+        } catch (error) {
+            console.error('发送自杀请求失败:', error);
+            showMessage('发送请求失败，请检查网络连接', 'error');
+        }
+    }
+}
+
+window.onload = function() {
             // 检查是否有保存的登录状态
             checkAndRestoreLoginState();
 

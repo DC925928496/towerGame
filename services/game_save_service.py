@@ -70,7 +70,8 @@ class GameSaveService(BaseService):
         try:
             save = self.get_save(save_id)
             if not save:
-                raise ValueError("存档不存在")
+                logger.info(f"存档{save_id}不存在，跳过删除请求")
+                return False
 
             self.log_operation(f"删除存档: {save['save_name']}")
             return self.game_save_dao.delete(save_id)

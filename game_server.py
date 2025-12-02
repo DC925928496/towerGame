@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import websockets
 from typing import Dict, List, Optional
 from dataclasses import asdict
@@ -14,6 +15,9 @@ from game_logic import (
 from services import service_manager
 from config.database_config import config_manager
 from database.dao import dao_manager
+
+
+logger = logging.getLogger(__name__)
 
 
 class GameState:
@@ -115,6 +119,53 @@ class GameState:
             'armor_name': self.player.armor_name
         }
 
+    def _clear_runtime_state(self):
+        """清理当前运行时的游戏状态"""
+        self.player = None
+        self.current_floor = None
+        self.floor_level = 1
+        self.game_over = False
+        self.game_over_reason = ""
+        self.merchant_attempt_count = 0
+        self.save_id = None
+
+    def _cleanup_save_data(self):
+        """删除当前玩家的存档数据（数据库或本地），忽略错误"""
+        if self.db_enabled and self.player_id:
+            try:
+                target_save_id = self.save_id
+                if not target_save_id:
+                    latest_save = service_manager.game_save.get_latest_save(self.player_id)
+                    if latest_save:
+                        target_save_id = latest_save.get('id')
+
+                if target_save_id:
+                    service_manager.game_save.delete_save(target_save_id)
+            except Exception as e:
+                logger.warning(f"删除数据库存档失败: {e}")
+        else:
+            try:
+                from save_load import delete_save
+                delete_save()
+            except Exception as e:
+                logger.warning(f"删除本地存档失败: {e}")
+
+        self.save_id = None
+
+    def _finalize_game_over(self, reason: str, cleanup_save: bool = False) -> List[Dict]:
+        """统一处理游戏结束逻辑"""
+        self.game_over = True
+        self.game_over_reason = reason
+
+        if cleanup_save:
+            self._cleanup_save_data()
+
+        return [{
+            'type': 'gameover',
+            'reason': reason,
+            'final_floor': self.floor_level
+        }]
+
     def move(self, direction: str) -> List[Dict]:
         """处理移动命令"""
         if self.game_over:
@@ -130,13 +181,7 @@ class GameState:
 
         # 检查游戏结束
         if not self.player.is_alive():
-            self.game_over = True
-            self.game_over_reason = "死亡"
-            messages.append({
-                'type': 'gameover',
-                'reason': self.game_over_reason,
-                'final_floor': self.floor_level
-            })
+            messages.extend(self._finalize_game_over("死亡", cleanup_save=True))
             return messages
 
         # 如果有战斗
@@ -234,13 +279,7 @@ class GameState:
 
         # 检查玩家死亡
         if not self.player.is_alive():
-            self.game_over = True
-            self.game_over_reason = "被击败"
-            messages.append({
-                'type': 'gameover',
-                'reason': f"被{monster.name}击败",
-                'final_floor': self.floor_level
-            })
+            messages.extend(self._finalize_game_over(f"被{monster.name}击败", cleanup_save=True))
             return messages
 
         # 无论怪物是否死亡，都更新玩家信息（实时显示属性变化）
@@ -295,13 +334,7 @@ class GameState:
 
             # 检查玩家死亡（虽然使用血瓶不会导致死亡，但保留检查）
             if not self.player.is_alive():
-                self.game_over = True
-                self.game_over_reason = "死亡"
-                messages.append({
-                    'type': 'gameover',
-                    'reason': self.game_over_reason,
-                    'final_floor': self.floor_level
-                })
+                messages.extend(self._finalize_game_over("死亡", cleanup_save=True))
 
         return messages
 
@@ -366,6 +399,32 @@ class GameState:
 
         # 无论成功失败都更新玩家信息
         messages.append(self.get_player_info_message())
+        return messages
+
+    def suicide(self) -> List[Dict]:
+        """重置游戏状态并删除存档（用于自杀重启）"""
+        messages = []
+
+        try:
+            # 删除当前存档
+            self._cleanup_save_data()
+
+            # 清理并重新开始游戏
+            self._clear_runtime_state()
+
+            # 开始新游戏
+            messages = self.new_game()
+            messages.append({
+                'type': 'log',
+                'message': '游戏已自杀重启！'
+            })
+
+        except Exception as e:
+            messages.append({
+                'type': 'error',
+                'message': f'自杀重启失败: {str(e)}'
+            })
+
         return messages
 
     def trade(self, item_name: str) -> List[Dict]:
@@ -441,7 +500,7 @@ class GameState:
     def auto_save(self):
         """自动保存游戏（在关键事件后调用）"""
         if self.db_enabled:
-            self.save_game()
+            asyncio.create_task(asyncio.to_thread(self.save_game))
 
     def _save_game_state(self):
         """保存游戏状态，优先更新最新存档"""
@@ -975,6 +1034,49 @@ async def start_game_for_user(websocket, game: GameState):
         }))
 
 
+async def handle_suicide(websocket, data: Dict, game: GameState):
+    """处理自杀重启请求"""
+    try:
+        # 检查用户是否已认证
+        if not game.authenticated_user:
+            await websocket.send(json.dumps({
+                'type': 'error',
+                'message': '请先登录'
+            }))
+            return
+
+        # 删除用户的存档（如果有）
+        user_id = game.authenticated_user['player_id']
+        if game.db_enabled and user_id and game.save_id:
+            # 删除数据库存档
+            try:
+                service_manager.game_save_service.delete_save(game.save_id)
+            except ValueError:
+                pass  # 存档不存在，忽略
+            game.save_id = None
+        else:
+            # 删除本地存档
+            from save_load import delete_save
+            delete_save()
+
+        # 立即触发游戏结束（就像死亡一样）
+        game.game_over = True
+        game.game_over_reason = "自杀重启"
+
+        # 发送游戏结束消息
+        await websocket.send(json.dumps({
+            'type': 'gameover',
+            'reason': game.game_over_reason,
+            'final_floor': game.floor_level
+        }))
+
+    except Exception as e:
+        await websocket.send(json.dumps({
+            'type': 'error',
+            'message': f'自杀重启失败: {str(e)}'
+        }))
+
+
 # 全局游戏状态存储
 # key: session_id, value: GameState
 games: Dict[str, GameState] = {}
@@ -1017,6 +1119,13 @@ async def handle_client(websocket):
                 # 处理昵称更新请求
                 if data.get('type') == 'update_nickname':
                     await handle_nickname_update(websocket, data, game)
+                    continue
+
+                # 处理自杀重启请求
+                if data.get('type') == 'suicide':
+                    response_messages = game.suicide()
+                    for msg in response_messages:
+                        await websocket.send(json.dumps(msg))
                     continue
 
                 cmd = data.get('cmd')
