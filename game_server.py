@@ -16,6 +16,7 @@ from services import service_manager
 from config.database_config import config_manager as db_config_manager
 from config.game_config import config_manager as game_config_manager
 from database.dao import dao_manager
+from database.simple_connection_pool import connection_pool
 
 
 logger = logging.getLogger(__name__)
@@ -40,10 +41,14 @@ class GameState:
         # 尝试初始化数据库连接
         try:
             if db_config_manager.is_configured():
-                self.db_enabled = True
+                if connection_pool.test_connection():
+                    self.db_enabled = True
+                else:
+                    logger.warning("数据库不可用，将使用本地存档模式启动")
+                    self.db_enabled = False
             else:
                 self.db_enabled = False
-        except Exception as e:
+        except Exception:
             self.db_enabled = False
 
     def new_game(self):

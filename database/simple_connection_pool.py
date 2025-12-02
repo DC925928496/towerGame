@@ -69,6 +69,25 @@ class SimpleDatabaseConnectionPool:
             logger.error(f"创建数据库连接失败: {str(e)}")
             raise
 
+    def test_connection(self) -> bool:
+        """测试数据库连接是否可用"""
+        try:
+            conn = pymysql.Connect(
+                host=self._config.host,
+                port=self._config.port,
+                user=self._config.user,
+                password=self._config.password,
+                database=self._config.database,
+                charset=self._config.charset,
+                autocommit=False,
+                cursorclass=pymysql.cursors.DictCursor
+            )
+            conn.close()
+            return True
+        except Exception as e:
+            logger.warning(f"数据库连接测试失败: {e}")
+            return False
+
     def execute_query(self, query: str, params: tuple = None) -> list:
         """执行查询"""
         with self.get_connection() as conn:
