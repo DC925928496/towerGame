@@ -767,7 +767,17 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
         high_value_items: List[Item] = []
         if level < 100:
             config = config_manager.get_config()
-            high_value_item_count = 1 + level // max(1, config.HIGH_VALUE_ITEM_INTERVAL)
+            high_value_item_count = 0
+
+            # 楼层保底掉落：首层与固定间隔一定提供装备
+            if level == 1 or (config.HIGH_VALUE_ITEM_INTERVAL and level % config.HIGH_VALUE_ITEM_INTERVAL == 0):
+                high_value_item_count += 1
+
+            # 其余楼层按概率掉落，控制装备刷新频率
+            if random.random() < config.HIGH_VALUE_ITEM_BASE_CHANCE:
+                high_value_item_count += 1
+
+            high_value_item_count = min(high_value_item_count, config.HIGH_VALUE_ITEM_MAX)
 
             for _ in range(high_value_item_count):
                 item_type = random.choice(['weapon', 'armor'])

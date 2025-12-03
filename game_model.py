@@ -224,7 +224,7 @@ class Monster:
 
     def take_damage(self, damage: int) -> int:
         """受到伤害，返回实际造成的伤害"""
-        actual_damage = max(1, damage - self.defense)
+        actual_damage = max(0, damage)
         self.hp = max(0, self.hp - actual_damage)
         return actual_damage
 
@@ -359,7 +359,7 @@ class Player:
 
     def take_damage(self, damage: int) -> int:
         """受到伤害，返回实际受到的伤害"""
-        actual_damage = max(1, damage - self.total_def)
+        actual_damage = max(0, damage)
         self.hp = max(0, self.hp - actual_damage)
         return actual_damage
 

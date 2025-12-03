@@ -54,10 +54,10 @@ class GameConfig:
     # 道具/装备生成
     POTION_BASE_HEAL: int = 120
     POTION_HEAL_PER_FLOOR: int = 18
-    WEAPON_BASE_ATK: int = 5
-    WEAPON_ATK_PER_FLOOR: int = 5
-    ARMOR_BASE_DEF: int = 2
-    ARMOR_DEF_PER_FLOOR: int = 3
+    WEAPON_BASE_ATK: int = 10
+    WEAPON_ATK_PER_FLOOR: int = 3
+    ARMOR_BASE_DEF: int = 4
+    ARMOR_DEF_PER_FLOOR: int = 2
 
     # 物品生成权重
     ITEM_WEIGHTS: Dict[str, float] = None
@@ -94,7 +94,9 @@ class GameConfig:
     MERCHANT_ARMOR_RANGE: tuple = (2, 3)
 
     # 战略投放
-    HIGH_VALUE_ITEM_INTERVAL: int = 10
+    HIGH_VALUE_ITEM_INTERVAL: int = 6
+    HIGH_VALUE_ITEM_BASE_CHANCE: float = 0.25
+    HIGH_VALUE_ITEM_MAX: int = 2
 
     # 锻造配置
     FORGE_BASE_COST: int = 120
