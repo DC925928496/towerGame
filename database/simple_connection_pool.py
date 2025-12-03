@@ -28,27 +28,37 @@ class SimpleDatabaseConnectionPool:
             raise
 
     @contextmanager
-    def get_connection(self):
-        """获取数据库连接的上下文管理器"""
-        conn = None
-        try:
-            conn = self._create_connection()
-            yield conn
-        except Exception as e:
-            if conn:
-                try:
-                    conn.rollback()
-                except:
-                    pass
-            logger.error(f"数据库操作失败: {e}")
-            raise
-        finally:
-            if conn:
-                try:
-                    conn.close()
-                    logger.debug("数据库连接已关闭")
-                except:
-                    pass
+    def get_connection(self, max_retries: int = 2):
+        """获取数据库连接的上下文管理器，支持重试"""
+        for attempt in range(max_retries + 1):
+            conn = None
+            try:
+                conn = self._create_connection()
+                yield conn
+                break  # 成功则退出重试循环
+            except Exception as e:
+                if conn:
+                    try:
+                        conn.rollback()
+                    except:
+                        pass
+
+                if attempt < max_retries:
+                    wait_time = (attempt + 1) * 2  # 2秒、4秒递增等待
+                    logger.warning(f"数据库连接失败 (尝试 {attempt + 1}/{max_retries + 1}): {e}")
+                    logger.info(f"等待 {wait_time} 秒后重试...")
+                    import time
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"数据库操作失败，已达到最大重试次数: {e}")
+                    raise
+            finally:
+                if conn:
+                    try:
+                        conn.close()
+                        logger.debug("数据库连接已关闭")
+                    except:
+                        pass
 
     def _create_connection(self) -> pymysql.Connection:
         """创建新的数据库连接"""
@@ -61,7 +71,10 @@ class SimpleDatabaseConnectionPool:
                 database=self._config.database,
                 charset=self._config.charset,
                 autocommit=False,
-                cursorclass=pymysql.cursors.DictCursor
+                cursorclass=pymysql.cursors.DictCursor,
+                connect_timeout=10,  # 10秒连接超时
+                read_timeout=10,     # 10秒读取超时
+                write_timeout=10     # 10秒写入超时
             )
             logger.info("创建新的数据库连接成功")
             return connection
@@ -69,24 +82,38 @@ class SimpleDatabaseConnectionPool:
             logger.error(f"创建数据库连接失败: {str(e)}")
             raise
 
-    def test_connection(self) -> bool:
-        """测试数据库连接是否可用"""
-        try:
-            conn = pymysql.Connect(
-                host=self._config.host,
-                port=self._config.port,
-                user=self._config.user,
-                password=self._config.password,
-                database=self._config.database,
-                charset=self._config.charset,
-                autocommit=False,
-                cursorclass=pymysql.cursors.DictCursor
-            )
-            conn.close()
-            return True
-        except Exception as e:
-            logger.warning(f"数据库连接测试失败: {e}")
-            return False
+    def test_connection(self, max_retries: int = 2) -> bool:
+        """测试数据库连接是否可用，支持重试"""
+        for attempt in range(max_retries + 1):
+            try:
+                # 添加连接超时设置
+                conn = pymysql.Connect(
+                    host=self._config.host,
+                    port=self._config.port,
+                    user=self._config.user,
+                    password=self._config.password,
+                    database=self._config.database,
+                    charset=self._config.charset,
+                    autocommit=False,
+                    cursorclass=pymysql.cursors.DictCursor,
+                    connect_timeout=10,  # 10秒连接超时
+                    read_timeout=10,     # 10秒读取超时
+                    write_timeout=10     # 10秒写入超时
+                )
+                conn.close()
+                logger.info("数据库连接测试成功")
+                return True
+            except Exception as e:
+                if attempt < max_retries:
+                    wait_time = (attempt + 1) * 2
+                    logger.warning(f"数据库连接测试失败 (尝试 {attempt + 1}/{max_retries + 1}): {e}")
+                    logger.info(f"等待 {wait_time} 秒后重试...")
+                    import time
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"数据库连接测试失败，已达到最大重试次数: {e}")
+                    return False
+        return False
 
     def execute_query(self, query: str, params: tuple = None) -> list:
         """执行查询"""

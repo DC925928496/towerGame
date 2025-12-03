@@ -10,8 +10,51 @@ from config.game_config import config_manager
 
 
 
+def calculate_combo_damage(base_damage: int, combo_chance: float) -> List[Dict[str, Any]]:
+    """
+    计算连击伤害
+
+    Args:
+        base_damage: 基础伤害
+        combo_chance: 连击概率
+
+    Returns:
+        连击伤害列表，每次连击的伤害信息
+    """
+    combo_attacks = []
+
+    # 第一次连击：50%概率，25%伤害
+    if random.random() < combo_chance:
+        first_hit = int(base_damage * 0.25)
+        combo_attacks.append({
+            'damage': first_hit,
+            'multiplier': 0.25,
+            'hit_type': '第一次连击'
+        })
+
+        # 第二次连击：25%概率，50%伤害（基于基础伤害）
+        if random.random() < 0.25:
+            second_hit = int(base_damage * 0.50)
+            combo_attacks.append({
+                'damage': second_hit,
+                'multiplier': 0.50,
+                'hit_type': '第二次连击'
+            })
+
+            # 第三次连击：5%概率，75%伤害（基于基础伤害）
+            if random.random() < 0.05:
+                third_hit = int(base_damage * 0.75)
+                combo_attacks.append({
+                    'damage': third_hit,
+                    'multiplier': 0.75,
+                    'hit_type': '第三次连击'
+                })
+
+    return combo_attacks
+
+
 def calculate_damage_with_attributes(atk: int, defense: int, player_attributes: List,
-                                   critical_chance: float = 0.05) -> Dict[str, Any]:
+                                   critical_chance: float = 0.05, monster_max_hp: int = None) -> Dict[str, Any]:
     """
     考虑武器随机属性的伤害计算
 
@@ -20,12 +63,16 @@ def calculate_damage_with_attributes(atk: int, defense: int, player_attributes: 
         defense: 防御力
         player_attributes: 玩家武器属性列表
         critical_chance: 暴击率
+        monster_max_hp: 怪物最大生命值（用于百分比伤害计算）
 
     Returns:
         伤害计算结果字典，包含：
         - damage: 最终伤害
         - life_steal: 吸血量
         - is_critical: 是否暴击
+        - is_lucky_hit: 是否幸运一击
+        - combo_attacks: 连击伤害列表
+        - percent_damage: 百分比伤害
         - damage_breakdown: 伤害构成详情
     """
     config = config_manager.get_config()
@@ -53,12 +100,42 @@ def calculate_damage_with_attributes(atk: int, defense: int, player_attributes: 
     # 计算最终伤害
     final_damage = int(base_damage * damage_mult * crit_multiplier)
 
-    # 计算吸血量
+    # 计算幸运一击
+    lucky_hit_chance = sum(attr.get_enhanced_value() for attr in player_attributes
+                           if attr.attribute_type == 'lucky_hit')
+    is_lucky_hit = random.random() < lucky_hit_chance
+    if is_lucky_hit:
+        final_damage *= 3  # 幸运一击造成3倍伤害
+
+    # 计算百分比伤害
+    percent_damage = 0
+    if monster_max_hp:
+        percent_rate = sum(attr.get_enhanced_value() for attr in player_attributes
+                           if attr.attribute_type == 'percent_damage')
+        if percent_rate > 0:
+            percent_damage = int(monster_max_hp * percent_rate)
+            # 对Boss的最大百分比伤害限制为5%
+            if monster_max_hp > 1000:  # 假设Boss血量超过1000
+                percent_damage = min(percent_damage, int(monster_max_hp * 0.05))
+
+    # 计算连击
+    combo_chance = sum(attr.get_enhanced_value() for attr in player_attributes
+                      if attr.attribute_type == 'combo_chance')
+    combo_attacks = calculate_combo_damage(final_damage, combo_chance)
+
+    # 计算吸血量（包括连击吸血）
     life_steal = 0
     life_steal_rate = sum(attr.get_enhanced_value() for attr in player_attributes
                           if attr.attribute_type == 'life_steal')
     if life_steal_rate > 0:
+        # 主攻击吸血
         life_steal = int(final_damage * life_steal_rate)
+        # 连击吸血
+        for combo in combo_attacks:
+            life_steal += int(combo['damage'] * life_steal_rate)
+
+    # 计算总伤害（主攻击 + 连击 + 百分比伤害）
+    total_damage = final_damage + sum(combo['damage'] for combo in combo_attacks) + percent_damage
 
     # 伤害构成详情（用于调试和显示）
     damage_breakdown = {
@@ -71,13 +148,23 @@ def calculate_damage_with_attributes(atk: int, defense: int, player_attributes: 
         'damage_mult': damage_mult,
         'is_critical': is_critical,
         'crit_multiplier': crit_multiplier,
-        'final_damage': final_damage
+        'is_lucky_hit': is_lucky_hit,
+        'final_damage': final_damage,
+        'percent_damage': percent_damage,
+        'combo_chance': combo_chance,
+        'combo_count': len(combo_attacks),
+        'combo_damage': sum(combo['damage'] for combo in combo_attacks),
+        'total_damage': total_damage
     }
 
     return {
         'damage': final_damage,
+        'total_damage': total_damage,
+        'percent_damage': percent_damage,
+        'combo_attacks': combo_attacks,
         'life_steal': life_steal,
         'is_critical': is_critical,
+        'is_lucky_hit': is_lucky_hit,
         'damage_breakdown': damage_breakdown
     }
 
@@ -131,20 +218,42 @@ def player_attack(player: Player, monster: Monster, floor: Floor) -> Dict[str, A
 
     # 玩家攻击 - 使用新的武器属性系统
     attack_result = calculate_damage_with_attributes(
-        player.total_atk,
+        player.total_atk(floor.level if floor else 1),
         monster.defense,
         player.weapon_attributes,
-        player.get_critical_chance()
+        player.get_critical_chance(),
+        monster.hp + (monster.hp * 0.1) if monster.hp < monster.max_hp else monster.max_hp  # 估算最大生命值
     )
 
+    # 应用主攻击伤害
     actual_damage = monster.take_damage(attack_result['damage'])
     result['player_damage'] = actual_damage
 
     # 伤害日志
     damage_desc = f"你对{monster.name}造成了{actual_damage}点伤害！"
-    if attack_result['is_critical']:
+    if attack_result['is_lucky_hit']:
+        damage_desc = f"🍀幸运一击！{damage_desc}"
+    elif attack_result['is_critical']:
         damage_desc = f"💥暴击！{damage_desc}"
     result['logs'].append(damage_desc)
+
+    # 应用百分比伤害
+    if attack_result.get('percent_damage', 0) > 0:
+        percent_damage = monster.take_damage(attack_result['percent_damage'])
+        result['player_damage'] += percent_damage
+        result['logs'].append(f"🔸百分比伤害造成了{percent_damage}点伤害！")
+
+    # 应用连击伤害（怪物不会反击连击）
+    combo_total_damage = 0
+    for i, combo in enumerate(attack_result['combo_attacks'], 1):
+        combo_damage = monster.take_damage(combo['damage'])
+        combo_total_damage += combo_damage
+        result['logs'].append(f"⚡连击{i}！{combo['hit_type']}造成了{combo_damage}点伤害！")
+
+    # 更新总伤害
+    if combo_total_damage > 0:
+        result['player_damage'] += combo_total_damage
+        result['logs'].append(f"连击总计：{combo_total_damage}点额外伤害")
 
     # 吸血处理
     if attack_result['life_steal'] > 0:
@@ -154,14 +263,22 @@ def player_attack(player: Player, monster: Monster, floor: Floor) -> Dict[str, A
     if not monster.is_alive():
         # 怪物死亡
         result['monster_dead'] = True
-        result['exp_gained'] = monster.exp
-        result['gold_gained'] = monster.gold
 
         result['logs'].append(f"你击败了{monster.name}！")
-        result['logs'].append(f"获得了{monster.exp}点经验值和{monster.gold}金币")
+
+        # 应用经验加成
+        exp_bonus_rate = player.get_exp_bonus_rate()
+        bonus_exp = int(monster.exp * exp_bonus_rate)
+        total_exp = monster.exp + bonus_exp
+
+        result['exp_gained'] = total_exp
+        if bonus_exp > 0:
+            result['logs'].append(f"获得了{monster.exp}点经验值（成长词条额外加成{bonus_exp}点）！")
+        else:
+            result['logs'].append(f"获得了{monster.exp}点经验值！")
 
         # 获得经验值和升级
-        level_up_logs = player.gain_exp(monster.exp)
+        level_up_logs = player.gain_exp(total_exp)
         result['level_up_logs'] = level_up_logs
         result['logs'].extend(level_up_logs)
 
@@ -171,10 +288,19 @@ def player_attack(player: Player, monster: Monster, floor: Floor) -> Dict[str, A
         total_gold = monster.gold + bonus_gold
 
         if bonus_gold > 0:
-            result['logs'].append(f"金币加成效果额外获得{bonus_gold}金币！")
+            result['logs'].append(f"获得了{monster.gold}金币（财富词条额外加成{bonus_gold}金币）！")
+        else:
+            result['logs'].append(f"获得了{monster.gold}金币！")
 
         result['gold_gained'] = total_gold
         player.gold += total_gold
+
+        # 应用击杀回血
+        kill_heal_amount = player.get_kill_heal_amount()
+        if kill_heal_amount > 0:
+            heal_amount = player.heal(kill_heal_amount)
+            if heal_amount > 0:
+                result['logs'].append(f"💀击杀回血！恢复了{heal_amount}点生命值！")
 
         # 移除怪物
         floor.remove_monster(monster.id)
@@ -182,10 +308,27 @@ def player_attack(player: Player, monster: Monster, floor: Floor) -> Dict[str, A
     else:
         # 怪物反击
         monster_damage = calculate_damage(monster.atk, player.total_def)
-        actual_damage_to_player = player.take_damage(monster_damage)
+
+        # 应用伤害减免
+        reduction_rate = player.get_damage_reduction_rate()
+        reduced_damage = int(monster_damage * (1.0 - reduction_rate))
+
+        actual_damage_to_player = player.take_damage(reduced_damage)
         result['monster_damage'] = actual_damage_to_player
 
-        result['logs'].append(f"{monster.name}对你造成了{actual_damage_to_player}点伤害！")
+        # 伤害日志
+        damage_log = f"{monster.name}对你造成了{actual_damage_to_player}点伤害！"
+        if reduction_rate > 0:
+            damage_log += f" (坚韧效果减免了{int(monster_damage * reduction_rate)}点伤害)"
+        result['logs'].append(damage_log)
+
+        # 应用反击伤害
+        thorn_rate = player.get_thorn_damage_rate()
+        if thorn_rate > 0:
+            thorn_damage = int(actual_damage_to_player * thorn_rate)
+            monster_hp_after_thorn = monster.take_damage(thorn_damage)
+            if thorn_damage > 0:
+                result['logs'].append(f"🌿荆棘效果对{monster.name}反弹了{thorn_damage}点伤害！")
 
         if not player.is_alive():
             result['logs'].append("你被击败了...")

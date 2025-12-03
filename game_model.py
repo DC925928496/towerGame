@@ -8,7 +8,6 @@ from utils.position_utils import Position, PositionUtils
 from utils.game_utils import GameUtils
 from config.game_config import config_manager
 
-
 # ==================== 武器属性系统 ====================
 
 @dataclass
@@ -45,47 +44,117 @@ class WeaponAttribute:
 
 # 属性类型配置
 ATTRIBUTE_TYPES = {
+    # 核心词条 (总权重60%)
     'attack_boost': {
         'name': '攻击力',
-        'weight': 0.25,
+        'weight': 0.16,
         'base_value': 5,
         'scale': 0.5,
         'description': '攻击力+{value}'
     },
     'damage_mult': {
         'name': '伤害倍率',
-        'weight': 0.15,
+        'weight': 0.10,
         'base_value': 0.1,
         'scale': 0.01,
         'description': '最终伤害+{value*100}%'
     },
     'armor_pen': {
         'name': '防御穿透',
-        'weight': 0.15,
+        'weight': 0.10,
         'base_value': 3,
         'scale': 0.2,
         'description': '防御穿透+{value}'
     },
     'life_steal': {
         'name': '生命偷取',
-        'weight': 0.15,
+        'weight': 0.09,
         'base_value': 0.05,
         'scale': 0.003,
         'description': '吸血率+{value*100}%'
     },
     'gold_bonus': {
         'name': '金币加成',
-        'weight': 0.15,
+        'weight': 0.08,
         'base_value': 0.2,
         'scale': 0.01,
         'description': '金币获取+{value*100}%'
     },
     'critical_chance': {
         'name': '暴击率',
-        'weight': 0.15,
+        'weight': 0.07,
         'base_value': 0.03,
         'scale': 0.002,
         'description': '暴击率+{value*100}%'
+    },
+
+    # 高优先级词条 (总权重20%)
+    'combo_chance': {
+        'name': '连击',
+        'weight': 0.08,
+        'base_value': 0.08,  # 8%基础连击概率
+        'scale': 0.005,     # 每级提升0.5%
+        'description': '连击率+{value*100}%'
+    },
+    'kill_heal': {
+        'name': '嗜血',
+        'weight': 0.06,
+        'base_value': 15,   # 基础回血15点
+        'scale': 2,         # 每级提升2点
+        'description': '击杀回血+{value}'
+    },
+    'exp_bonus': {
+        'name': '成长',
+        'weight': 0.06,
+        'base_value': 0.25,  # 基础经验加成25%
+        'scale': 0.015,      # 每级提升1.5%
+        'description': '经验获取+{value*100}%'
+    },
+
+    # 中优先级词条 (总权重15%)
+    'thorn_damage': {
+        'name': '荆棘',
+        'weight': 0.05,
+        'base_value': 0.15,  # 15%反弹伤害
+        'scale': 0.01,       # 每级提升1%
+        'description': '反击伤害+{value*100}%'
+    },
+    'damage_reduction': {
+        'name': '坚韧',
+        'weight': 0.05,
+        'base_value': 0.05,  # 5%伤害减免
+        'scale': 0.003,      # 每级提升0.3%
+        'description': '伤害减免+{value*100}%'
+    },
+    'percent_damage': {
+        'name': '破甲',
+        'weight': 0.05,
+        'base_value': 0.03,  # 3%最大生命值伤害
+        'scale': 0.002,      # 每级提升0.2%
+        'description': '百分比伤害+{value*100}%'
+    },
+
+    # 低优先级词条 (总权重5%)
+    'floor_bonus': {
+        'name': '传承',
+        'weight': 0.02,
+        'base_value': 1,     # 每层+1攻击力
+        'scale': 0.1,        # 每级+0.1
+        'description': '层数加成+每层{value}攻击力'
+    },
+    'lucky_hit': {
+        'name': '幸运',
+        'weight': 0.02,
+        'base_value': 0.02,  # 2%幸运一击概率
+        'scale': 0.001,      # 每级提升0.1%
+        'description': '幸运一击率+{value*100}%'
+    },
+    'berserk_mode': {
+        'name': '怒火',
+        'weight': 0.01,
+        'base_value': 0.50,  # 50%攻击力加成
+        'scale': 0.02,       # 每级提升2%
+        'description': '怒火加成+{value*100}%'
     }
 }
 
@@ -255,9 +324,8 @@ class Player:
         potion_key = f"{config.POTION_NAME}{config.POTION_NAME_DELIMITER}{start_potion_heal}"
         self.inventory = {potion_key: config.PLAYER_START_POTION_COUNT}
 
-    @property
-    def total_atk(self) -> int:
-        """总攻击力 = 基础 + 武器加成 + 属性加成"""
+    def total_atk(self, floor_level: int = 1) -> int:
+        """总攻击力 = 基础 + 武器加成 + 属性加成 + 层数加成 + 怒火加成"""
         base_atk = self.attack + self.weapon_atk  # 修改字段名引用
 
         # 计算武器属性的攻击力加成
@@ -266,7 +334,22 @@ class Player:
             if attr.attribute_type == 'attack_boost':
                 attack_boost += attr.get_enhanced_value()
 
-        return base_atk + int(attack_boost)
+        # 计算层数加成
+        floor_bonus = 0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'floor_bonus':
+                floor_bonus += int(attr.get_enhanced_value() * (floor_level - 1))  # 第1层不加成
+
+        # 计算怒火加成（血量低于30%时生效）
+        berserk_bonus = 0
+        hp_ratio = self.hp / self.max_hp
+        if hp_ratio < 0.3:  # 血量低于30%
+            for attr in self.weapon_attributes:
+                if attr.attribute_type == 'berserk_mode':
+                    berserk_bonus += int(base_atk * attr.get_enhanced_value())
+
+        total = base_atk + int(attack_boost) + floor_bonus + berserk_bonus
+        return total
 
     def get_damage_multiplier(self) -> float:
         """获取武器属性提供的伤害倍率"""
@@ -308,6 +391,78 @@ class Player:
             if attr.attribute_type == 'critical_chance':
                 crit_bonus += attr.get_enhanced_value()
         return base_crit_chance + crit_bonus
+
+    def get_combo_chance(self) -> float:
+        """获取武器属性提供的连击率"""
+        combo_chance = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'combo_chance':
+                combo_chance += attr.get_enhanced_value()
+        return combo_chance
+
+    def get_kill_heal_amount(self) -> int:
+        """获取武器属性提供的击杀回血量"""
+        kill_heal = 0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'kill_heal':
+                kill_heal += int(attr.get_enhanced_value())
+        return kill_heal
+
+    def get_exp_bonus_rate(self) -> float:
+        """获取武器属性提供的经验加成率"""
+        exp_bonus = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'exp_bonus':
+                exp_bonus += attr.get_enhanced_value()
+        return exp_bonus
+
+    def get_thorn_damage_rate(self) -> float:
+        """获取武器属性提供的反击伤害率"""
+        thorn_rate = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'thorn_damage':
+                thorn_rate += attr.get_enhanced_value()
+        return thorn_rate
+
+    def get_damage_reduction_rate(self) -> float:
+        """获取武器属性提供的伤害减免率"""
+        reduction_rate = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'damage_reduction':
+                reduction_rate += attr.get_enhanced_value()
+        return reduction_rate
+
+    def get_percent_damage_rate(self) -> float:
+        """获取武器属性提供的百分比伤害率"""
+        percent_rate = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'percent_damage':
+                percent_rate += attr.get_enhanced_value()
+        return percent_rate
+
+    def get_floor_bonus_atk(self) -> float:
+        """获取武器属性提供的层数加成攻击力"""
+        floor_bonus = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'floor_bonus':
+                floor_bonus += attr.get_enhanced_value()
+        return floor_bonus
+
+    def get_lucky_hit_chance(self) -> float:
+        """获取武器属性提供的幸运一击率"""
+        lucky_chance = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'lucky_hit':
+                lucky_chance += attr.get_enhanced_value()
+        return lucky_chance
+
+    def get_berserk_bonus(self) -> float:
+        """获取武器属性提供的怒火加成"""
+        berserk_bonus = 0.0
+        for attr in self.weapon_attributes:
+            if attr.attribute_type == 'berserk_mode':
+                berserk_bonus += attr.get_enhanced_value()
+        return berserk_bonus
 
     def equip_weapon(self, weapon_item: 'Item') -> List[str]:
         """装备武器，返回装备日志"""

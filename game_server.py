@@ -3,7 +3,6 @@ import json
 import logging
 import websockets
 from typing import Dict, List, Optional
-from dataclasses import asdict
 
 from map_generator import generate_floor
 from game_model import Player, Floor, Position, CellType, Item, WeaponAttribute
@@ -20,6 +19,23 @@ from database.simple_connection_pool import connection_pool
 
 
 logger = logging.getLogger(__name__)
+
+# 全局数据库可用性标志
+DATABASE_AVAILABLE = False
+
+
+def safe_database_operation(operation_name: str, operation_func, fallback_result=None):
+    """安全执行数据库操作，失败时返回备用结果"""
+    if not DATABASE_AVAILABLE:
+        logger.info(f"数据库不可用，跳过 {operation_name}")
+        return fallback_result
+
+    try:
+        return operation_func()
+    except Exception as e:
+        logger.error(f"{operation_name} 失败: {e}")
+        logger.info("已启用本地模式，建议重启服务器以避免重复错误")
+        return fallback_result
 
 
 class GameState:
@@ -38,18 +54,8 @@ class GameState:
         self.authenticated_user: Optional[Dict] = None
         self.is_authenticated: bool = False
 
-        # 尝试初始化数据库连接
-        try:
-            if db_config_manager.is_configured():
-                if connection_pool.test_connection():
-                    self.db_enabled = True
-                else:
-                    logger.warning("数据库不可用，将使用本地存档模式启动")
-                    self.db_enabled = False
-            else:
-                self.db_enabled = False
-        except Exception:
-            self.db_enabled = False
+        # 使用全局数据库可用性标志
+        self.db_enabled = DATABASE_AVAILABLE
 
     def new_game(self):
         """开始新游戏"""
@@ -111,7 +117,7 @@ class GameState:
             'weapon_atk': self.player.weapon_atk,
             'defense': self.player.defense,
             'armor_def': self.player.armor_def,
-            'total_atk': self.player.total_atk,
+            'total_atk': self.player.total_atk(self.floor_level),
             'total_def': self.player.total_def,
             'exp': self.player.exp,
             'exp_needed': self.player.exp_needed,
@@ -637,7 +643,7 @@ class GameState:
 
     def _load_weapon_attributes(self):
         """加载武器词条"""
-        try:
+        def load_from_db():
             # 从数据库获取玩家的武器词条
             weapon_attrs_data = dao_manager.weapon_attribute.get_by_player_id(self.player_id)
 
@@ -654,8 +660,8 @@ class GameState:
                 )
                 self.player.weapon_attributes.append(weapon_attr)
 
-        except Exception as e:
-            self.player.weapon_attributes = []
+        # 使用安全数据库操作
+        safe_database_operation("加载武器词条", load_from_db)
 
     def _load_inventory(self):
         """加载玩家道具信息"""
@@ -1192,7 +1198,37 @@ async def handle_client(websocket):
 
 async def main():
     """启动WebSocket服务器"""
+    # 启动前测试数据库连接
+    print("正在启动爬塔游戏服务器...")
+    print("=" * 50)
+
+    # 测试数据库连接
+    global DATABASE_AVAILABLE
+    DATABASE_AVAILABLE = False
+    try:
+        if db_config_manager.is_configured():
+            print("检测到数据库配置，正在测试连接...")
+            if connection_pool.test_connection():
+                print("[OK] 数据库连接成功！将启用数据库存档功能")
+                DATABASE_AVAILABLE = True
+            else:
+                print("[WARN] 数据库连接失败，将使用本地存档模式")
+        else:
+            print("[INFO] 未配置数据库，将使用本地存档模式")
+    except Exception as e:
+        print(f"[ERROR] 数据库初始化失败: {e}")
+        print("[INFO] 将使用本地存档模式启动")
+
+    print("=" * 50)
+
+    if DATABASE_AVAILABLE:
+        print("[START] 服务器启动中... (数据库模式)")
+    else:
+        print("[START] 服务器启动中... (本地模式)")
+
     async with websockets.serve(handle_client, "localhost", 8080):
+        print("[OK] 服务器已启动，监听端口: ws://localhost:8080")
+        print("[TIP] 在浏览器中打开 index.html 开始游戏")
         await asyncio.Future()  # 永久运行
 
 
@@ -1200,4 +1236,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        pass
+        print("\n[STOP] 服务器已停止")
+    except Exception as e:
+        print(f"\n[ERROR] 服务器启动失败: {e}")
+        print("[TIP] 请检查端口8080是否被占用，或尝试重新启动")

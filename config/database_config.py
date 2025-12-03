@@ -23,10 +23,10 @@ class DatabaseConfig:
     charset: str = 'utf8mb4'
 
     # 连接池配置
-    pool_size: int = 5
-    max_overflow: int = 10
-    pool_timeout: int = 30
-    pool_recycle: int = 3600
+    pool_size: int = 3  # 减少连接池大小，避免过多连接
+    max_overflow: int = 5  # 减少最大溢出连接数
+    pool_timeout: int = 60  # 增加获取连接的超时时间
+    pool_recycle: int = 1800  # 减少连接回收时间到30分钟
 
     def get_connection_string(self) -> str:
         """获取数据库连接字符串"""
@@ -48,10 +48,10 @@ class DatabaseConfigManager:
                 database=os.getenv('DB_NAME', 'tower_game'),
                 user=os.getenv('DB_USER', ''),
                 password=os.getenv('DB_PASSWORD', ''),
-                pool_size=int(os.getenv('DB_POOL_SIZE', '5')),
-                max_overflow=int(os.getenv('DB_MAX_OVERFLOW', '10')),
-                pool_timeout=int(os.getenv('DB_POOL_TIMEOUT', '30')),
-                pool_recycle=int(os.getenv('DB_POOL_RECYCLE', '3600'))
+                pool_size=int(os.getenv('DB_POOL_SIZE', '3')),
+                max_overflow=int(os.getenv('DB_MAX_OVERFLOW', '5')),
+                pool_timeout=int(os.getenv('DB_POOL_TIMEOUT', '60')),
+                pool_recycle=int(os.getenv('DB_POOL_RECYCLE', '1800'))
             )
         return self._config
 

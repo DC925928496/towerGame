@@ -1251,6 +1251,19 @@
     box-shadow: 0 2px 8px rgba(244, 67, 54, 0.4);
 }
 
+/* 帮助按钮样式 - 使用紫色主题 */
+.help-btn {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%) !important;
+    border-color: #b794f4 !important;
+    color: white !important;
+}
+
+.help-btn:hover {
+    background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%) !important;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(159, 122, 234, 0.4);
+}
+
         .nickname-btn:hover {
             background: #68d391;
             color: white;
@@ -1352,6 +1365,265 @@
             opacity: 0.3;
             pointer-events: none;
         }
+
+        /* 武器卡片样式 */
+        .weapon-card {
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            border: 2px solid #4a5568;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .weapon-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .weapon-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .weapon-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .weapon-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #e0e0e0;
+            flex: 1;
+        }
+
+        .weapon-rarity {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .rarity-common { background: #718096; color: #fff; }
+        .rarity-rare { background: #3182ce; color: #fff; }
+        .rarity-epic { background: #805ad5; color: #fff; }
+        .rarity-legendary { background: #d69e2e; color: #000; }
+
+        .weapon-stats {
+            font-size: 12px;
+            color: #cbd5e0;
+            margin-bottom: 10px;
+        }
+
+        .weapon-attributes {
+            border-top: 1px solid #4a5568;
+            padding-top: 8px;
+        }
+
+        .weapon-attribute {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            color: #a0aec0;
+            margin: 3px 0;
+        }
+
+        .attribute-icon {
+            width: 16px;
+            text-align: center;
+            margin-right: 6px;
+            font-size: 10px;
+        }
+
+        .attribute-value {
+            color: #63b3ed;
+            font-weight: bold;
+        }
+
+        .no-weapon {
+            color: #718096;
+            font-style: italic;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* 帮助弹窗样式 */
+        .help-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .help-content {
+            position: relative;
+            background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+            border: 2px solid #4a5568;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            max-height: 80vh;
+            margin: 5vh auto;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .help-header {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            padding: 20px;
+            border-bottom: 1px solid #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .help-title {
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .help-close {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .help-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .help-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .help-section {
+            margin-bottom: 25px;
+        }
+
+        .help-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-section h4 {
+            color: #63b3ed;
+            margin-bottom: 12px;
+            font-size: 16px;
+            border-bottom: 1px solid #4a5568;
+            padding-bottom: 6px;
+        }
+
+        .help-note {
+            color: #a0aec0;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 弹窗中的图例样式 */
+        .modal-legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .modal-legend-entry {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: rgba(45, 55, 72, 0.6);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-legend-entry:hover {
+            background: rgba(74, 85, 104, 0.8);
+            transform: translateY(-1px);
+        }
+
+        .modal-hotkeys {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .modal-hotkeys li {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .modal-hotkeys li:last-child {
+            border-bottom: none;
+        }
+
+        .modal-hotkey {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: #63b3ed;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 12px;
+            min-width: 40px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        /* 移动设备优化 */
+        @media (max-width: 768px) {
+            .help-content {
+                margin: 2vh;
+                max-height: 90vh;
+                border-radius: 10px;
+            }
+
+            .help-header {
+                padding: 15px;
+            }
+
+            .help-body {
+                padding: 15px;
+                max-height: 70vh;
+            }
+
+            .help-title {
+                font-size: 16px;
+            }
+
+            .modal-legend-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1434,6 +1706,7 @@
                 <span id="nickname">gamer</span>
             </div>
             <div class="button-row">
+                <button class="nickname-btn help-btn" onclick="showHelpModal()" title="图例和操作说明">❓</button>
                 <button class="nickname-btn" onclick="showNicknameModal()" title="修改昵称">✏️</button>
                 <button class="nickname-btn logout-btn" onclick="handleLogout()" title="登出">🚪</button>
                 <button class="nickname-btn suicide-btn" onclick="suicide()" title="自杀重启">💀</button>
@@ -1476,9 +1749,8 @@
 
         <div class="right-panel">
             <h3>装备</h3>
-            <div class="info-item">
-                <span>武器:</span>
-                <span id="weapon">无</span>
+            <div id="weapon-container">
+                <div class="no-weapon">⚔️ 未装备武器</div>
             </div>
             <div class="info-item">
                 <span>防具:</span>
@@ -1494,90 +1766,6 @@
                     <span>3</span>
                 </div>
             </div>
-
-            <div class="separator"></div>
-
-            <div class="legend">
-                <div>
-                    <h4>图例</h4>
-                    <div class="legend-note">图标与 ASCII 符号对应</div>
-                </div>
-                <div class="legend-grid">
-                    <div class="legend-entry">
-                        <span class="game-icon icon-player legend-icon">🟡</span>
-                        <div class="legend-text">
-                            <span class="legend-name">玩家</span>
-                                                    </div>
-                    </div>
-                    <div class="legend-entry">
-                        <span class="game-icon icon-monster legend-icon">👾</span>
-                        <div class="legend-text">
-                            <span class="legend-name">怪物</span>
-                                                    </div>
-                    </div>
-                    <div class="legend-entry">
-                        <span class="game-icon icon-stairs legend-icon">🪜</span>
-                        <div class="legend-text">
-                            <span class="legend-name">楼梯</span>
-                                                    </div>
-                    </div>
-                    <div class="legend-entry">
-                        <span class="game-icon icon-potion legend-icon">🧪</span>
-                        <div class="legend-text">
-                            <span class="legend-name">血瓶</span>
-                                                    </div>
-                    </div>
-                    <div class="legend-entry">
-                        <span class="game-icon icon-weapon legend-icon">🗡</span>
-                        <div class="legend-text">
-                            <span class="legend-name">武器</span>
-                                                    </div>
-                    </div>
-                    <div class="legend-entry">
-                        <span class="game-icon icon-armor legend-icon">🛡</span>
-                        <div class="legend-text">
-                            <span class="legend-name">防具</span>
-                                                    </div>
-                    </div>
-                    <div class="legend-entry">
-                        <span class="game-icon icon-merchant legend-icon">🛍️</span>
-                        <div class="legend-text">
-                            <span class="legend-name">商人</span>
-                                                    </div>
-                    </div>
-                    <div class="legend-entry">
-                        <span class="game-icon icon-wall legend-icon">⬛</span>
-                        <div class="legend-text">
-                            <span class="legend-name">墙体</span>
-                                                    </div>
-                    </div>
-                </div>
-
-                <hr class="legend-divider" />
-
-                <div>
-                    <h4>操作</h4>
-                    <div class="legend-note">快速上手键位</div>
-                </div>
-                <ul class="legend-hotkeys">
-                    <li>
-                        <span class="hotkey">E</span>
-                        <span>与商人交易</span>
-                    </li>
-                    <li>
-                        <span class="hotkey">F</span>
-                        <span>打开锻造界面</span>
-                    </li>
-                    <li>
-                        <span class="hotkey">↑↓←→ / WASD</span>
-                        <span>移动</span>
-                    </li>
-                    <li>
-                        <span class="hotkey">1-9</span>
-                        <span>使用背包道具</span>
-                    </li>
-                </ul>
-            </div>
         </div>
     </div>
 
@@ -1589,6 +1777,116 @@
 
     <div class="status-bar">
         <span id="connection-status" class="disconnected">未连接</span>
+    </div>
+
+    <!-- 帮助弹窗 -->
+    <div class="help-modal" id="help-modal">
+        <div class="help-content">
+            <div class="help-header">
+                <h2 class="help-title">📖 图例与操作说明</h2>
+                <button class="help-close" onclick="closeHelpModal()">×</button>
+            </div>
+            <div class="help-body">
+                <!-- 图例部分 -->
+                <div class="help-section">
+                    <h4>🗺️ 游戏图例</h4>
+                    <div class="help-note">游戏地图中的图标与符号说明</div>
+                    <div class="modal-legend-grid">
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-player">🟡</span>
+                            <div class="legend-text">
+                                <span class="legend-name">玩家</span>
+                            </div>
+                        </div>
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-monster">👾</span>
+                            <div class="legend-text">
+                                <span class="legend-name">怪物</span>
+                            </div>
+                        </div>
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-stairs">🪜</span>
+                            <div class="legend-text">
+                                <span class="legend-name">楼梯</span>
+                            </div>
+                        </div>
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-potion">🧪</span>
+                            <div class="legend-text">
+                                <span class="legend-name">血瓶</span>
+                            </div>
+                        </div>
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-weapon">🗡️</span>
+                            <div class="legend-text">
+                                <span class="legend-name">武器</span>
+                            </div>
+                        </div>
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-armor">🛡</span>
+                            <div class="legend-text">
+                                <span class="legend-name">防具</span>
+                            </div>
+                        </div>
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-merchant">🛍️</span>
+                            <div class="legend-text">
+                                <span class="legend-name">商人</span>
+                            </div>
+                        </div>
+                        <div class="modal-legend-entry">
+                            <span class="game-icon icon-wall">⬛</span>
+                            <div class="legend-text">
+                                <span class="legend-name">墙体</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作部分 -->
+                <div class="help-section">
+                    <h4>⌨️ 基本操作</h4>
+                    <div class="help-note">快速上手键位说明</div>
+                    <ul class="modal-hotkeys">
+                        <li>
+                            <span class="modal-hotkey">↑↓←→ / WASD</span>
+                            <span>移动角色</span>
+                        </li>
+                        <li>
+                            <span class="modal-hotkey">1-9</span>
+                            <span>使用背包中对应位置的道具</span>
+                        </li>
+                        <li>
+                            <span class="modal-hotkey">E</span>
+                            <span>与商人交易（需要在商人附近）</span>
+                        </li>
+                        <li>
+                            <span class="modal-hotkey">F</span>
+                            <span>打开武器锻造界面</span>
+                        </li>
+                        <li>
+                            <span class="modal-hotkey">ESC</span>
+                            <span>关闭弹窗界面</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 游戏机制说明 -->
+                <div class="help-section">
+                    <h4>🎮 游戏机制</h4>
+                    <div class="help-note">重要游戏概念与规则</div>
+                    <div class="help-note" style="margin-bottom: 8px;">
+                        <strong>怪物威胁区域：</strong>怪物周围3格内道具/楼梯无法使用
+                    </div>
+                    <div class="help-note" style="margin-bottom: 8px;">
+                        <strong>自动交互：</strong>走到道具/楼梯位置自动拾取或上楼
+                    </div>
+                    <div class="help-note">
+                        <strong>目标：</strong>从第1层爬到第100层并击败最终Boss
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="game-over-overlay" id="game-over-overlay">
@@ -2105,6 +2403,84 @@
             document.getElementById('log').innerHTML = '';
         }
 
+        // 武器卡片显示函数
+        function updateWeaponDisplay(data) {
+            const weaponContainer = document.getElementById('weapon-container');
+
+            if (!data.weapon_name || data.weapon_name === '无') {
+                weaponContainer.innerHTML = '<div class="no-weapon">⚔️ 未装备武器</div>';
+                return;
+            }
+
+            // 词条图标映射
+            const attributeIcons = {
+                'attack_boost': '💪',
+                'damage_mult': '🔥',
+                'armor_pen': '🗡️',
+                'life_steal': '🩸',
+                'gold_bonus': '💰',
+                'critical_chance': '⚡',
+                'combo_chance': '⚔️',
+                'kill_heal': '💀',
+                'exp_bonus': '📈',
+                'thorn_damage': '🌿',
+                'damage_reduction': '🛡️',
+                'percent_damage': '💥',
+                'floor_bonus': '📊',
+                'lucky_hit': '🍀',
+                'berserk_mode': '😡'
+            };
+
+            // 稀有度显示名称
+            const rarityNames = {
+                'common': '普通',
+                'rare': '稀有',
+                'epic': '史诗',
+                'legendary': '传说'
+            };
+
+            let weaponHtml = '<div class="weapon-card">';
+
+            // 武器头部
+            weaponHtml += '<div class="weapon-header">';
+            weaponHtml += '<div style="display: flex; align-items: center; flex: 1;">';
+            weaponHtml += '<span class="weapon-icon">⚔️</span>';
+            weaponHtml += `<span class="weapon-name">${data.weapon_name}</span>`;
+            weaponHtml += '</div>';
+
+            if (data.weapon_rarity) {
+                const rarityClass = `rarity-${data.weapon_rarity}`;
+                const rarityName = rarityNames[data.weapon_rarity] || '';
+                weaponHtml += `<span class="weapon-rarity ${rarityClass}">${rarityName}</span>`;
+            }
+
+            weaponHtml += '</div>';
+
+            // 武器基础属性
+            weaponHtml += '<div class="weapon-stats">';
+            if (data.weapon_atk > 0) {
+                weaponHtml += `攻击力: +${data.weapon_atk}`;
+            }
+            weaponHtml += '</div>';
+
+            // 武器词条
+            if (data.weapon_attributes && data.weapon_attributes.length > 0) {
+                weaponHtml += '<div class="weapon-attributes">';
+                data.weapon_attributes.forEach(attr => {
+                    const icon = attributeIcons[attr.attribute_type] || '🔮';
+                    const value = attr.description || `${attr.attribute_type}`;
+                    weaponHtml += `<div class="weapon-attribute">`;
+                    weaponHtml += `<span class="attribute-icon">${icon}</span>`;
+                    weaponHtml += `<span class="attribute-value">${value}</span>`;
+                    weaponHtml += `</div>`;
+                });
+                weaponHtml += '</div>';
+            }
+
+            weaponHtml += '</div>';
+            weaponContainer.innerHTML = weaponHtml;
+        }
+
         // 更新信息面板
         function updateInfoPanel(data) {
             document.getElementById('floor').textContent = data.floor || 1;
@@ -2115,44 +2491,8 @@
             document.getElementById('level').textContent = data.level || 1;
             document.getElementById('gold').textContent = data.gold || 0;
 
-            // 装备 - 智能显示属性，避免重复
-            let weaponText = data.weapon_name || '无';
-            if (data.weapon_name && data.weapon_atk > 0 && !data.weapon_name.includes('+')) {
-                // 只有当装备名称不包含+时才添加属性值
-                weaponText = `${data.weapon_name} (+${data.weapon_atk})`;
-            }
-
-            // 添加稀有度颜色显示
-            if (data.weapon_name && data.weapon_rarity) {
-                const rarityColors = {
-                    'common': '#ffffff',    // 白色
-                    'rare': '#0080ff',      // 蓝色
-                    'epic': '#800080',      // 紫色
-                    'legendary': '#ffd700'    // 金色
-                };
-                const color = rarityColors[data.weapon_rarity] || '#ffffff';
-                weaponText = `<span style="color: ${color}">${weaponText}</span>`;
-
-                // 显示稀有度名称
-                const rarityNames = {
-                    'common': '',
-                    'rare': '稀有',
-                    'epic': '史诗',
-                    'legendary': '传说'
-                };
-                const rarityName = rarityNames[data.weapon_rarity];
-                if (rarityName) {
-                    weaponText += ` <span style="color: ${color}; font-size: 11px;">[${rarityName}]</span>`;
-                }
-            }
-
-            // 显示武器属性
-            if (data.weapon_attributes && data.weapon_attributes.length > 0) {
-                const attrTexts = data.weapon_attributes.map(attr => attr.description).join(', ');
-                weaponText += `<div style="font-size: 11px; color: #b0b0b0; margin-top: 3px; line-height: 1.2;">${attrTexts}</div>`;
-            }
-
-            document.getElementById('weapon').innerHTML = weaponText;
+            // 武器显示 - 使用卡片式布局
+            updateWeaponDisplay(data);
 
             let armorText = data.armor_name || '无';
             if (data.armor_name && data.armor_def > 0 && !data.armor_name.includes('+')) {
@@ -2938,11 +3278,9 @@
             showMessage(message);
         }
 
-        
-        
-        // 初始化连接
+        // 自杀重启功能
         function suicide() {
-    if (confirm('确定要自杀并重启游戏吗？\\n\\n这将结束当前游戏并重新开始！')) {
+    if (confirm('确定要自杀并重启游戏吗？\n\n这将结束当前游戏并重新开始！')) {
         try {
             // 发送自杀重启请求到服务器
             ws.send(JSON.stringify({
@@ -2956,6 +3294,35 @@
         }
     }
 }
+
+        // 帮助弹窗功能
+        function showHelpModal() {
+            const modal = document.getElementById('help-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                // 防止背景滚动
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeHelpModal() {
+            const modal = document.getElementById('help-modal');
+            if (modal) {
+                modal.style.display = 'none';
+                // 恢复背景滚动
+                document.body.style.overflow = '';
+            }
+        }
+
+        // ESC键关闭弹窗
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('help-modal');
+                if (modal && modal.style.display === 'flex') {
+                    closeHelpModal();
+                }
+            }
+        });
 
 window.onload = function() {
             // 检查是否有保存的登录状态

@@ -227,7 +227,16 @@ def generate_weapon_name(floor_level: int, rarity: str, attributes: List[WeaponA
             'armor_pen': '穿透',
             'life_steal': '吸血',
             'gold_bonus': '财富',
-            'critical_chance': '致命'
+            'critical_chance': '致命',
+            'combo_chance': '连击',
+            'kill_heal': '嗜血',
+            'exp_bonus': '成长',
+            'thorn_damage': '荆棘',
+            'damage_reduction': '坚韧',
+            'percent_damage': '破甲',
+            'floor_bonus': '传承',
+            'lucky_hit': '幸运',
+            'berserk_mode': '怒火'
         }
         base_name = attr_names.get(main_attr.attribute_type, '神兵')
 
