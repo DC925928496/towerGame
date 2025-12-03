@@ -41,6 +41,39 @@ class WeaponAttribute:
         """获取锻造强化后的数值"""
         return self.value * (1.0 + self.level * 0.1)  # 每级+10%
 
+# ==================== 防具属性系统 ====================
+
+@dataclass
+class ArmorAttribute:
+    """防具随机属性类"""
+    attribute_type: str  # 'defense_boost', 'damage_reduction', 'thorn_reflect', etc.
+    value: float
+    description: str
+    level: int = 0  # 锻造等级，每级+10%效果
+
+    def to_dict(self) -> dict:
+        """转换为字典格式"""
+        return {
+            'attribute_type': self.attribute_type,
+            'value': self.value,
+            'description': self.description,
+            'level': self.level
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'ArmorAttribute':
+        """从字典创建属性对象"""
+        return cls(
+            attribute_type=data['attribute_type'],
+            value=data['value'],
+            description=data['description'],
+            level=data.get('level', 0)
+        )
+
+    def get_enhanced_value(self) -> float:
+        """获取锻造强化后的数值"""
+        return self.value * (1.0 + self.level * 0.1)  # 每级+10%
+
 
 # 属性类型配置
 ATTRIBUTE_TYPES = {
@@ -158,6 +191,76 @@ ATTRIBUTE_TYPES = {
     }
 }
 
+# 防具词条类型配置
+ARMOR_ATTRIBUTE_TYPES = {
+    # 防御型词条（总权重60%）
+    'defense_boost': {
+        'name': '守护',
+        'weight': 0.18,
+        'base_value': 10,
+        'scale': 0.5,
+        'description': '防御力+{value}'
+    },
+    'damage_reduction': {
+        'name': '坚韧',
+        'weight': 0.12,
+        'base_value': 0.05,
+        'scale': 0.003,
+        'description': '伤害减免+{value*100}%'
+    },
+    'thorn_reflect': {
+        'name': '荆棘',
+        'weight': 0.12,
+        'base_value': 0.15,
+        'scale': 0.01,
+        'description': '荆棘反射+{value*100}%'
+    },
+    'block_chance': {
+        'name': '格挡',
+        'weight': 0.10,
+        'base_value': 0.08,
+        'scale': 0.005,
+        'description': '格挡率+{value*100}%'
+    },
+    'dodge_chance': {
+        'name': '闪避',
+        'weight': 0.08,
+        'base_value': 0.05,
+        'scale': 0.003,
+        'description': '闪避率+{value*100}%'
+    },
+
+    # 生存型词条（总权重40%）
+    'hp_boost': {
+        'name': '生命',
+        'weight': 0.15,
+        'base_value': 50,
+        'scale': 3,
+        'description': '生命值+{value}'
+    },
+    'floor_heal': {
+        'name': '恢复',
+        'weight': 0.10,
+        'base_value': 0.10,
+        'scale': 0.005,
+        'description': '上楼回血+{value*100}%'
+    },
+    'kill_heal': {
+        'name': '嗜血',
+        'weight': 0.08,
+        'base_value': 12,
+        'scale': 1,
+        'description': '击杀回血+{value}'
+    },
+    'potion_boost': {
+        'name': '强化',
+        'weight': 0.07,
+        'base_value': 0.20,
+        'scale': 0.01,
+        'description': '药水增效+{value*100}%'
+    }
+}
+
 # 稀有度配置（统一由GameConfig驱动）
 RARITY_CONFIG = config_manager.get_config().RARITY_SETTINGS
 
@@ -207,14 +310,17 @@ class Item:
 
     # 新增字段：随机属性系统
     rarity: str = 'common'  # common, rare, epic, legendary
-    attributes: List[WeaponAttribute] = None
-    base_name: Optional[str] = None  # 原始武器名称（用于生成新名称）
+    attributes: List[WeaponAttribute] = None  # 武器属性（向后兼容）
+    armor_attributes: List[ArmorAttribute] = None  # 防具属性
+    base_name: Optional[str] = None  # 原始装备名称（用于生成新名称）
 
     def __post_init__(self):
         if self.item_id is None:
             self.item_id = f"item_{random.randint(1000, 9999)}"
         if self.attributes is None:
             self.attributes = []
+        if self.armor_attributes is None:
+            self.armor_attributes = []
         if self.base_name is None:
             self.base_name = self.name
 
@@ -318,6 +424,8 @@ class Player:
         self.weapon_rarity = 'common'  # 新增：武器稀有度
         self.armor_def = 0
         self.armor_name = None
+        self.armor_attributes: List[ArmorAttribute] = []  # 新增：防具随机属性
+        self.armor_rarity = 'common'  # 新增：防具稀有度
 
         # 背包：{道具名: 数量}
         start_potion_heal = config.PLAYER_START_POTION_HEAL
@@ -501,8 +609,59 @@ class Player:
 
     @property
     def total_def(self) -> int:
-        """总防御力 = 基础 + 防具加成"""
-        return self.defense + self.armor_def
+        """总防御力 = 基础 + 防具加成 + 防具词条加成"""
+        base_def = self.defense + self.armor_def
+
+        # 计算防具词条的防御力加成
+        defense_boost = 0
+        for attr in self.armor_attributes:
+            if attr.attribute_type == 'defense_boost':
+                defense_boost += attr.get_enhanced_value()
+
+        return int(base_def + defense_boost)
+
+    @property
+    def max_hp_with_attributes(self) -> int:
+        """最大生命值 = 基础 + 防具词条加成"""
+        base_max_hp = self.max_hp
+
+        # 计算防具词条的生命值加成
+        hp_boost = 0
+        for attr in self.armor_attributes:
+            if attr.attribute_type == 'hp_boost':
+                hp_boost += attr.get_enhanced_value()
+
+        return int(base_max_hp + hp_boost)
+
+    def get_armor_attribute_value(self, attribute_type: str) -> float:
+        """获取防具词条的强化值"""
+        total_value = 0.0
+        for attr in self.armor_attributes:
+            if attr.attribute_type == attribute_type:
+                total_value += attr.get_enhanced_value()
+        return total_value
+
+    def on_floor_change(self) -> None:
+        """上楼时的防具词条效果"""
+        # 上楼回血
+        heal_rate = self.get_armor_attribute_value('floor_heal')
+        if heal_rate > 0:
+            heal_amount = int(self.max_hp_with_attributes * heal_rate)
+            self.hp = min(self.max_hp_with_attributes, self.hp + heal_amount)
+
+    def on_kill_monster(self) -> None:
+        """击败怪物时的防具词条效果"""
+        # 击杀回血（防具版本）
+        heal_amount = self.get_armor_attribute_value('kill_heal')
+        if heal_amount > 0:
+            self.hp = min(self.max_hp_with_attributes, self.hp + int(heal_amount))
+
+    def apply_potion_boost(self, base_heal: int) -> int:
+        """应用药水增效词条"""
+        boost_rate = self.get_armor_attribute_value('potion_boost')
+        if boost_rate > 0:
+            return int(base_heal * (1.0 + boost_rate))
+        return base_heal
 
     @property
     def exp_needed(self) -> int:
@@ -553,11 +712,19 @@ class Player:
 
         potion_heal = self._parse_potion_heal_value(item_name)
         if potion_heal > 0:
-            healed = self.heal(potion_heal)
+            # 应用防具药水加成
+            boosted_heal = self.apply_potion_boost(potion_heal)
+            healed = self.heal(boosted_heal)
             self.inventory[item_name] -= 1
             if self.inventory[item_name] == 0:
                 del self.inventory[item_name]
-            return f"使用了{item_name}，回复了 {healed} 点生命值"
+
+            # 构建治疗日志
+            if boosted_heal > potion_heal:
+                boost_amount = boosted_heal - potion_heal
+                return f"使用了{item_name}，回复了 {healed} 点生命值 🧪防具增效额外+{boost_amount}点"
+            else:
+                return f"使用了{item_name}，回复了 {healed} 点生命值"
 
         return None
 

@@ -4,7 +4,7 @@ from typing import List, Optional, Dict
 from game_model import (
     Floor, Room, Position, Cell, CellType,
     Monster, Item, FINAL_BOSS, Merchant, MerchantItem,
-    WeaponAttribute, ATTRIBUTE_TYPES, RARITY_CONFIG
+    WeaponAttribute, ArmorAttribute, ATTRIBUTE_TYPES, ARMOR_ATTRIBUTE_TYPES, RARITY_CONFIG
 )
 
 # 导入新的工具类和配置
@@ -253,6 +253,80 @@ def generate_rarity() -> str:
 
     return random.choices(rarities, weights=weights)[0]
 
+def generate_armor_attributes(floor_level: int, rarity: str) -> List[ArmorAttribute]:
+    """为防具生成随机属性列表"""
+    if rarity not in RARITY_CONFIG:
+        rarity = 'common'
+
+    attr_count = RARITY_CONFIG[rarity]['attr_count']
+
+    # 按权重选择属性类型（不重复）
+    available_types = list(ARMOR_ATTRIBUTE_TYPES.keys())
+    selected_types = []
+
+    for _ in range(min(attr_count, len(available_types))):
+        weights = [ARMOR_ATTRIBUTE_TYPES[attr]['weight'] for attr in available_types]
+        selected = random.choices(available_types, weights=weights)[0]
+        selected_types.append(selected)
+        available_types.remove(selected)
+
+    attributes = []
+    for attr_type in selected_types:
+        attr_config = ARMOR_ATTRIBUTE_TYPES[attr_type]
+
+        # 基于楼层和稀有度计算数值
+        base_value = attr_config['base_value'] + floor_level * attr_config['scale']
+        rarity_multiplier = RARITY_CONFIG[rarity]['multiplier']
+        final_value = base_value * rarity_multiplier
+
+        # 创建属性 - 处理特殊格式化字符串
+        description = attr_config['description']
+        if '{value*100}' in description:
+            # 对于百分比格式，需要先计算乘积再格式化
+            description = description.replace('{value*100}', f'{final_value*100:.1f}')
+        else:
+            description = description.format(value=final_value)
+
+        attribute = ArmorAttribute(
+            attribute_type=attr_type,
+            value=final_value,
+            description=description,
+            level=0
+        )
+        attributes.append(attribute)
+
+    return attributes
+
+def generate_armor_name(floor_level: int, rarity: str, attributes: List[ArmorAttribute]) -> str:
+    """为防具生成动态名称"""
+    # 获取稀有度前缀
+    rarity_config = RARITY_CONFIG[rarity]
+    prefix = random.choice(rarity_config['prefixes'])
+
+    # 根据主要属性选择后缀
+    if not attributes:
+        base_name = "布甲"
+    else:
+        # 选择数值最高的属性作为防具特性
+        main_attr = max(attributes, key=lambda a: a.value)
+        attr_names = {
+            'defense_boost': '守护',
+            'damage_reduction': '坚韧',
+            'thorn_reflect': '荆棘',
+            'block_chance': '格挡',
+            'dodge_chance': '闪避',
+            'hp_boost': '生命',
+            'floor_heal': '恢复',
+            'kill_heal': '嗜血',
+            'potion_boost': '强化'
+        }
+        base_name = attr_names.get(main_attr.attribute_type, '护甲')
+
+    armor_types = ['铠甲', '胸甲', '护甲', '战甲', '重甲', '轻甲']
+    armor_type = random.choice(armor_types)
+
+    return f"{prefix}{base_name}{armor_type}"
+
 # ==================== 生成函数 ====================
 
 def generate_monster(floor_level: int, position: Position) -> Monster:
@@ -486,16 +560,21 @@ def generate_item(floor_level: int, position: Position, forced_type: Optional[st
             base_name=weapon_name
         )
     else:  # armor
+        rarity = generate_rarity()
+        armor_attributes = generate_armor_attributes(floor_level, rarity)
+        armor_name = generate_armor_name(floor_level, rarity, armor_attributes)
         effect_value = config.ARMOR_BASE_DEF + floor_level * config.ARMOR_DEF_PER_FLOOR
-        name = f"铠甲+{effect_value}"
         symbol = '◆'
 
         return Item(
             symbol=symbol,
-            name=name,
+            name=armor_name,
             effect_type=item_type,
             effect_value=effect_value,
-            position=position
+            position=position,
+            rarity=rarity,
+            armor_attributes=armor_attributes,
+            base_name=armor_name
         )
 
 

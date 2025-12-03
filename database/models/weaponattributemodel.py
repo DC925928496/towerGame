@@ -1,6 +1,6 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-03 15:41:23
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
@@ -16,7 +16,7 @@ from .base_model import BaseModel
 
 @dataclass
 class WeaponAttributeModel(BaseModel):
-    """武器属性表"""
+    """装备属性表（武器防具通用）"""
 
 
     attribute_type: str
@@ -30,6 +30,7 @@ class WeaponAttributeModel(BaseModel):
     value: int = 0
     level: int = 0
     description: str = None
+    equipment_type: str = "weapon"
     # 外键关系
     player: Optional['PlayerModel'] = None
 
@@ -108,6 +109,10 @@ class WeaponAttributeModel(BaseModel):
         if self.updated_at is not None:
             if not isinstance(self.updated_at, datetime):
                 errors.append("属性更新时间必须是日期时间对象")
+        # equipment_type 类型验证
+        if self.equipment_type is not None:
+            if not isinstance(self.equipment_type, str):
+                errors.append("装备类型：weapon或armor必须是字符串")
         return errors
 
     def _validate_field_constraints(self) -> List[str]:
@@ -151,6 +156,11 @@ class WeaponAttributeModel(BaseModel):
         if self.updated_at is not None:
             # datetime类型不需要长度验证
             pass
+        # equipment_type 约束验证
+        if self.equipment_type is not None:
+            # 字符串长度检查
+            if len(self.equipment_type) > 20:
+                errors.append("装备类型：weapon或armor长度不能超过20个字符")
         return errors
 
     def _validate_foreign_keys(self) -> List[str]:
@@ -197,7 +207,7 @@ class WeaponAttributeModel(BaseModel):
             'valid': len(errors) == 0,
             'error_count': len(errors),
             'errors': errors,
-            'field_count': 8,
+            'field_count': 9,
             'required_fields': ['player_id','attribute_type',],
             'foreign_keys': ['player',]
         }
@@ -281,3 +291,7 @@ class WeaponAttributeModel(BaseModel):
             self.description = self.description.strip()
         # created_at 数据清理
         # updated_at 数据清理
+        # equipment_type 数据清理
+        if self.equipment_type:
+            # 去除首尾空格
+            self.equipment_type = self.equipment_type.strip()

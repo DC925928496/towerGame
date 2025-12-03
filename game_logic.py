@@ -184,6 +184,48 @@ def calculate_damage(atk: int, defense: int) -> int:
     config = config_manager.get_config()
     return max(config.MIN_DAMAGE, atk - defense)
 
+def calculate_damage_with_armor_defense(base_damage: int, player: Player) -> tuple[int, list]:
+    """
+    计算包含防具词条的防御效果
+
+    Args:
+        base_damage: 基础伤害值
+        player: 玩家对象
+
+    Returns:
+        (最终伤害值, 防具效果日志列表)
+    """
+    final_damage = base_damage
+    logs = []
+
+    # 伤害减免（乘法计算）
+    reduction_rate = player.get_armor_attribute_value('damage_reduction')
+    if reduction_rate > 0:
+        old_damage = final_damage
+        final_damage = int(final_damage * (1.0 - reduction_rate))
+        reduction_amount = old_damage - final_damage
+        logs.append(f"✨防具伤害减免！减少了{reduction_amount}点伤害")
+
+    # 格挡（概率触发，减少60%伤害）
+    block_chance = player.get_armor_attribute_value('block_chance')
+    if block_chance > 0 and random.random() < block_chance:
+        old_damage = final_damage
+        final_damage = int(final_damage * 0.4)  # 格挡减少60%伤害
+        block_reduction = old_damage - final_damage
+        logs.append(f"🛡️格挡成功！减少了{block_reduction}点伤害")
+
+    # 闪避（概率触发，完全避免）
+    dodge_chance = player.get_armor_attribute_value('dodge_chance')
+    if dodge_chance > 0 and random.random() < dodge_chance:
+        final_damage = 0
+        logs.append("💨闪避成功！完全避免伤害")
+
+    # 确保最小伤害
+    config = config_manager.get_config()
+    final_damage = max(0, final_damage)  # 闪避时可以为0
+
+    return final_damage, logs
+
 
 def player_attack(player: Player, monster: Monster, floor: Floor) -> Dict[str, Any]:
     """
@@ -302,6 +344,13 @@ def player_attack(player: Player, monster: Monster, floor: Floor) -> Dict[str, A
             if heal_amount > 0:
                 result['logs'].append(f"💀击杀回血！恢复了{heal_amount}点生命值！")
 
+        # 触发防具击杀回血
+        old_hp = player.hp
+        player.on_kill_monster()
+        armor_kill_heal = player.hp - old_hp
+        if armor_kill_heal > 0:
+            result['logs'].append(f"🛡️防具嗜血效果恢复了{armor_kill_heal}点生命值！")
+
         # 移除怪物
         floor.remove_monster(monster.id)
 
@@ -309,26 +358,34 @@ def player_attack(player: Player, monster: Monster, floor: Floor) -> Dict[str, A
         # 怪物反击
         monster_damage = calculate_damage(monster.atk, player.total_def)
 
-        # 应用伤害减免
-        reduction_rate = player.get_damage_reduction_rate()
-        reduced_damage = int(monster_damage * (1.0 - reduction_rate))
+        # 应用防具词条防御效果
+        final_damage, armor_logs = calculate_damage_with_armor_defense(monster_damage, player)
 
-        actual_damage_to_player = player.take_damage(reduced_damage)
+        actual_damage_to_player = player.take_damage(final_damage)
         result['monster_damage'] = actual_damage_to_player
 
-        # 伤害日志
+        # 添加防具效果日志
+        result['logs'].extend(armor_logs)
+
+        # 基础伤害日志
         damage_log = f"{monster.name}对你造成了{actual_damage_to_player}点伤害！"
-        if reduction_rate > 0:
-            damage_log += f" (坚韧效果减免了{int(monster_damage * reduction_rate)}点伤害)"
         result['logs'].append(damage_log)
 
-        # 应用反击伤害
+        # 应用反击伤害（武器荆棘）
         thorn_rate = player.get_thorn_damage_rate()
         if thorn_rate > 0:
             thorn_damage = int(actual_damage_to_player * thorn_rate)
             monster_hp_after_thorn = monster.take_damage(thorn_damage)
             if thorn_damage > 0:
-                result['logs'].append(f"🌿荆棘效果对{monster.name}反弹了{thorn_damage}点伤害！")
+                result['logs'].append(f"🌿武器荆棘效果对{monster.name}反弹了{thorn_damage}点伤害！")
+
+        # 应用防具荆棘反射
+        thorn_reflect_rate = player.get_armor_attribute_value('thorn_reflect')
+        if thorn_reflect_rate > 0:
+            reflect_damage = int(actual_damage_to_player * thorn_reflect_rate)
+            monster_hp_after_reflect = monster.take_damage(reflect_damage)
+            if reflect_damage > 0:
+                result['logs'].append(f"🛡️防具荆棘反射对{monster.name}反弹了{reflect_damage}点伤害！")
 
         if not player.is_alive():
             result['logs'].append("你被击败了...")
@@ -568,13 +625,41 @@ def pickup_item(player: Player, floor: Floor) -> Dict[str, Any]:
             )
 
     elif item.effect_type == 'armor':
-        # 防具：替换当前防具，旧防具掉落在当前位置
+        # 防具：替换当前防���，旧防具掉落在当前位置
         old_armor_name = player.armor_name
         old_armor_def = player.armor_def
+        old_armor_attributes = player.armor_attributes.copy()
+        old_armor_rarity = player.armor_rarity
+
+        # 记录装备前的生命值
+        old_max_hp = player.max_hp
+        old_current_hp = player.hp
 
         player.armor_def = item.effect_value
         player.armor_name = item.name
+        player.armor_attributes = item.armor_attributes.copy() if item.armor_attributes else []
+        player.armor_rarity = item.rarity
+
         result['logs'].append(f"装备了{item.name}")
+        if item.armor_attributes:
+            result['logs'].append(f"防具��有度：{item.rarity}")
+            for attr in item.armor_attributes:
+                result['logs'].append(f"  {attr.description}")
+        # 计算装备后的生命值变化
+        new_max_hp = player.max_hp_with_attributes
+        hp_boost = new_max_hp - old_max_hp
+
+        # 如果有HP加成，显示相应反馈
+        if hp_boost > 0:
+            result['logs'].append(f"❤️生命值上限提升了{hp_boost}点！")
+            # 按比例补充当前生命值
+            if old_current_hp > 0:
+                hp_ratio = old_current_hp / old_max_hp if old_max_hp > 0 else 1.0
+                new_hp = min(new_max_hp, int(new_max_hp * hp_ratio))
+                actual_heal = new_hp - old_current_hp
+                if actual_heal > 0:
+                    player.hp = new_hp
+                    result['logs'].append(f"当前生命值补充了{actual_heal}点")
 
         # 创建旧防具道具
         if old_armor_name and old_armor_def > 0:
@@ -584,7 +669,9 @@ def pickup_item(player: Player, floor: Floor) -> Dict[str, Any]:
                 effect_type='armor',
                 effect_value=old_armor_def,
                 position=player.position,
-                item_id=f"dropped_armor_{random.randint(1000, 9999)}"
+                item_id=f"dropped_armor_{random.randint(1000, 9999)}",
+                rarity=old_armor_rarity,
+                armor_attributes=old_armor_attributes.copy() if old_armor_attributes else []
             )
 
     # 从地图上移除拾取的道具
@@ -665,6 +752,13 @@ def descend_floor(player: Player, floor: Floor, current_floor_level: int) -> Dic
 
     result['success'] = True
     result['logs'].append(f"进入了第{current_floor_level + 1}层...")
+
+    # 触发防具上楼回血
+    old_hp = player.hp
+    player.on_floor_change()
+    floor_heal = player.hp - old_hp
+    if floor_heal > 0:
+        result['logs'].append(f"🛡️防具恢复效果恢复了{floor_heal}点生命值！")
 
     return result
 

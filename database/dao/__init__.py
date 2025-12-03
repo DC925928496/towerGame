@@ -4,6 +4,7 @@ DAO层统一入口
 """
 from .player_dao import PlayerDAO
 from .weapon_attribute_dao import WeaponAttributeDAO
+from .equipment_attribute_dao import EquipmentAttributeDAO
 from .game_save_dao import GameSaveDAO
 from .equipment_dao import EquipmentDAO
 from .floor_dao import FloorDAO
@@ -22,6 +23,7 @@ class DAOManager:
         """初始化所有DAO实例"""
         self.player_dao = PlayerDAO()
         self.weapon_attribute_dao = WeaponAttributeDAO()
+        self.equipment_attribute_dao = EquipmentAttributeDAO()
         self.game_save_dao = GameSaveDAO()
         self.equipment_dao = EquipmentDAO()
         self.floor_dao = FloorDAO()
@@ -43,6 +45,12 @@ class DAOManager:
     def weapon_attribute(self) -> WeaponAttributeDAO:
         """武器属性DAO"""
         return self.weapon_attribute_dao
+
+    # 装备属性相关DAO
+    @property
+    def equipment_attribute(self) -> EquipmentAttributeDAO:
+        """装备属性DAO（武器防具通用）"""
+        return self.equipment_attribute_dao
 
     # 游戏存档相关DAO
     @property
@@ -103,6 +111,7 @@ class DAOManager:
         return {
             'player': self.player_dao,
             'weapon_attribute': self.weapon_attribute_dao,
+            'equipment_attribute': self.equipment_attribute_dao,
             'game_save': self.game_save_dao,
             'equipment': self.equipment_dao,
             'floor': self.floor_dao,
@@ -129,6 +138,7 @@ dao_manager = DAOManager()
 __all__ = [
     'PlayerDAO',
     'WeaponAttributeDAO',
+    'EquipmentAttributeDAO',
     'GameSaveDAO',
     'EquipmentDAO',
     'FloorDAO',

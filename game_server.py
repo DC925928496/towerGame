@@ -128,7 +128,9 @@ class GameState:
             'weapon_name': self.player.weapon_name,
             'weapon_rarity': self.player.weapon_rarity,
             'weapon_attributes': [attr.to_dict() for attr in self.player.weapon_attributes],
-            'armor_name': self.player.armor_name
+            'armor_name': self.player.armor_name,
+            'armor_rarity': getattr(self.player, 'armor_rarity', 'common'),
+            'armor_attributes': [attr.to_dict() for attr in getattr(self.player, 'armor_attributes', [])]
         }
 
     def _clear_runtime_state(self):
@@ -498,6 +500,9 @@ class GameState:
             # 保存武器词条
             self._save_weapon_attributes()
 
+            # 保存防具词条
+            self._save_armor_attributes()
+
             # 保存道具信息
             self._save_inventory()
 
@@ -637,6 +642,10 @@ class GameState:
                         # 加载防具
                         self.player.armor_name = item_name
                         self.player.armor_def = defense_value
+                        self.player.armor_rarity = rarity_level
+
+                        # 加载防具词条
+                        self._load_armor_attributes()
 
         except Exception as e:
             pass
@@ -661,7 +670,32 @@ class GameState:
                 self.player.weapon_attributes.append(weapon_attr)
 
         # 使用安全数据库操作
-        safe_database_operation("加载武器词条", load_from_db)
+        safe_database_operation("加载��器词条", load_from_db)
+
+    def _load_armor_attributes(self):
+        """加载防具词条"""
+        def load_from_db():
+            # 从数据库获取玩家的防具词条
+            armor_attrs_data = dao_manager.equipment_attribute.get_by_player_and_type(self.player_id, 'armor')
+
+            # 清空现有词条
+            if not hasattr(self.player, 'armor_attributes'):
+                self.player.armor_attributes = []
+            else:
+                self.player.armor_attributes = []
+
+            # 转换为ArmorAttribute对象
+            for attr_data in armor_attrs_data:
+                armor_attr = ArmorAttribute(
+                    attribute_type=attr_data['attribute_type'],
+                    value=attr_data['value'],
+                    description=attr_data['description'],
+                    level=attr_data.get('level', 0)
+                )
+                self.player.armor_attributes.append(armor_attr)
+
+        # 使用安全数据库操作
+        safe_database_operation("加载防具词条", load_from_db)
 
     def _load_inventory(self):
         """加载玩家道具信息"""
@@ -701,6 +735,28 @@ class GameState:
         except Exception as e:
             pass
 
+    def _save_armor_attributes(self):
+        """保存防具词条"""
+        try:
+            # 先删除现有的防具词条
+            dao_manager.equipment_attribute.delete_by_player_and_type(self.player_id, 'armor')
+
+            # 如果有防具词条，保存到数据库
+            if hasattr(self.player, 'armor_attributes') and self.player.armor_attributes:
+                attrs_data = []
+                for attr in self.player.armor_attributes:
+                    attrs_data.append({
+                        'attribute_type': attr.attribute_type,
+                        'value': attr.value,
+                        'description': attr.description,
+                        'level': attr.level
+                    })
+
+                dao_manager.equipment_attribute.create_player_attributes(self.player_id, attrs_data)
+
+        except Exception as e:
+            pass
+
     def _save_equipment(self):
         """保存玩家装备信息"""
         try:
@@ -725,7 +781,7 @@ class GameState:
                     equipment_type='armor',
                     item_name=self.player.armor_name,
                     defense_value=self.player.armor_def,
-                    rarity_level='common'  # 防具稀有度暂时使用默认值
+                    rarity_level=getattr(self.player, 'armor_rarity', 'common')
                 )
 
         except Exception as e:

@@ -1752,9 +1752,8 @@
             <div id="weapon-container">
                 <div class="no-weapon">⚔️ 未装备武器</div>
             </div>
-            <div class="info-item">
-                <span>防具:</span>
-                <span id="armor">无</span>
+            <div id="armor-container">
+                <div class="no-weapon">🛡️ 未装备防具</div>
             </div>
 
             <div class="separator"></div>
@@ -2481,6 +2480,81 @@
             weaponContainer.innerHTML = weaponHtml;
         }
 
+        // 防具卡片显示函数
+        function updateArmorDisplay(data) {
+            const armorContainer = document.getElementById('armor-container');
+
+            if (!data.armor_name || data.armor_name === '无') {
+                armorContainer.innerHTML = '<div class="no-weapon">🛡️ 未装备防具</div>';
+                return;
+            }
+
+            // 防具词条图标映射
+            const armorAttributeIcons = {
+                'defense_boost': '🛡️',
+                'damage_reduction': '✨',
+                'thorn_reflect': '🌿',
+                'block_chance': '🛡️',
+                'dodge_chance': '💨',
+                'hp_boost': '❤️',
+                'floor_heal': '🆙',
+                'kill_heal': '💀',
+                'potion_boost': '🧪'
+            };
+
+            // 稀有度显示名称
+            const rarityNames = {
+                'common': '普通',
+                'rare': '稀有',
+                'epic': '史诗',
+                'legendary': '传说'
+            };
+
+            let armorHtml = '<div class="weapon-card">';
+
+            // 防具头部
+            armorHtml += '<div class="weapon-header">';
+            armorHtml += '<div style="display: flex; align-items: center; flex: 1;">';
+            armorHtml += '<span class="weapon-icon">🛡️</span>';
+            armorHtml += `<span class="weapon-name">${data.armor_name}</span>`;
+            armorHtml += '</div>';
+
+            if (data.armor_rarity) {
+                const rarityClass = `rarity-${data.armor_rarity}`;
+                const rarityName = rarityNames[data.armor_rarity] || '';
+                armorHtml += `<span class="weapon-rarity ${rarityClass}">${rarityName}</span>`;
+            }
+
+            armorHtml += '</div>';
+
+            // 防具基础属性
+            armorHtml += '<div class="weapon-attributes">';
+            armorHtml += `<div class="weapon-attr">`;
+            armorHtml += `<span class="weapon-attr-icon">🛡️</span>`;
+            armorHtml += `<span class="weapon-attr-name">防御力</span>`;
+            armorHtml += `<span class="weapon-attr-value">+${data.armor_def || 0}</span>`;
+            armorHtml += `</div>`;
+            armorHtml += '</div>';
+
+            // 防具词条列表
+            if (data.armor_attributes && data.armor_attributes.length > 0) {
+                armorHtml += '<div class="weapon-attributes-list">';
+
+                data.armor_attributes.forEach(attr => {
+                    const icon = armorAttributeIcons[attr.attribute_type] || '📊';
+                    armorHtml += `<div class="weapon-attribute-item">`;
+                    armorHtml += `<span class="weapon-attr-icon">${icon}</span>`;
+                    armorHtml += `<span class="weapon-attr-name">${attr.description}</span>`;
+                    armorHtml += `</div>`;
+                });
+
+                armorHtml += '</div>';
+            }
+
+            armorHtml += '</div>';
+            armorContainer.innerHTML = armorHtml;
+        }
+
         // 更新信息面板
         function updateInfoPanel(data) {
             document.getElementById('floor').textContent = data.floor || 1;
@@ -2494,12 +2568,8 @@
             // 武器显示 - 使用卡片式布局
             updateWeaponDisplay(data);
 
-            let armorText = data.armor_name || '无';
-            if (data.armor_name && data.armor_def > 0 && !data.armor_name.includes('+')) {
-                // 只有当装备名称不包含+时才添加属性值
-                armorText = `${data.armor_name} (+${data.armor_def})`;
-            }
-            document.getElementById('armor').textContent = armorText;
+            // 防具显示 - 使用卡片式布局
+            updateArmorDisplay(data);
 
             // 背包
             const inventoryDiv = document.getElementById('inventory');
