@@ -2528,23 +2528,21 @@
             armorHtml += '</div>';
 
             // 防具基础属性
-            armorHtml += '<div class="weapon-attributes">';
-            armorHtml += `<div class="weapon-attr">`;
-            armorHtml += `<span class="weapon-attr-icon">🛡️</span>`;
-            armorHtml += `<span class="weapon-attr-name">防御力</span>`;
-            armorHtml += `<span class="weapon-attr-value">+${data.armor_def || 0}</span>`;
-            armorHtml += `</div>`;
+            armorHtml += '<div class="weapon-stats">';
+            if (data.armor_def > 0) {
+                armorHtml += `防御力: +${data.armor_def}`;
+            }
             armorHtml += '</div>';
 
             // 防具词条列表
             if (data.armor_attributes && data.armor_attributes.length > 0) {
-                armorHtml += '<div class="weapon-attributes-list">';
+                armorHtml += '<div class="weapon-attributes">';
 
                 data.armor_attributes.forEach(attr => {
                     const icon = armorAttributeIcons[attr.attribute_type] || '📊';
-                    armorHtml += `<div class="weapon-attribute-item">`;
-                    armorHtml += `<span class="weapon-attr-icon">${icon}</span>`;
-                    armorHtml += `<span class="weapon-attr-name">${attr.description}</span>`;
+                    armorHtml += `<div class="weapon-attribute">`;
+                    armorHtml += `<span class="attribute-icon">${icon}</span>`;
+                    armorHtml += `<span class="attribute-value">${attr.description}</span>`;
                     armorHtml += `</div>`;
                 });
 

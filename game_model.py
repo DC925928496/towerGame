@@ -193,70 +193,70 @@ ATTRIBUTE_TYPES = {
 
 # 防具词条类型配置
 ARMOR_ATTRIBUTE_TYPES = {
-    # 防御型词条（总权重60%）
+    # 防御型词条（总权重60%）- 调整后的平衡设置
     'defense_boost': {
         'name': '守护',
-        'weight': 0.18,
-        'base_value': 10,
-        'scale': 0.5,
+        'weight': 0.16,  # 略微降低，避免过于依赖基础防御
+        'base_value': 15,  # 提高基础值，增强早期防御能力
+        'scale': 0.8,     # 提高成长率，适应后期高伤害
         'description': '防御力+{value}'
     },
     'damage_reduction': {
         'name': '坚韧',
-        'weight': 0.12,
-        'base_value': 0.05,
-        'scale': 0.003,
+        'weight': 0.14,  # 略微提高，伤害减免很有价值
+        'base_value': 0.08, # 提高基础值，确保早期有效
+        'scale': 0.004, # 提高成长率，保持后期价值
         'description': '伤害减免+{value*100}%'
     },
     'thorn_reflect': {
         'name': '荆棘',
-        'weight': 0.12,
-        'base_value': 0.15,
-        'scale': 0.01,
+        'weight': 0.12,  # 保持当前
+        'base_value': 0.12, # 略微降低基础值，但通过成长来平衡
+        'scale': 0.008,  # 提高成长率，增强后期效果
         'description': '荆棘反射+{value*100}%'
     },
     'block_chance': {
         'name': '格挡',
-        'weight': 0.10,
-        'base_value': 0.08,
-        'scale': 0.005,
+        'weight': 0.10,  # 保持当前
+        'base_value': 0.10, # 提高基础值，增加触发概率
+        'scale': 0.004,  # 保持当前
         'description': '格挡率+{value*100}%'
     },
     'dodge_chance': {
         'name': '闪避',
-        'weight': 0.08,
-        'base_value': 0.05,
-        'scale': 0.003,
+        'weight': 0.08,  # 保持当前
+        'base_value': 0.06, # 提高基础值，增加触发概率
+        'scale': 0.002,  # 略微降低成长率，避免后期过强
         'description': '闪避率+{value*100}%'
     },
 
-    # 生存型词条（总权重40%）
+    # 生存型词条（总权重40%）- 调整后的平衡设置
     'hp_boost': {
         'name': '生命',
-        'weight': 0.15,
-        'base_value': 50,
-        'scale': 3,
+        'weight': 0.16,  # 略微提高，生命加成很实用
+        'base_value': 40,  # 略微降低基础值，但通过成长来平衡
+        'scale': 4,     # 提高成长率，保持后期价值
         'description': '生命值+{value}'
     },
     'floor_heal': {
         'name': '恢复',
-        'weight': 0.10,
-        'base_value': 0.10,
-        'scale': 0.005,
+        'weight': 0.10,  # 保持当前
+        'base_value': 0.12, # 提高基础值，增强恢复效果
+        'scale': 0.006, # 提高成长率
         'description': '上楼回血+{value*100}%'
     },
     'kill_heal': {
         'name': '嗜血',
-        'weight': 0.08,
-        'base_value': 12,
-        'scale': 1,
+        'weight': 0.08,  # 保持当前
+        'base_value': 10,  # 略微降低基础值
+        'scale': 1.2,    # 提高成长率，增强连击效果
         'description': '击杀回血+{value}'
     },
     'potion_boost': {
         'name': '强化',
-        'weight': 0.07,
-        'base_value': 0.20,
-        'scale': 0.01,
+        'weight': 0.06,  # 略微降低，避免过于依赖药水
+        'base_value': 0.18, # 保持当前
+        'scale': 0.008,  # 保持当前
         'description': '药水增效+{value*100}%'
     }
 }

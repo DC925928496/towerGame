@@ -1254,37 +1254,19 @@ async def handle_client(websocket):
 
 async def main():
     """启动WebSocket服务器"""
-    # 启动前测试数据库连接
-    print("正在启动爬塔游戏服务器...")
-    print("=" * 50)
-
     # 测试数据库连接
     global DATABASE_AVAILABLE
     DATABASE_AVAILABLE = False
     try:
         if db_config_manager.is_configured():
-            print("检测到数据库配置，正在测试连接...")
             if connection_pool.test_connection():
-                print("[OK] 数据库连接成功！将启用数据库存档功能")
                 DATABASE_AVAILABLE = True
-            else:
-                print("[WARN] 数据库连接失败，将使用本地存档模式")
-        else:
-            print("[INFO] 未配置数据库，将使用本地存档模式")
-    except Exception as e:
-        print(f"[ERROR] 数据库初始化失败: {e}")
-        print("[INFO] 将使用本地存档模式启动")
-
-    print("=" * 50)
-
-    if DATABASE_AVAILABLE:
-        print("[START] 服务器启动中... (数据库模式)")
-    else:
-        print("[START] 服务器启动中... (本地模式)")
+    except:
+        pass
 
     async with websockets.serve(handle_client, "localhost", 8080):
-        print("[OK] 服务器已启动，监听端口: ws://localhost:8080")
-        print("[TIP] 在浏览器中打开 index.html 开始游戏")
+        print("服务器已启动: ws://localhost:8080")
+        print("在浏览器中打开 index.html 开始游戏")
         await asyncio.Future()  # 永久运行
 
 
@@ -1292,7 +1274,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n[STOP] 服务器已停止")
+        print("\n服务器已停止")
     except Exception as e:
-        print(f"\n[ERROR] 服务器启动失败: {e}")
-        print("[TIP] 请检查端口8080是否被占用，或尝试重新启动")
+        print(f"\n服务器启动失败: {e}")
+        print("请检查端口8080是否被占用")
