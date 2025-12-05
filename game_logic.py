@@ -921,6 +921,625 @@ def get_forge_info(player: Player) -> Dict[str, Any]:
     return forge_info
 
 
+# ==================== 基础属性升级系统 ====================
+
+def forge_base_attribute(player: Player, equipment_type: str) -> Dict[str, Any]:
+    """
+    锻造装备基础属性（攻击力/防御力）
+
+    Args:
+        player: 玩家对象
+        equipment_type: 装备类型 ('weapon' 或 'armor')
+
+    Returns:
+        锻造结果字典
+    """
+    if equipment_type == 'weapon':
+        # 检查是否有武器
+        if not player.weapon_name or player.weapon_atk <= 0:
+            return {
+                "success": False,
+                "message": "没有装备武器，无法锻造"
+            }
+
+        current_atk = player.weapon_atk
+        upgrade_value = max(1, int(current_atk * 0.05))  # 5%提升，最少+1
+
+        # 成本公式：300 + 当前攻击力×2 + 玩家等级×15
+        forge_cost = 300 + current_atk * 2 + player.level * 15
+        success_rate = 0.9  # 90%成功率
+
+        # 检查金币
+        if player.gold < forge_cost:
+            return {
+                "success": False,
+                "message": f"金币不足，需要{forge_cost}金币",
+                "required_gold": forge_cost,
+                "current_gold": player.gold
+            }
+
+        # 扣除金币
+        player.gold -= forge_cost
+
+        # 尝试锻造
+        is_success = random.random() < success_rate
+
+        if is_success:
+            # 锻造成功
+            player.weapon_atk += upgrade_value
+            return {
+                "success": True,
+                "message": f"锻造成功！武器攻击力 +{upgrade_value}（{current_atk} → {player.weapon_atk}）",
+                "old_value": current_atk,
+                "new_value": player.weapon_atk,
+                "upgrade_value": upgrade_value,
+                "gold_spent": forge_cost,
+                "success_rate": success_rate
+            }
+        else:
+            # 锻造失败
+            return {
+                "success": False,
+                "message": f"锻造失败！武器攻击力保持 {current_atk}",
+                "current_value": current_atk,
+                "gold_spent": forge_cost,
+                "success_rate": success_rate,
+                "is_forge_failure": True
+            }
+
+    elif equipment_type == 'armor':
+        # 检查是否有防具
+        if not player.armor_name or player.armor_def <= 0:
+            return {
+                "success": False,
+                "message": "没有装备防具，无法锻造"
+            }
+
+        current_def = player.armor_def
+        upgrade_value = max(1, int(current_def * 0.05))  # 5%提升，最少+1
+
+        # 成本公式：300 + 当前防御力×3 + 玩家等级×15
+        forge_cost = 300 + current_def * 3 + player.level * 15
+        success_rate = 0.9  # 90%成功率
+
+        # 检查金币
+        if player.gold < forge_cost:
+            return {
+                "success": False,
+                "message": f"金币不足，需要{forge_cost}金币",
+                "required_gold": forge_cost,
+                "current_gold": player.gold
+            }
+
+        # 扣除金币
+        player.gold -= forge_cost
+
+        # 尝试锻造
+        is_success = random.random() < success_rate
+
+        if is_success:
+            # 锻造成功
+            player.armor_def += upgrade_value
+            return {
+                "success": True,
+                "message": f"锻造成功！防具防御力 +{upgrade_value}（{current_def} → {player.armor_def}）",
+                "old_value": current_def,
+                "new_value": player.armor_def,
+                "upgrade_value": upgrade_value,
+                "gold_spent": forge_cost,
+                "success_rate": success_rate
+            }
+        else:
+            # 锻造失败
+            return {
+                "success": False,
+                "message": f"锻造失败！防具防御力保持 {current_def}",
+                "current_value": current_def,
+                "gold_spent": forge_cost,
+                "success_rate": success_rate,
+                "is_forge_failure": True
+            }
+
+    else:
+        return {
+            "success": False,
+            "message": "无效的装备类型"
+        }
+
+
+# ==================== 新增随机词条系统 ====================
+
+def add_random_attribute(player: Player, equipment_type: str) -> Dict[str, Any]:
+    """
+    为装备添加随机词条
+
+    Args:
+        player: 玩家对象
+        equipment_type: 装备类型 ('weapon' 或 'armor')
+
+    Returns:
+        锻造结果字典
+    """
+    from game_model import ATTRIBUTE_TYPES, ARMOR_ATTRIBUTE_TYPES, RARITY_CONFIG, WeaponAttribute, ArmorAttribute
+
+    if equipment_type == 'weapon':
+        # 检查是否有武器
+        if not player.weapon_name or player.weapon_atk <= 0:
+            return {
+                "success": False,
+                "message": "没有装备武器，无法锻造"
+            }
+
+        # 检查词条槽是否已满
+        max_attrs = RARITY_CONFIG[player.weapon_rarity]['attr_count']
+        current_count = len(player.weapon_attributes)
+
+        if current_count >= max_attrs:
+            return {
+                "success": False,
+                "message": f"词条已满（{current_count}/{max_attrs}），无法新增"
+            }
+
+        # 成本公式：500 + 玩家等级×25 + 现有词条数×200
+        forge_cost = 500 + player.level * 25 + current_count * 200
+        success_rate = 0.7  # 70%成功率
+
+        # 检查金币
+        if player.gold < forge_cost:
+            return {
+                "success": False,
+                "message": f"金币不足，需要{forge_cost}金币",
+                "required_gold": forge_cost,
+                "current_gold": player.gold
+            }
+
+        # 扣除金币
+        player.gold -= forge_cost
+
+        # 尝试锻造
+        is_success = random.random() < success_rate
+
+        if is_success:
+            # 锻造成功，生成新词条
+            # 获取已有词条类型
+            existing_types = {attr.attribute_type for attr in player.weapon_attributes}
+
+            # 排除已有词条类型
+            available_types = {k: v for k, v in ATTRIBUTE_TYPES.items() if k not in existing_types}
+
+            if not available_types:
+                return {
+                    "success": False,
+                    "message": "没有可用的词条类型，无法新增",
+                    "is_forge_failure": True
+                }
+
+            # 加权随机选择
+            attr_type = random.choices(
+                list(available_types.keys()),
+                weights=[v['weight'] for v in available_types.values()]
+            )[0]
+
+            attr_config = ATTRIBUTE_TYPES[attr_type]
+
+            # 基于玩家当前楼层计算数值（假设玩家等级约等于楼层进度）
+            estimated_floor = player.level  # 简化处理
+            base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
+            rarity_multiplier = RARITY_CONFIG[player.weapon_rarity]['multiplier']
+            final_value = base_value * rarity_multiplier
+
+            # 创建属性描述
+            description = attr_config['description']
+            if '{value*100}' in description:
+                description = description.replace('{value*100}', f'{final_value*100:.1f}')
+            else:
+                description = description.format(value=final_value)
+
+            # 创建新词条
+            new_attr = WeaponAttribute(
+                attribute_type=attr_type,
+                value=final_value,
+                description=description,
+                level=0
+            )
+
+            player.weapon_attributes.append(new_attr)
+
+            return {
+                "success": True,
+                "message": f"成功添加词条：{new_attr.description}（{current_count+1}/{max_attrs}）",
+                "new_attribute": new_attr.to_dict(),
+                "gold_spent": forge_cost,
+                "success_rate": success_rate
+            }
+        else:
+            # 锻造失败
+            return {
+                "success": False,
+                "message": "添加词条失败！",
+                "gold_spent": forge_cost,
+                "success_rate": success_rate,
+                "is_forge_failure": True
+            }
+
+    elif equipment_type == 'armor':
+        # 检查是否有防具
+        if not player.armor_name or player.armor_def <= 0:
+            return {
+                "success": False,
+                "message": "没有装备防具，无法锻造"
+            }
+
+        # 检查词条槽是否已满
+        max_attrs = RARITY_CONFIG[player.armor_rarity]['attr_count']
+        current_count = len(player.armor_attributes)
+
+        if current_count >= max_attrs:
+            return {
+                "success": False,
+                "message": f"词条已满（{current_count}/{max_attrs}），无法新增"
+            }
+
+        # 成本公式：500 + 玩家等级×25 + 现有词条数×200
+        forge_cost = 500 + player.level * 25 + current_count * 200
+        success_rate = 0.7  # 70%成功率
+
+        # 检查金币
+        if player.gold < forge_cost:
+            return {
+                "success": False,
+                "message": f"金币不足，需要{forge_cost}金币",
+                "required_gold": forge_cost,
+                "current_gold": player.gold
+            }
+
+        # 扣除金币
+        player.gold -= forge_cost
+
+        # 尝试锻造
+        is_success = random.random() < success_rate
+
+        if is_success:
+            # 锻造成功，生成新词条
+            # 获取已有词条类型
+            existing_types = {attr.attribute_type for attr in player.armor_attributes}
+
+            # 排除已有词条类型
+            available_types = {k: v for k, v in ARMOR_ATTRIBUTE_TYPES.items() if k not in existing_types}
+
+            if not available_types:
+                return {
+                    "success": False,
+                    "message": "没有可用的词条类型，无法新增",
+                    "is_forge_failure": True
+                }
+
+            # 加权随机选择
+            attr_type = random.choices(
+                list(available_types.keys()),
+                weights=[v['weight'] for v in available_types.values()]
+            )[0]
+
+            attr_config = ARMOR_ATTRIBUTE_TYPES[attr_type]
+
+            # 基于玩家当前等级计算数值
+            estimated_floor = player.level
+            base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
+            rarity_multiplier = RARITY_CONFIG[player.armor_rarity]['multiplier']
+            final_value = base_value * rarity_multiplier
+
+            # 创建属性描述
+            description = attr_config['description']
+            if '{value*100}' in description:
+                description = description.replace('{value*100}', f'{final_value*100:.1f}')
+            else:
+                description = description.format(value=final_value)
+
+            # 创建新词条
+            new_attr = ArmorAttribute(
+                attribute_type=attr_type,
+                value=final_value,
+                description=description,
+                level=0
+            )
+
+            player.armor_attributes.append(new_attr)
+
+            return {
+                "success": True,
+                "message": f"成功添加词条：{new_attr.description}（{current_count+1}/{max_attrs}）",
+                "new_attribute": new_attr.to_dict(),
+                "gold_spent": forge_cost,
+                "success_rate": success_rate
+            }
+        else:
+            # 锻造失败
+            return {
+                "success": False,
+                "message": "添加词条失败！",
+                "gold_spent": forge_cost,
+                "success_rate": success_rate,
+                "is_forge_failure": True
+            }
+
+    else:
+        return {
+            "success": False,
+            "message": "无效的装备类型"
+        }
+
+
+# ==================== 重铸词条系统 ====================
+
+def reforge_attribute(player: Player, equipment_type: str, attribute_index: int) -> Dict[str, Any]:
+    """
+    重铸词条：保持等级不变，随机更换词条类型
+
+    Args:
+        player: 玩家对象
+        equipment_type: 装备类型 ('weapon' 或 'armor')
+        attribute_index: 要重铸的词条索引
+
+    Returns:
+        锻造结果字典
+    """
+    from game_model import ATTRIBUTE_TYPES, ARMOR_ATTRIBUTE_TYPES, RARITY_CONFIG, WeaponAttribute, ArmorAttribute
+
+    if equipment_type == 'weapon':
+        # 检查是否有武器
+        if not player.weapon_name or player.weapon_atk <= 0:
+            return {
+                "success": False,
+                "message": "没有装备武器，无法锻造"
+            }
+
+        # 检查词条索引是否有效
+        if attribute_index < 0 or attribute_index >= len(player.weapon_attributes):
+            return {
+                "success": False,
+                "message": "无效的词条索引"
+            }
+
+        old_attr = player.weapon_attributes[attribute_index]
+
+        # 成本公式：400 + 词条等级×100 + 玩家等级×20
+        forge_cost = 400 + old_attr.level * 100 + player.level * 20
+        success_rate = 0.8  # 80%成功率
+
+        # 检查金币
+        if player.gold < forge_cost:
+            return {
+                "success": False,
+                "message": f"金币不足，需要{forge_cost}金币",
+                "required_gold": forge_cost,
+                "current_gold": player.gold
+            }
+
+        # 扣除金币
+        player.gold -= forge_cost
+
+        # 尝试锻造
+        is_success = random.random() < success_rate
+
+        if is_success:
+            # 锻造成功，重铸词条
+            # 获取已有词条类型（排除当前要重铸的词条）
+            existing_types = {attr.attribute_type for i, attr in enumerate(player.weapon_attributes) if i != attribute_index}
+
+            # 排除已有词条类型
+            available_types = {k: v for k, v in ATTRIBUTE_TYPES.items() if k not in existing_types}
+
+            if not available_types:
+                # 如果没有可用类型，至少允许保留当前类型
+                available_types = ATTRIBUTE_TYPES
+
+            # 加权随机选择新类型
+            new_attr_type = random.choices(
+                list(available_types.keys()),
+                weights=[v['weight'] for v in available_types.values()]
+            )[0]
+
+            attr_config = ATTRIBUTE_TYPES[new_attr_type]
+
+            # 基于玩家当前等级计算数值
+            estimated_floor = player.level
+            base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
+            rarity_multiplier = RARITY_CONFIG[player.weapon_rarity]['multiplier']
+            final_value = base_value * rarity_multiplier
+
+            # 创建属性描述
+            description = attr_config['description']
+            if '{value*100}' in description:
+                description = description.replace('{value*100}', f'{final_value*100:.1f}')
+            else:
+                description = description.format(value=final_value)
+
+            # 创建新词条（保留等级）
+            new_attr = WeaponAttribute(
+                attribute_type=new_attr_type,
+                value=final_value,
+                description=description,
+                level=old_attr.level  # 保留等级
+            )
+
+            # 替换词条
+            player.weapon_attributes[attribute_index] = new_attr
+
+            return {
+                "success": True,
+                "message": f"重铸成功！{old_attr.description} → {new_attr.description}（Lv.{new_attr.level + 1}）",
+                "old_attribute": old_attr.to_dict(),
+                "new_attribute": new_attr.to_dict(),
+                "gold_spent": forge_cost,
+                "success_rate": success_rate
+            }
+        else:
+            # 锻造失败
+            return {
+                "success": False,
+                "message": f"重铸失败！保留词条：{old_attr.description}",
+                "current_attribute": old_attr.to_dict(),
+                "gold_spent": forge_cost,
+                "success_rate": success_rate,
+                "is_forge_failure": True
+            }
+
+    elif equipment_type == 'armor':
+        # 检查是否有防具
+        if not player.armor_name or player.armor_def <= 0:
+            return {
+                "success": False,
+                "message": "没有装备防具，无法锻造"
+            }
+
+        # 检查词条索引是否有效
+        if attribute_index < 0 or attribute_index >= len(player.armor_attributes):
+            return {
+                "success": False,
+                "message": "无效的词条索引"
+            }
+
+        old_attr = player.armor_attributes[attribute_index]
+
+        # 成本公式：400 + 词条等级×100 + 玩家等级×20
+        forge_cost = 400 + old_attr.level * 100 + player.level * 20
+        success_rate = 0.8  # 80%成功率
+
+        # 检查金币
+        if player.gold < forge_cost:
+            return {
+                "success": False,
+                "message": f"金币不足，需要{forge_cost}金币",
+                "required_gold": forge_cost,
+                "current_gold": player.gold
+            }
+
+        # 扣除金币
+        player.gold -= forge_cost
+
+        # 尝试锻造
+        is_success = random.random() < success_rate
+
+        if is_success:
+            # 锻造成功，重铸词条
+            # 获取已有词条类型（排除当前要重铸的词条）
+            existing_types = {attr.attribute_type for i, attr in enumerate(player.armor_attributes) if i != attribute_index}
+
+            # 排除已有词条类型
+            available_types = {k: v for k, v in ARMOR_ATTRIBUTE_TYPES.items() if k not in existing_types}
+
+            if not available_types:
+                # 如果没有可用类型，至少允许保留当前类型
+                available_types = ARMOR_ATTRIBUTE_TYPES
+
+            # 加权随机选择新类型
+            new_attr_type = random.choices(
+                list(available_types.keys()),
+                weights=[v['weight'] for v in available_types.values()]
+            )[0]
+
+            attr_config = ARMOR_ATTRIBUTE_TYPES[new_attr_type]
+
+            # 基于玩家当前等级计算数值
+            estimated_floor = player.level
+            base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
+            rarity_multiplier = RARITY_CONFIG[player.armor_rarity]['multiplier']
+            final_value = base_value * rarity_multiplier
+
+            # 创建属性描述
+            description = attr_config['description']
+            if '{value*100}' in description:
+                description = description.replace('{value*100}', f'{final_value*100:.1f}')
+            else:
+                description = description.format(value=final_value)
+
+            # 创建新词条（保留等级）
+            new_attr = ArmorAttribute(
+                attribute_type=new_attr_type,
+                value=final_value,
+                description=description,
+                level=old_attr.level  # 保留等级
+            )
+
+            # 替换词条
+            player.armor_attributes[attribute_index] = new_attr
+
+            return {
+                "success": True,
+                "message": f"重铸成功！{old_attr.description} → {new_attr.description}（Lv.{new_attr.level + 1}）",
+                "old_attribute": old_attr.to_dict(),
+                "new_attribute": new_attr.to_dict(),
+                "gold_spent": forge_cost,
+                "success_rate": success_rate
+            }
+        else:
+            # 锻造失败
+            return {
+                "success": False,
+                "message": f"重铸失败！保留词条：{old_attr.description}",
+                "current_attribute": old_attr.to_dict(),
+                "gold_spent": forge_cost,
+                "success_rate": success_rate,
+                "is_forge_failure": True
+            }
+
+    else:
+        return {
+            "success": False,
+            "message": "无效的装备类型"
+        }
+
+
+# ==================== 扩展锻造信息系统 ====================
+
+def get_forge_info_extended(player: Player) -> Dict[str, Any]:
+    """
+    获取完整的锻造信息，包括武器和防具
+
+    Args:
+        player: 玩家对象
+
+    Returns:
+        锻造信息字典，包含武器和防具的完整信息
+    """
+    from game_model import RARITY_CONFIG
+
+    # 武器信息
+    weapon_info = {
+        "has_weapon": bool(player.weapon_name) and player.weapon_atk > 0,
+        "weapon_name": player.weapon_name or "",
+        "weapon_atk": player.weapon_atk,
+        "weapon_rarity": player.weapon_rarity,
+        "attributes": [],
+        "max_attributes": 0
+    }
+
+    if weapon_info["has_weapon"]:
+        weapon_info["max_attributes"] = RARITY_CONFIG[player.weapon_rarity]['attr_count']
+        weapon_info["attributes"] = [attr.to_dict() for attr in player.weapon_attributes]
+
+    # 防具信息
+    armor_info = {
+        "has_armor": bool(player.armor_name) and player.armor_def > 0,
+        "armor_name": player.armor_name or "",
+        "armor_def": player.armor_def,
+        "armor_rarity": player.armor_rarity,
+        "attributes": [],
+        "max_attributes": 0
+    }
+
+    if armor_info["has_armor"]:
+        armor_info["max_attributes"] = RARITY_CONFIG[player.armor_rarity]['attr_count']
+        armor_info["attributes"] = [attr.to_dict() for attr in player.armor_attributes]
+
+    return {
+        "weapon": weapon_info,
+        "armor": armor_info,
+        "gold": player.gold,
+        "player_level": player.level
+    }
+
+
 # ==================== 商人交易系统 ====================
 
 def handle_trade_request(player: Player, floor: Floor, item_name: str) -> dict:
@@ -982,7 +1601,7 @@ def handle_trade_request(player: Player, floor: Floor, item_name: str) -> dict:
     return response
 
 def get_merchant_info(player: Player, floor: Floor) -> dict:
-    """获取商人信息"""
+    """获取商人信息（包含锻造信息）"""
     if not floor.is_merchant_floor:
         return {"has_merchant": False}
 
@@ -1004,5 +1623,7 @@ def get_merchant_info(player: Player, floor: Floor) -> dict:
                 for item in floor.merchant.inventory
             ]
         },
-        "gold": player.gold
+        "gold": player.gold,
+        "forge": get_forge_info_extended(player)  # 新增：添加锻造信息
     }
+

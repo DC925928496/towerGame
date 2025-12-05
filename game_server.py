@@ -9,7 +9,8 @@ from game_model import Player, Floor, Position, CellType, Item, WeaponAttribute
 from game_logic import (
     move_player, pickup_item, player_attack,
     handle_trade_request, get_merchant_info,
-    forge_weapon_attribute, get_forge_info
+    forge_weapon_attribute, get_forge_info,
+    forge_base_attribute, add_random_attribute, reforge_attribute
 )
 from services import service_manager
 from config.database_config import config_manager as db_config_manager
@@ -411,6 +412,114 @@ class GameState:
             })
 
         # 无论成功失败都更新玩家信息
+        messages.append(self.get_player_info_message())
+        return messages
+
+    def forge_base_attr(self, equipment_type: str) -> List[Dict]:
+        """处理基础属性升级命令"""
+        if self.game_over:
+            return [{'type': 'log', 'message': '游戏已结束！'}]
+
+        messages = []
+        result = forge_base_attribute(self.player, equipment_type)
+
+        if result['success']:
+            messages.append({
+                'type': 'forge_result',
+                'success': True,
+                'message': result['message'],
+                'equipment_type': equipment_type,
+                'gold_spent': result['gold_spent']
+            })
+        elif result.get('is_forge_failure'):
+            # 锻造失败（非错误情况）
+            messages.append({
+                'type': 'forge_result',
+                'success': False,
+                'message': result['message'],
+                'gold_spent': result['gold_spent']
+            })
+        else:
+            # 锻造错误（金币不足等）
+            messages.append({
+                'type': 'forge_result',
+                'success': False,
+                'message': result['message']
+            })
+
+        # 更新玩家信息
+        messages.append(self.get_player_info_message())
+        return messages
+
+    def add_random_attr(self, equipment_type: str) -> List[Dict]:
+        """处理新增随机词条命令"""
+        if self.game_over:
+            return [{'type': 'log', 'message': '游戏已结束！'}]
+
+        messages = []
+        result = add_random_attribute(self.player, equipment_type)
+
+        if result['success']:
+            messages.append({
+                'type': 'forge_result',
+                'success': True,
+                'message': result['message'],
+                'equipment_type': equipment_type,
+                'gold_spent': result['gold_spent']
+            })
+        elif result.get('is_forge_failure'):
+            # 锻造失败（非错误情况）
+            messages.append({
+                'type': 'forge_result',
+                'success': False,
+                'message': result['message'],
+                'gold_spent': result['gold_spent']
+            })
+        else:
+            # 锻造错误（金币不足等）
+            messages.append({
+                'type': 'forge_result',
+                'success': False,
+                'message': result['message']
+            })
+
+        # 更新玩家信息
+        messages.append(self.get_player_info_message())
+        return messages
+
+    def reforge_attr(self, equipment_type: str, attribute_index: int) -> List[Dict]:
+        """处理重铸词条命令"""
+        if self.game_over:
+            return [{'type': 'log', 'message': '游戏已结束！'}]
+
+        messages = []
+        result = reforge_attribute(self.player, equipment_type, attribute_index)
+
+        if result['success']:
+            messages.append({
+                'type': 'forge_result',
+                'success': True,
+                'message': result['message'],
+                'equipment_type': equipment_type,
+                'gold_spent': result['gold_spent']
+            })
+        elif result.get('is_forge_failure'):
+            # 锻造失败（非错误情况）
+            messages.append({
+                'type': 'forge_result',
+                'success': False,
+                'message': result['message'],
+                'gold_spent': result['gold_spent']
+            })
+        else:
+            # 锻造错误（金币不足等）
+            messages.append({
+                'type': 'forge_result',
+                'success': False,
+                'message': result['message']
+            })
+
+        # 更新玩家信息
         messages.append(self.get_player_info_message())
         return messages
 
@@ -1222,6 +1331,28 @@ async def handle_client(websocket):
                         response_messages = game.forge(int(attribute_index))
                     else:
                         response_messages = [{'type': 'log', 'message': '缺少词条索引参数'}]
+
+                elif cmd == 'forge_base_attr':
+                    equipment_type = data.get('equipment_type')
+                    if equipment_type:
+                        response_messages = game.forge_base_attr(equipment_type)
+                    else:
+                        response_messages = [{'type': 'log', 'message': '缺少装备类型参数'}]
+
+                elif cmd == 'add_random_attr':
+                    equipment_type = data.get('equipment_type')
+                    if equipment_type:
+                        response_messages = game.add_random_attr(equipment_type)
+                    else:
+                        response_messages = [{'type': 'log', 'message': '缺少装备类型参数'}]
+
+                elif cmd == 'reforge_attr':
+                    equipment_type = data.get('equipment_type')
+                    attribute_index = data.get('attribute_index')
+                    if equipment_type and attribute_index is not None:
+                        response_messages = game.reforge_attr(equipment_type, int(attribute_index))
+                    else:
+                        response_messages = [{'type': 'log', 'message': '缺少装备类型或词条索引参数'}]
 
                 else:
                     response_messages = [{

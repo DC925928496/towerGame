@@ -455,293 +455,86 @@
             color: #9ae6b4;
         }
 
-        /* 锻造对话框 */
-        .forge-dialog {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-            border: 2px solid #FF6B35;
-            padding: 25px;
-            border-radius: 15px;
-            z-index: 1000;
-            min-width: 90vw;
-            max-width: 95vw;
-            width: 800px;
-            height: 80vh;
-            max-height: 85vh;
-            box-shadow: 0 0 40px rgba(255, 107, 53, 0.6);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 锻造对话框响应式设计 */
-        @media (max-width: 768px) {
-            .forge-dialog {
-                min-width: 95vw;
-                max-width: 98vw;
-                height: 85vh;
-                max-height: 90vh;
-                padding: 15px;
-            }
-        }
-
-        .forge-dialog h3 {
-            color: #FF6B35;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 20px;
-        }
-
-        .forge-info-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 15px;
-        }
-
-        .forge-weapon-info {
-            background: linear-gradient(135deg, #333 0%, #444 100%);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #FF6B35;
-        }
-
-        .forge-weapon-name {
-            color: #ffffff;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .forge-weapon-rarity {
-            color: #FFD700;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .forge-attributes-list {
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid #555;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-        }
-
-        .forge-attribute-item {
-            margin: 15px;
-            padding: 15px;
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-            border-radius: 12px;
-            border-left: 5px solid #FF6B35;
-            transition: all 0.3s ease;
-        }
-
-        .forge-attribute-item:hover {
-            background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
-            box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .forge-attr-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .forge-attr-description {
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 16px;
-            flex: 1;
-        }
-
-        .forge-attr-level {
-            background: linear-gradient(135deg, #FF6B35 0%, #FF8F65 100%);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            min-width: 60px;
-            text-align: center;
-            margin-left: 10px;
-        }
-
-        .forge-attr-details {
-            color: #cccccc;
-            font-size: 13px;
-            margin: 8px 0;
-            line-height: 1.4;
-        }
-
-        .forge-attr-stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #555;
-        }
-
-        .forge-attr-cost {
-            color: #FFD700;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        .forge-attr-success-rate {
-            color: #4CAF50;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .forge-attr-button {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #FF6B35 0%, #FF8F65 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            min-width: 80px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-        }
-
-        .forge-attr-button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #FF8F65 0%, #FF6B35 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
-        }
-
-        .forge-attr-button:disabled {
-            background: linear-gradient(135deg, #666 0%, #555 100%);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-            opacity: 0.6;
-        }
-
-        .forge-player-gold {
-            text-align: center;
-            margin-bottom: 10px;
-            color: #FFD700;
-            font-weight: bold;
-            font-size: 18px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        .forge-instructions {
-            background: linear-gradient(135deg, #333 0%, #444 100%);
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #ddd;
-            text-align: center;
-            border: 1px solid rgba(255, 107, 53, 0.2);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .forge-instructions div {
-            margin: 2px 0;
-            padding: 2px 0;
-            transition: all 0.2s ease;
-        }
-
-        .forge-instructions div:hover {
-            color: #FF6B35;
-            transform: scale(1.02);
-        }
-
-        .forge-dialog .close-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-        }
-
-        .forge-dialog .close-btn:hover {
-            background: linear-gradient(135deg, #da190b 0%, #b71c1c 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
-        }
-
-        .forge-dialog .close-btn:active {
-            transform: translateY(0);
-        }
-
         /* 商人对话框 */
         .merchant-dialog {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            width: min(1280px, 96vw);
+            max-height: calc(100vh - 200px);
             background: #2a2a2a;
             border: 2px solid #FF9800;
-            padding: 25px;
-            border-radius: 15px;
-            z-index: 1000;
-            min-width: 90vw;
-            max-width: 95vw;
-            width: 800px;
-            height: 80vh;
-            max-height: 85vh;
+            padding: 20px 24px;
+            border-radius: 16px;
             box-shadow: 0 0 40px rgba(255, 152, 0, 0.6);
             display: flex;
             flex-direction: column;
+            gap: 18px;
+            overflow: visible;
         }
 
         /* 商人对话框响应式设计 */
         @media (max-width: 768px) {
             .merchant-dialog {
-                min-width: 95vw;
-                max-width: 98vw;
-                height: 85vh;
-                max-height: 90vh;
-                padding: 15px;
+                width: 96vw;
+                padding: 16px 14px;
+                gap: 12px;
+                max-height: calc(100vh - 140px);
             }
         }
 
         .merchant-dialog h3 {
             color: #FF9800;
-            margin-bottom: 15px;
-            text-align: center;
+            margin: 0;
             font-size: 20px;
         }
 
-        .merchant-inventory-container {
+        .merchant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .merchant-body {
             flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            min-height: 0;
+        }
+
+        @media (max-width: 980px) {
+            .merchant-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .merchant-column {
+            background: linear-gradient(135deg, #2f2f2f 0%, #1f1f1f 100%);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            border-radius: 14px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
-            margin-bottom: 15px;
-            border: 1px solid #555;
-            border-radius: 8px;
-            overflow: hidden;
+            gap: 12px;
+            min-height: 0;
+            overflow: visible;
+        }
+
+        .column-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FF9800;
+            letter-spacing: 1px;
         }
 
         .merchant-inventory {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 10px;
             scrollbar-width: thin;
             scrollbar-color: #FF9800 #333;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            min-height: 0;
         }
 
         /* 美化滚动条 */
@@ -761,6 +554,13 @@
 
         .merchant-inventory::-webkit-scrollbar-thumb:hover {
             background: #F57C00;
+        }
+
+        .forge-view {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            min-height: 0;
         }
 
         .merchant-item {
@@ -873,67 +673,21 @@
             opacity: 0.6;
         }
 
-        /* 滚动控制按钮 */
-        .scroll-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 12px;
-            background: linear-gradient(135deg, #333 0%, #444 100%);
-            border-top: 1px solid #555;
-        }
-
-        .scroll-btn {
-            width: 50px;
-            height: 35px;
-            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
-        }
-
-        .scroll-btn:hover {
-            background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.5);
-        }
-
-        .scroll-btn:active {
-            transform: scale(0.95);
-        }
-
-        .scroll-btn:disabled {
-            background: linear-gradient(135deg, #666 0%, #555 100%);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-            opacity: 0.5;
-        }
-
         .player-gold {
-            text-align: center;
-            margin-bottom: 10px;
+            text-align: left;
             color: #FFD700;
             font-weight: bold;
             font-size: 18px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(255, 193, 7, 0.08) 100%);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
         }
 
         .merchant-dialog .close-btn {
-            width: 100%;
-            padding: 12px;
+            width: auto;
+            padding: 10px 20px;
             background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
             color: white;
             border: none;
@@ -943,6 +697,7 @@
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+            flex-shrink: 0;
         }
 
         .merchant-dialog .close-btn:hover {
@@ -955,15 +710,13 @@
             transform: translateY(0);
         }
 
-        /* 键盘操作指引样式 */
+        /* 提示信息样式 */
         .merchant-instructions {
             background: linear-gradient(135deg, #333 0%, #444 100%);
-            padding: 10px;
-            margin: 10px 0;
+            padding: 8px 10px;
             border-radius: 8px;
             font-size: 12px;
             color: #ddd;
-            text-align: center;
             border: 1px solid rgba(255, 152, 0, 0.2);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
@@ -971,36 +724,146 @@
         .merchant-instructions div {
             margin: 2px 0;
             padding: 2px 0;
+        }
+
+        .merchant-column .merchant-instructions {
+            flex-shrink: 0;
+        }
+
+        #forge-overlay {
+            z-index: 1100 !important;
+        }
+
+        .merchant-empty {
+            text-align: center;
+            color: #aaa;
+            padding: 40px 0;
+            font-size: 14px;
+        }
+
+        /* ==================== 锻造视图样式 ==================== */
+        .forge-equipment-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .equipment-card {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            border: 2px solid #4a5568;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .equipment-card:hover {
+            border-color: #718096;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .equipment-card.selected {
+            border-color: #FF9800;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.4);
+            background: linear-gradient(135deg, #3d4758 0%, #2a3142 100%);
+        }
+
+        .equipment-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .equipment-card p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #a0aec0;
+        }
+
+        .forge-options-list {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #FF9800 #333;
+        }
+
+        .forge-options-list::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .forge-options-list::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 6px;
+        }
+
+        .forge-options-list::-webkit-scrollbar-thumb {
+            background: #FF9800;
+            border-radius: 6px;
+        }
+
+        .forge-option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            border: 1px solid #4a5568;
+            border-radius: 8px;
             transition: all 0.2s ease;
         }
 
-        .merchant-instructions div:hover {
-            color: #FF9800;
-            transform: scale(1.02);
+        .forge-option-item:hover {
+            border-color: #718096;
+            transform: translateX(5px);
         }
 
-        /* 键盘快捷键提示样式 */
-        .merchant-item button[data-key] {
-            position: relative;
-        }
-
-        .merchant-item button[data-key]:not(:disabled)::after {
-            content: attr(data-key);
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            border-radius: 50%;
+        .option-info {
+            flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .option-name {
+            font-size: 14px;
+            color: #e2e8f0;
             font-weight: bold;
+        }
+
+        .option-stats {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+
+        .forge-option-item button {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #FF9800 0%, #FF6B35 100%);
+            border: none;
+            border-radius: 6px;
             color: white;
-            box-shadow: 0 2px 6px rgba(76, 175, 80, 0.4);
-            border: 2px solid white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .forge-option-item button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
+        }
+
+        .forge-option-item button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .forge-option-item button:disabled:hover {
+            transform: none;
+            box-shadow: none;
         }
 
         /* ============ 登录界面样式 ============ */
@@ -1857,15 +1720,15 @@
                         </li>
                         <li>
                             <span class="modal-hotkey">E</span>
-                            <span>与商人交易（需要在商人附近）</span>
+                            <span>在商人附近开启/关闭交易与锻造界面</span>
                         </li>
                         <li>
-                            <span class="modal-hotkey">F</span>
-                            <span>打开武器锻造界面</span>
+                            <span class="modal-hotkey">鼠标</span>
+                            <span>在商店/锻造界面执行购买、强化等操作</span>
                         </li>
                         <li>
                             <span class="modal-hotkey">ESC</span>
-                            <span>关闭弹窗界面</span>
+                            <span>快速关闭当前弹窗界面</span>
                         </li>
                     </ul>
                 </div>
@@ -2860,30 +2723,19 @@
                     addLog(message.message);
                     break;
 
-                case 'forge_info':
-                    // 显示锻造信息
-                    if (message.has_weapon) {
-                        showForgeDialog(message);
+                case 'forge_result':
+                    // 锻造结果处理
+                    if (message.success) {
+                        addLog(message.message);
+                        // 锻造成功，重新请求商人信息以刷新界面
+                        sendMessage({cmd: 'merchant_info'});
                     } else {
                         addLog(message.message);
+                        // 如果是锻造失败（非错误），金币已扣除，需要刷新界面
+                        if (message.gold_spent !== undefined) {
+                            sendMessage({cmd: 'merchant_info'});
+                        }
                     }
-                    break;
-
-                case 'forge_success':
-                    // 锻造成功
-                    addLog(message.message);
-                    closeForgeDialog();
-                    break;
-
-                case 'forge_failure':
-                    // 锻造失败
-                    addLog(message.message);
-                    updateForgeDialog(message); // 更新锻造界面显示
-                    break;
-
-                case 'forge_error':
-                    // 锻造错误
-                    addLog(message.message);
                     break;
 
                 default:
@@ -2909,112 +2761,17 @@
             }
         }
 
-        // 锻造界面函数
-        function showForgeDialog(forgeData) {
-            // 创建对话框背景遮罩
-            const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.8);
-                z-index: 999;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            `;
-            overlay.id = 'forge-overlay';
-
-            // 创建锻造对话框
-            const dialog = document.createElement('div');
-            dialog.className = 'forge-dialog';
-            dialog.innerHTML = `
-                <h3>武器锻造</h3>
-                <div class="forge-info-container">
-                    <div class="forge-weapon-info">
-                        <div class="forge-weapon-name">${forgeData.weapon_name}</div>
-                        <div class="forge-weapon-rarity">${forgeData.weapon_rarity || '普通'}</div>
-                    </div>
-                    <div class="forge-attributes-list">
-                        ${forgeData.attributes.map((attr, index) => `
-                            <div class="forge-attribute-item">
-                                <div class="forge-attr-header">
-                                    <div class="forge-attr-description">${attr.description}</div>
-                                    <div class="forge-attr-level">Lv.${attr.level + 1}</div>
-                                </div>
-                                <div class="forge-attr-details">
-                                    当前效果: ${attr.enhanced_value}
-                                    ${attr.base_value ? `(基础: ${attr.base_value})` : ''}
-                                </div>
-                                <div class="forge-attr-stats">
-                                    <div class="forge-attr-cost">${attr.forge_cost}金币</div>
-                                    <div class="forge-attr-success-rate">成功率: ${(attr.success_rate * 100).toFixed(1)}%</div>
-                                </div>
-                                <button class="forge-attr-button" onclick="forgeAttribute(${index})" data-index="${index}">
-                                    强化
-                                </button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                <div class="forge-player-gold">你的金币: <span id="player-gold-forge">0</span></div>
-                <div class="forge-instructions">
-                    <div>点击 [强化] 按钮或按数字键 [1-9] 强化对应词条</div>
-                    <div>按 [F] 键关闭锻造界面</div>
-                </div>
-                <button class="close-btn" onclick="closeForgeDialog()">关闭 [F]</button>
-            `;
-
-            overlay.appendChild(dialog);
-            document.body.appendChild(overlay);
-
-            // 显示玩家金币
-            const playerGoldSpan = document.getElementById('player-gold-forge');
-            if (playerGoldSpan) {
-                playerGoldSpan.textContent = forgeData.gold || 0;
-            }
-        }
-
-        function closeForgeDialog() {
-            const overlay = document.getElementById('forge-overlay');
-            if (overlay) {
-                document.body.removeChild(overlay);
-            }
-        }
-
-        function updateForgeDialog(message) {
-            // 更新锻造界面显示（通常用于锻造失败后）
-            const overlay = document.getElementById('forge-overlay');
-            if (overlay) {
-                // 更新金币显示
-                const playerGoldSpan = document.getElementById('player-gold-forge');
-                if (playerGoldSpan && message.new_gold !== undefined) {
-                    playerGoldSpan.textContent = message.new_gold;
-                }
-
-                // 如果锻造失败，更新对应词条的显示
-                if (message.attribute_index !== undefined && message.current_level !== undefined) {
-                    const attrButton = overlay.querySelector(`[data-index="${message.attribute_index}"]`);
-                    if (attrButton) {
-                        const attrItem = attrButton.closest('.forge-attribute-item');
-                        const levelDiv = attrItem.querySelector('.forge-attr-level');
-                        levelDiv.textContent = `Lv.${message.current_level + 1}`;
-
-                        // 更新金币显示（如果需要）
-                        // 可以根据服务器的响应更新其他信息
-                    }
-                }
-            }
-        }
-
-        function forgeAttribute(attributeIndex) {
-            sendMessage({cmd: 'forge', attribute_index: attributeIndex});
-        }
-
         // 商人交易界面函数
+        let currentMerchantData = null;  // 保存当前商人数据
+        let selectedEquipmentType = 'weapon';  // 当前选中的装备类型
+
         function showMerchantDialog(merchantData) {
+            // 如果已经存在商人界面，先移除以避免重复遮罩
+            closeMerchantDialog();
+
+            // 保存商人数据供其他函数使用
+            currentMerchantData = merchantData;
+
             // 创建对话框背景遮罩
             const overlay = document.createElement('div');
             overlay.style.cssText = `
@@ -3022,88 +2779,61 @@
                 top: 0;
                 left: 0;
                 right: 0;
-                bottom: 0;
+                bottom: 160px;
                 background: rgba(0, 0, 0, 0.8);
                 z-index: 999;
                 display: flex;
                 justify-content: center;
-                align-items: center;
+                align-items: flex-start;
+                padding: 20px 20px 0;
+                overflow-y: auto;
+                overflow-x: hidden;
             `;
             overlay.id = 'merchant-overlay';
+
+            const inventory = Array.isArray(merchantData.merchant.inventory) ? merchantData.merchant.inventory : [];
 
             // 创建商人对话框
             const dialog = document.createElement('div');
             dialog.className = 'merchant-dialog';
             dialog.innerHTML = `
-                <h3>${merchantData.merchant.name}</h3>
-                <div class="merchant-inventory-container">
-                    <div class="merchant-inventory" id="merchant-items">
-                        ${merchantData.merchant.inventory.map((item, index) => `
-                            <div class="merchant-item" data-item-index="${index}">
-                                <div class="item-info">
-                                    <div class="item-name">${item.name}</div>
-                                    <div class="item-stats">${item.type === 'potion' ? '回复' : item.type === 'weapon' ? '攻击' : '防御'} +${item.value}</div>
+                <div class="merchant-header">
+                    <h3>${merchantData.merchant.name}</h3>
+                    <button class="close-btn" onclick="closeMerchantDialog()">关闭</button>
+                </div>
+                <div class="merchant-body">
+                    <div class="merchant-column shop-column">
+                        <div class="column-title">商店</div>
+                        <div class="player-gold">你的金币: ${merchantData.gold || 0}</div>
+                        <div class="merchant-inventory" id="merchant-items">
+                            ${inventory.length ? inventory.map(item => `
+                                <div class="merchant-item">
+                                    <div class="item-info">
+                                        <div class="item-name">${item.name}</div>
+                                        <div class="item-stats">${item.type === 'potion' ? '回复' : item.type === 'weapon' ? '攻击' : '防御'} +${item.value}</div>
+                                    </div>
+                                    <div class="price">${item.price}金币</div>
+                                    <button onclick="buyItem('${item.name}')" ${merchantData.gold < item.price ? 'disabled' : ''}>购买</button>
                                 </div>
-                                <div class="price">${item.price}金币</div>
-                                <button onclick="buyItem('${item.name}')" data-key="${index + 1}" ${merchantData.gold < item.price ? 'disabled' : ''}>购买 [${index + 1}]</button>
-                            </div>
-                        `).join('')}
+                            `).join('') : '<div class="merchant-empty">暂无可售商品</div>'}
+                        </div>
+                        <div class="merchant-instructions">
+                            <div>点击 "购买" 按钮即可完成交易</div>
+                            <div>使用鼠标滚轮浏览物品列表</div>
+                        </div>
                     </div>
-                    <div class="scroll-controls">
-                        <button class="scroll-btn" id="scroll-up-btn" onclick="scrollMerchantItems('up')">↑</button>
-                        <button class="scroll-btn" id="scroll-down-btn" onclick="scrollMerchantItems('down')">↓</button>
+                    <div class="merchant-column forge-column">
+                        <div class="column-title">锻造</div>
+                        <div id="forge-view" class="forge-view">
+                            <!-- 锻造内容将由 renderForgeView() 动态生成 -->
+                        </div>
                     </div>
                 </div>
-                <div class="player-gold">你的金币: ${merchantData.gold || 0}</div>
-                <div class="merchant-instructions">
-                    <div>按数字键 [1-9] 购买对应商品</div>
-                    <div>按 [E] 键关闭商人界面</div>
-                    <div>使用 ↑↓ 按钮滚动查看更多商品</div>
-                </div>
-                <button class="close-btn" onclick="closeMerchantDialog()">关闭 [E]</button>
             `;
 
             overlay.appendChild(dialog);
             document.body.appendChild(overlay);
-
-            // 初始化滚动按钮状态
-            updateScrollButtons();
-
-            // 添加滚动事件监听器
-            const merchantItems = document.getElementById('merchant-items');
-            if (merchantItems) {
-                merchantItems.addEventListener('scroll', updateScrollButtons);
-            }
-        }
-
-        function updateScrollButtons() {
-            const merchantItems = document.getElementById('merchant-items');
-            const scrollUpBtn = document.getElementById('scroll-up-btn');
-            const scrollDownBtn = document.getElementById('scroll-down-btn');
-
-            if (!merchantItems || !scrollUpBtn || !scrollDownBtn) return;
-
-            // 更新向上按钮状态
-            scrollUpBtn.disabled = merchantItems.scrollTop <= 0;
-
-            // 更新向下按钮状态
-            const isScrolledToBottom = merchantItems.scrollTop + merchantItems.clientHeight >= merchantItems.scrollHeight - 5;
-            scrollDownBtn.disabled = isScrolledToBottom;
-        }
-
-        function scrollMerchantItems(direction) {
-            const merchantItems = document.getElementById('merchant-items');
-            if (!merchantItems) return;
-
-            const scrollAmount = 180; // 增加每次滚动的像素
-            if (direction === 'up') {
-                merchantItems.scrollTop = Math.max(0, merchantItems.scrollTop - scrollAmount);
-            } else {
-                merchantItems.scrollTop = Math.min(merchantItems.scrollHeight, merchantItems.scrollTop + scrollAmount);
-            }
-
-            // 更新按钮状态
-            setTimeout(updateScrollButtons, 100);
+            renderForgeView();
         }
 
         function closeMerchantDialog() {
@@ -3115,6 +2845,204 @@
 
         function buyItem(itemName) {
             sendMessage({cmd: 'trade', item_name: itemName});
+        }
+
+        function renderForgeView() {
+            if (!currentMerchantData || !currentMerchantData.forge) return;
+
+            const forgeView = document.getElementById('forge-view');
+            const forgeData = currentMerchantData.forge;
+
+            forgeView.innerHTML = `
+                <div class="forge-equipment-selector">
+                    <div class="equipment-card ${selectedEquipmentType === 'weapon' ? 'selected' : ''}"
+                         onclick="selectEquipment('weapon')">
+                        <h4>⚔️ ${forgeData.weapon.weapon_name || '未装备武器'}</h4>
+                        ${forgeData.weapon.has_weapon ? `
+                            <p>攻击力: ${forgeData.weapon.weapon_atk}</p>
+                            <p>稀有度: ${getRarityName(forgeData.weapon.weapon_rarity)}</p>
+                            <p>词条: ${forgeData.weapon.attributes.length}/${forgeData.weapon.max_attributes}</p>
+                        ` : '<p style="color: #888;">无装备</p>'}
+                    </div>
+                    <div class="equipment-card ${selectedEquipmentType === 'armor' ? 'selected' : ''}"
+                         onclick="selectEquipment('armor')">
+                        <h4>🛡️ ${forgeData.armor.armor_name || '未装备防具'}</h4>
+                        ${forgeData.armor.has_armor ? `
+                            <p>防御力: ${forgeData.armor.armor_def}</p>
+                            <p>稀有度: ${getRarityName(forgeData.armor.armor_rarity)}</p>
+                            <p>词条: ${forgeData.armor.attributes.length}/${forgeData.armor.max_attributes}</p>
+                        ` : '<p style="color: #888;">无装备</p>'}
+                    </div>
+                </div>
+                <div id="forge-options-container">
+                    <!-- 动态渲染锻造选项 -->
+                </div>
+            `;
+
+            renderForgeOptions();
+        }
+
+        function selectEquipment(type) {
+            selectedEquipmentType = type;
+            renderForgeView();
+        }
+
+        function getRarityName(rarity) {
+            const rarityNames = {
+                'common': '普通',
+                'rare': '稀有',
+                'epic': '史诗',
+                'legendary': '传说'
+            };
+            return rarityNames[rarity] || rarity;
+        }
+
+        function renderForgeOptions() {
+            if (!currentMerchantData || !currentMerchantData.forge) return;
+
+            const forgeData = currentMerchantData.forge;
+            const equipment = forgeData[selectedEquipmentType];
+            const container = document.getElementById('forge-options-container');
+
+            const hasEquipment = selectedEquipmentType === 'weapon' ? equipment.has_weapon : equipment.has_armor;
+
+            if (!hasEquipment) {
+                container.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">未装备该类型装备</p>';
+                return;
+            }
+
+            const playerLevel = forgeData.player_level || 1;
+            const playerGold = forgeData.gold || 0;
+
+            let optionsHTML = '<div class="forge-options-list">';
+
+            // 1. 基础属性升级
+            const baseAttr = selectedEquipmentType === 'weapon' ? equipment.weapon_atk : equipment.armor_def;
+            const baseAttrName = selectedEquipmentType === 'weapon' ? '攻击力' : '防御力';
+            const baseCost = 300 + baseAttr * (selectedEquipmentType === 'weapon' ? 2 : 3) + playerLevel * 15;
+            const upgradeValue = Math.max(1, Math.floor(baseAttr * 0.05));
+
+            optionsHTML += `
+                <div class="forge-option-item">
+                    <div class="option-info">
+                        <span class="option-name">升级基础${baseAttrName} (+${upgradeValue})</span>
+                        <span class="option-stats">成本: ${baseCost}金币 | 成功率: 90%</span>
+                    </div>
+                    <button onclick="forgeBaseAttribute('${selectedEquipmentType}')"
+                            ${playerGold < baseCost ? 'disabled' : ''}>强化</button>
+                </div>
+            `;
+
+            // 2. 词条升级
+            if (equipment.attributes && equipment.attributes.length > 0) {
+                equipment.attributes.forEach((attr, index) => {
+                    const cost = calculateForgeAttributeCost(attr.level, equipment[selectedEquipmentType + '_rarity'], playerLevel);
+                    const successRate = calculateForgeSuccessRate(attr.level, equipment[selectedEquipmentType + '_rarity']);
+
+                    optionsHTML += `
+                        <div class="forge-option-item">
+                            <div class="option-info">
+                                <span class="option-name">${attr.description} Lv.${attr.level + 1} → Lv.${attr.level + 2}</span>
+                                <span class="option-stats">成本: ${cost}金币 | 成功率: ${(successRate * 100).toFixed(0)}%</span>
+                            </div>
+                            <button onclick="forgeAttributeLevel('${selectedEquipmentType}', ${index})"
+                                    ${playerGold < cost ? 'disabled' : ''}>强化</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 3. 新增词条
+            const currentAttrCount = equipment.attributes ? equipment.attributes.length : 0;
+            const maxAttrCount = equipment.max_attributes || 0;
+
+            if (currentAttrCount < maxAttrCount) {
+                const addCost = 500 + playerLevel * 25 + currentAttrCount * 200;
+                optionsHTML += `
+                    <div class="forge-option-item">
+                        <div class="option-info">
+                            <span class="option-name">新增随机词条 (${currentAttrCount + 1}/${maxAttrCount})</span>
+                            <span class="option-stats">成本: ${addCost}金币 | 成功率: 70%</span>
+                        </div>
+                        <button onclick="addRandomAttribute('${selectedEquipmentType}')"
+                                ${playerGold < addCost ? 'disabled' : ''}>添加</button>
+                    </div>
+                `;
+            }
+
+            // 4. 重铸词条
+            if (equipment.attributes && equipment.attributes.length > 0) {
+                equipment.attributes.forEach((attr, index) => {
+                    const reforgeCost = 400 + attr.level * 100 + playerLevel * 20;
+                    optionsHTML += `
+                        <div class="forge-option-item">
+                            <div class="option-info">
+                                <span class="option-name">重铸: ${attr.description}</span>
+                                <span class="option-stats">成本: ${reforgeCost}金币 | 成功率: 80%</span>
+                            </div>
+                            <button onclick="reforgeAttribute('${selectedEquipmentType}', ${index})"
+                                    ${playerGold < reforgeCost ? 'disabled' : ''}>重铸</button>
+                        </div>
+                    `;
+                });
+            }
+
+            optionsHTML += '</div>';
+            container.innerHTML = optionsHTML;
+        }
+
+        // 锻造成本和成功率计算（复用现有逻辑）
+        function calculateForgeAttributeCost(level, rarity, playerLevel) {
+            const baseCost = 120 + level * 80 + playerLevel * 10;
+            const rarityMultiplier = {
+                'common': 1.0,
+                'rare': 1.15,
+                'epic': 1.35,
+                'legendary': 1.6
+            };
+            return Math.floor(baseCost * (rarityMultiplier[rarity] || 1.0));
+        }
+
+        function calculateForgeSuccessRate(level, rarity) {
+            const baseSuccessRate = Math.max(0.25, 0.85 - level * 0.1);
+            const rarityBonus = {
+                'common': 0.0,
+                'rare': 0.05,
+                'epic': 0.1,
+                'legendary': 0.15
+            };
+            return Math.min(0.95, baseSuccessRate + (rarityBonus[rarity] || 0.0));
+        }
+
+        // 锻造操作函数
+        function forgeBaseAttribute(equipmentType) {
+            sendMessage({
+                cmd: 'forge_base_attr',
+                equipment_type: equipmentType
+            });
+        }
+
+        function forgeAttributeLevel(equipmentType, index) {
+            sendMessage({
+                cmd: 'forge',
+                equipment_type: equipmentType,
+                attribute_index: index
+            });
+        }
+
+        function addRandomAttribute(equipmentType) {
+            sendMessage({
+                cmd: 'add_random_attr',
+                equipment_type: equipmentType
+            });
+        }
+
+        function reforgeAttribute(equipmentType, index) {
+            sendMessage({
+                cmd: 'reforge_attr',
+                equipment_type: equipmentType,
+                attribute_index: index
+            });
         }
 
         // 键盘事件处理
@@ -3177,55 +3105,15 @@
             }
 
             if (merchantOverlay) {
-                // 商人界面打开时的特殊按键处理
                 switch (event.key) {
                     case 'e':
                     case 'E':
                     case 'Escape':
                     case 'Esc':
                         closeMerchantDialog();
-                        event.preventDefault();
-                        return; // 直接返回，不执行后续逻辑
-
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        // 数字键购买商品
-                        const itemIndex = parseInt(event.key) - 1;
-                        const merchantItems = merchantOverlay.querySelectorAll('.merchant-item[data-item-index]');
-                        if (merchantItems[itemIndex]) {
-                            const itemName = merchantItems[itemIndex].querySelector('.item-name').textContent;
-                            const buyButton = merchantItems[itemIndex].querySelector('button');
-                            if (buyButton && !buyButton.disabled) {
-                                buyItem(itemName);
-                            }
-                        }
-                        event.preventDefault();
-                        return; // 直接返回，不执行后续逻辑
-
-                    case 'ArrowUp':
-                    case 'w':
-                    case 'W':
-                        // 上键控制滚动
-                        scrollMerchantItems('up');
-                        event.preventDefault();
-                        return; // 直接返回，不执行后续逻辑
-
-                    case 'ArrowDown':
-                    case 's':
-                    case 'S':
-                        // 下键控制滚动
-                        scrollMerchantItems('down');
-                        event.preventDefault();
-                        return; // 直接返回，不执行后续逻辑
+                        break;
                 }
-                // 商人界面打开时，其他按键不处理
+                event.preventDefault();
                 return;
             }
 
@@ -3250,11 +3138,6 @@
                 case 'd':
                 case 'D':
                     command = {cmd: 'move', dir: 'right'};
-                    break;
-                // 添加锻造按键
-                case 'f':
-                case 'F':
-                    command = {cmd: 'forge_info'};
                     break;
 
                 // 添加商人交互按键
