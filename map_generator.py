@@ -186,7 +186,7 @@ def generate_weapon_attributes(floor_level: int, rarity: str) -> List[WeaponAttr
     for attr_type in selected_types:
         attr_config = ATTRIBUTE_TYPES[attr_type]
 
-        # 基于楼层和稀有度计算数值
+        # 基于楼层和稀有度计算数值，先计算浮点值，再按展示需求处理
         base_value = attr_config['base_value'] + floor_level * attr_config['scale']
         rarity_multiplier = RARITY_CONFIG[rarity]['multiplier']
         final_value = base_value * rarity_multiplier
@@ -194,10 +194,12 @@ def generate_weapon_attributes(floor_level: int, rarity: str) -> List[WeaponAttr
         # 创建属性 - 处理特殊格式化字符串
         description = attr_config['description']
         if '{value*100}' in description:
-            # 对于百分比格式，需要先计算乘积再格式化
+            # 百分比类词条：使用一位小数展示百分比
             description = description.replace('{value*100}', f'{final_value*100:.1f}')
         else:
-            description = description.format(value=final_value)
+            # 非百分比词条：按整数四舍五入展示，避免出现长小数
+            value_str = str(int(round(final_value)))
+            description = description.format(value=value_str)
 
         attribute = WeaponAttribute(
             attribute_type=attr_type,
@@ -274,7 +276,7 @@ def generate_armor_attributes(floor_level: int, rarity: str) -> List[ArmorAttrib
     for attr_type in selected_types:
         attr_config = ARMOR_ATTRIBUTE_TYPES[attr_type]
 
-        # 基于楼层和稀有度计算数值
+        # 基于楼层和稀有度计算数值，先计算浮点值，再按展示需求处理
         base_value = attr_config['base_value'] + floor_level * attr_config['scale']
         rarity_multiplier = RARITY_CONFIG[rarity]['multiplier']
         final_value = base_value * rarity_multiplier
@@ -282,10 +284,12 @@ def generate_armor_attributes(floor_level: int, rarity: str) -> List[ArmorAttrib
         # 创建属性 - 处理特殊格式化字符串
         description = attr_config['description']
         if '{value*100}' in description:
-            # 对于百分比格式，需要先计算乘积再格式化
+            # 百分比类词条：使用一位小数展示百分比
             description = description.replace('{value*100}', f'{final_value*100:.1f}')
         else:
-            description = description.format(value=final_value)
+            # 非百分比词条：按整数四舍五入展示，避免出现长小数
+            value_str = str(int(round(final_value)))
+            description = description.format(value=value_str)
 
         attribute = ArmorAttribute(
             attribute_type=attr_type,
@@ -678,7 +682,10 @@ def generate_merchant_inventory(floor_level: int) -> List[MerchantItem]:
             armor_item.name,
             "armor",
             armor_item.effect_value,
-            price
+            price,
+            rarity=armor_item.rarity,
+            attributes=armor_item.armor_attributes.copy(),
+            base_name=armor_item.base_name
         ))
 
     return inventory

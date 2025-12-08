@@ -39,7 +39,8 @@ class WeaponAttribute:
 
     def get_enhanced_value(self) -> float:
         """获取锻造强化后的数值"""
-        return self.value * (1.0 + self.level * 0.1)  # 每级+10%
+        # 每级+10%，统一保留两位小数，避免浮点精度导致的长小数
+        return round(self.value * (1.0 + self.level * 0.1), 2)
 
 # ==================== 防具属性系统 ====================
 
@@ -72,7 +73,8 @@ class ArmorAttribute:
 
     def get_enhanced_value(self) -> float:
         """获取锻造强化后的数值"""
-        return self.value * (1.0 + self.level * 0.1)  # 每级+10%
+        # 每级+10%，统一保留两位小数，避免浮点精度导致的长小数
+        return round(self.value * (1.0 + self.level * 0.1), 2)
 
 
 # 属性类型配置
@@ -781,7 +783,7 @@ class MerchantItem:
     effect_value: int
     price: int
     rarity: Optional[str] = None
-    attributes: Optional[List[WeaponAttribute]] = None
+    attributes: Optional[List] = None  # 可以是WeaponAttribute或ArmorAttribute
     base_name: Optional[str] = None
 
 

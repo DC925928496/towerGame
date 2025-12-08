@@ -1122,18 +1122,20 @@ def add_random_attribute(player: Player, equipment_type: str) -> Dict[str, Any]:
 
             attr_config = ATTRIBUTE_TYPES[attr_type]
 
-            # 基于玩家当前楼层计算数值（假设玩家等级约等于楼层进度）
+            # 基于玩家当前楼层计算数值（假设玩家等级约等于楼层进度），统一保留两位小数
             estimated_floor = player.level  # 简化处理
             base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
             rarity_multiplier = RARITY_CONFIG[player.weapon_rarity]['multiplier']
-            final_value = base_value * rarity_multiplier
+            final_value = round(base_value * rarity_multiplier, 2)
 
             # 创建属性描述
             description = attr_config['description']
             if '{value*100}' in description:
                 description = description.replace('{value*100}', f'{final_value*100:.1f}')
             else:
-                description = description.format(value=final_value)
+                # 非百分比词条：按整数四舍五入展示，避免出现长小数
+                value_str = str(int(round(final_value)))
+                description = description.format(value=value_str)
 
             # 创建新词条
             new_attr = WeaponAttribute(
@@ -1226,14 +1228,16 @@ def add_random_attribute(player: Player, equipment_type: str) -> Dict[str, Any]:
             estimated_floor = player.level
             base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
             rarity_multiplier = RARITY_CONFIG[player.armor_rarity]['multiplier']
-            final_value = base_value * rarity_multiplier
+            final_value = round(base_value * rarity_multiplier, 2)
 
             # 创建属性描述
             description = attr_config['description']
             if '{value*100}' in description:
                 description = description.replace('{value*100}', f'{final_value*100:.1f}')
             else:
-                description = description.format(value=final_value)
+                # 非百分比词条：按整数四舍五入展示，避免出现长小数
+                value_str = str(int(round(final_value)))
+                description = description.format(value=value_str)
 
             # 创建新词条
             new_attr = ArmorAttribute(
@@ -1345,14 +1349,16 @@ def reforge_attribute(player: Player, equipment_type: str, attribute_index: int)
             estimated_floor = player.level
             base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
             rarity_multiplier = RARITY_CONFIG[player.weapon_rarity]['multiplier']
-            final_value = base_value * rarity_multiplier
+            final_value = round(base_value * rarity_multiplier, 2)
 
             # 创建属性描述
             description = attr_config['description']
             if '{value*100}' in description:
                 description = description.replace('{value*100}', f'{final_value*100:.1f}')
             else:
-                description = description.format(value=final_value)
+                # 其它数值统一最多保留两位小数，并去掉多余的 0
+                value_str = f"{final_value:.2f}".rstrip('0').rstrip('.')
+                description = description.format(value=value_str)
 
             # 创建新词条（保留等级）
             new_attr = WeaponAttribute(
@@ -1444,14 +1450,16 @@ def reforge_attribute(player: Player, equipment_type: str, attribute_index: int)
             estimated_floor = player.level
             base_value = attr_config['base_value'] + estimated_floor * attr_config['scale']
             rarity_multiplier = RARITY_CONFIG[player.armor_rarity]['multiplier']
-            final_value = base_value * rarity_multiplier
+            final_value = round(base_value * rarity_multiplier, 2)
 
             # 创建属性描述
             description = attr_config['description']
             if '{value*100}' in description:
                 description = description.replace('{value*100}', f'{final_value*100:.1f}')
             else:
-                description = description.format(value=final_value)
+                # 其它数值统一最多保留两位小数，并去掉多余的 0
+                value_str = f"{final_value:.2f}".rstrip('0').rstrip('.')
+                description = description.format(value=value_str)
 
             # 创建新词条（保留等级）
             new_attr = ArmorAttribute(
@@ -1587,8 +1595,33 @@ def handle_trade_request(player: Player, floor: Floor, item_name: str) -> dict:
         else:
             equip_message = ""
     elif merchant_item.effect_type == "armor":
+        # 记录装备前的生命值
+        old_max_hp = player.max_hp_with_attributes
+        old_current_hp = player.hp
+
+        # 装备防具
         player.armor_def = merchant_item.effect_value
         player.armor_name = merchant_item.name
+        player.armor_attributes = merchant_item.attributes.copy() if merchant_item.attributes else []
+        player.armor_rarity = merchant_item.rarity or 'common'
+
+        # 计算装备后的生命值变化
+        new_max_hp = player.max_hp_with_attributes
+        hp_boost = new_max_hp - old_max_hp
+
+        equip_message = f"装备了{merchant_item.name}"
+        if merchant_item.rarity and merchant_item.rarity != 'common':
+            equip_message += f"（{merchant_item.rarity}）"
+        if hp_boost > 0:
+            equip_message += f"，生命值上限提升了{hp_boost}点！"
+            # 按比例补充当前生命值
+            if old_current_hp > 0:
+                hp_ratio = old_current_hp / old_max_hp if old_max_hp > 0 else 1.0
+                new_hp = min(new_max_hp, int(new_max_hp * hp_ratio))
+                actual_heal = new_hp - old_current_hp
+                if actual_heal > 0:
+                    player.hp = new_hp
+                    equip_message += f"当前生命值补充了{actual_heal}点！"
 
     response = {
         "success": True,
@@ -1596,7 +1629,7 @@ def handle_trade_request(player: Player, floor: Floor, item_name: str) -> dict:
         "item": merchant_item,
         "new_gold": player.gold
     }
-    if merchant_item.effect_type == "weapon" and equip_message:
+    if equip_message:
         response["message"] += f"（{equip_message}）"
     return response
 
