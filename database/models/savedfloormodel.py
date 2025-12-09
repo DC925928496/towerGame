@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class SavedFloorModel(BaseModel):
     """保存的楼层表"""
-
 
     created_at: datetime
 
@@ -34,9 +32,6 @@ class SavedFloorModel(BaseModel):
     stairs_x: int = 0
     stairs_y: int = 0
     is_merchant_floor: int = 0
-    # 外键关系
-    player: Optional['PlayerModel'] = None
-    save: Optional['GameSaveModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -72,11 +67,17 @@ class SavedFloorModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.save_id is None or (isinstance(self.save_id, str) and self.save_id.strip() == ''):
+        if self.save_id is None or (
+            isinstance(self.save_id, str) and self.save_id.strip() == ""
+        ):
             errors.append("所属存档ID不能为空")
-        if self.player_id is None or (isinstance(self.player_id, str) and self.player_id.strip() == ''):
+        if self.player_id is None or (
+            isinstance(self.player_id, str) and self.player_id.strip() == ""
+        ):
             errors.append("player_id不能为空")
-        if self.floor_level is None or (isinstance(self.floor_level, str) and self.floor_level.strip() == ''):
+        if self.floor_level is None or (
+            isinstance(self.floor_level, str) and self.floor_level.strip() == ""
+        ):
             errors.append("楼层编号不能为空")
         return errors
 
@@ -97,7 +98,9 @@ class SavedFloorModel(BaseModel):
                 errors.append("player_id必须是整数")
         # floor_level 类型验证
         if self.floor_level is not None:
-            if not isinstance(self.floor_level, int) or isinstance(self.floor_level, bool):
+            if not isinstance(self.floor_level, int) or isinstance(
+                self.floor_level, bool
+            ):
                 errors.append("楼层编号必须是整数")
         # width 类型验证
         if self.width is not None:
@@ -109,11 +112,15 @@ class SavedFloorModel(BaseModel):
                 errors.append("楼层高度必须是整数")
         # player_start_x 类型验证
         if self.player_start_x is not None:
-            if not isinstance(self.player_start_x, int) or isinstance(self.player_start_x, bool):
+            if not isinstance(self.player_start_x, int) or isinstance(
+                self.player_start_x, bool
+            ):
                 errors.append("玩家起始X坐标必须是整数")
         # player_start_y 类型验证
         if self.player_start_y is not None:
-            if not isinstance(self.player_start_y, int) or isinstance(self.player_start_y, bool):
+            if not isinstance(self.player_start_y, int) or isinstance(
+                self.player_start_y, bool
+            ):
                 errors.append("玩家起始Y坐标必须是整数")
         # stairs_x 类型验证
         if self.stairs_x is not None:
@@ -125,7 +132,9 @@ class SavedFloorModel(BaseModel):
                 errors.append("楼梯Y坐标必须是整数")
         # is_merchant_floor 类型验证
         if self.is_merchant_floor is not None:
-            if not isinstance(self.is_merchant_floor, int) or isinstance(self.is_merchant_floor, bool):
+            if not isinstance(self.is_merchant_floor, int) or isinstance(
+                self.is_merchant_floor, bool
+            ):
                 errors.append("是否为商人楼层必须是整数")
         # created_at 类型验证
         if self.created_at is not None:
@@ -208,18 +217,6 @@ class SavedFloorModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # player 外键验证
-        if self.player_id is not None:
-            if self.player_id <= 0:
-                errors.append("player的ID必须是有效正整数")
-            if self.player is None:
-                errors.append("player对象不存在")
-        # save 外键验证
-        if self.save_id is not None:
-            if self.save_id <= 0:
-                errors.append("save的ID必须是有效正整数")
-            if self.save is None:
-                errors.append("save对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -252,12 +249,16 @@ class SavedFloorModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 13,
-            'required_fields': ['save_id','player_id','floor_level',],
-            'foreign_keys': ['player','save',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 13,
+            "required_fields": [
+                "save_id",
+                "player_id",
+                "floor_level",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -270,7 +271,7 @@ class SavedFloorModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -278,7 +279,7 @@ class SavedFloorModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'SavedFloorModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "SavedFloorModel":
         """
         从字典创建实例
 

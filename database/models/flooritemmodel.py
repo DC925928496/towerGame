@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class FloorItemModel(BaseModel):
     """楼层物品表"""
-
 
     item_name: str
 
@@ -35,8 +33,6 @@ class FloorItemModel(BaseModel):
     position_x: int = 0
     position_y: int = 0
     rarity_level: str = "common"
-    # 外键关系
-    floor: Optional['SavedFloorModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -72,9 +68,13 @@ class FloorItemModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.floor_id is None or (isinstance(self.floor_id, str) and self.floor_id.strip() == ''):
+        if self.floor_id is None or (
+            isinstance(self.floor_id, str) and self.floor_id.strip() == ""
+        ):
             errors.append("所属楼层ID不能为空")
-        if self.item_name is None or (isinstance(self.item_name, str) and self.item_name.strip() == ''):
+        if self.item_name is None or (
+            isinstance(self.item_name, str) and self.item_name.strip() == ""
+        ):
             errors.append("物品名称不能为空")
         return errors
 
@@ -107,15 +107,21 @@ class FloorItemModel(BaseModel):
                 errors.append("效果类型(heal/mana等)必须是字符串")
         # effect_value 类型验证
         if self.effect_value is not None:
-            if not isinstance(self.effect_value, int) or isinstance(self.effect_value, bool):
+            if not isinstance(self.effect_value, int) or isinstance(
+                self.effect_value, bool
+            ):
                 errors.append("效果数值必须是整数")
         # position_x 类型验证
         if self.position_x is not None:
-            if not isinstance(self.position_x, int) or isinstance(self.position_x, bool):
+            if not isinstance(self.position_x, int) or isinstance(
+                self.position_x, bool
+            ):
                 errors.append("物品X坐标必须是整数")
         # position_y 类型验证
         if self.position_y is not None:
-            if not isinstance(self.position_y, int) or isinstance(self.position_y, bool):
+            if not isinstance(self.position_y, int) or isinstance(
+                self.position_y, bool
+            ):
                 errors.append("物品Y坐标必须是整数")
         # rarity_level 类型验证
         if self.rarity_level is not None:
@@ -197,12 +203,6 @@ class FloorItemModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # floor 外键验证
-        if self.floor_id is not None:
-            if self.floor_id <= 0:
-                errors.append("floor的ID必须是有效正整数")
-            if self.floor is None:
-                errors.append("floor对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -235,12 +235,15 @@ class FloorItemModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 12,
-            'required_fields': ['floor_id','item_name',],
-            'foreign_keys': ['floor',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 12,
+            "required_fields": [
+                "floor_id",
+                "item_name",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -253,7 +256,7 @@ class FloorItemModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -261,7 +264,7 @@ class FloorItemModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'FloorItemModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "FloorItemModel":
         """
         从字典创建实例
 

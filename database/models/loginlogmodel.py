@@ -1,18 +1,17 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class LoginLogModel(BaseModel):
@@ -29,8 +28,6 @@ class LoginLogModel(BaseModel):
     ip_address: str = None
     user_agent: str = None
     reason: str = None
-    # 外键关系
-    player: Optional['PlayerModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -117,6 +114,8 @@ class LoginLogModel(BaseModel):
                 errors.append("日志唯一标识ID不能为负数")
         # player_id 约束验证
         if self.player_id is not None:
+            if self.player_id < 0:
+                errors.append("玩家ID不能为负数")
         # username 约束验证
         if self.username is not None:
             # 字符串长度检查
@@ -151,12 +150,6 @@ class LoginLogModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # player 外键验证
-        if self.player_id is not None:
-            if self.player_id <= 0:
-                errors.append("player的ID必须是有效正整数")
-            if self.player is None:
-                errors.append("player对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -199,7 +192,7 @@ class LoginLogModel(BaseModel):
             'errors': errors,
             'field_count': 8,
             'required_fields': ['login_type',],
-            'foreign_keys': ['player',]
+            'foreign_keys': []
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:

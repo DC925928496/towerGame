@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class GameSaveModel(BaseModel):
     """游戏存档表"""
-
 
     save_name: str
 
@@ -29,8 +27,6 @@ class GameSaveModel(BaseModel):
     player_id: int = 0
     floor_level: int = 1
     is_active: int = 1
-    # 外键关系
-    player: Optional['PlayerModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -66,9 +62,13 @@ class GameSaveModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.player_id is None or (isinstance(self.player_id, str) and self.player_id.strip() == ''):
+        if self.player_id is None or (
+            isinstance(self.player_id, str) and self.player_id.strip() == ""
+        ):
             errors.append("所属玩家ID不能为空")
-        if self.save_name is None or (isinstance(self.save_name, str) and self.save_name.strip() == ''):
+        if self.save_name is None or (
+            isinstance(self.save_name, str) and self.save_name.strip() == ""
+        ):
             errors.append("存档名称不能为空")
         return errors
 
@@ -85,7 +85,9 @@ class GameSaveModel(BaseModel):
                 errors.append("所属玩家ID必须是整数")
         # floor_level 类型验证
         if self.floor_level is not None:
-            if not isinstance(self.floor_level, int) or isinstance(self.floor_level, bool):
+            if not isinstance(self.floor_level, int) or isinstance(
+                self.floor_level, bool
+            ):
                 errors.append("存档时所在楼层必须是整数")
         # save_name 类型验证
         if self.save_name is not None:
@@ -146,12 +148,6 @@ class GameSaveModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # player 外键验证
-        if self.player_id is not None:
-            if self.player_id <= 0:
-                errors.append("player的ID必须是有效正整数")
-            if self.player is None:
-                errors.append("player对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -184,12 +180,15 @@ class GameSaveModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 7,
-            'required_fields': ['player_id','save_name',],
-            'foreign_keys': ['player',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 7,
+            "required_fields": [
+                "player_id",
+                "save_name",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -202,7 +201,7 @@ class GameSaveModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -210,7 +209,7 @@ class GameSaveModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'GameSaveModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "GameSaveModel":
         """
         从字典创建实例
 

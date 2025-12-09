@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class FloorMerchantModel(BaseModel):
     """楼层商人表"""
-
 
     merchant_name: str
 
@@ -29,8 +27,6 @@ class FloorMerchantModel(BaseModel):
     floor_id: int = 0
     merchant_type: str = "general"
     is_active: int = 1
-    # 外键关系
-    floor: Optional['SavedFloorModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -66,9 +62,13 @@ class FloorMerchantModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.floor_id is None or (isinstance(self.floor_id, str) and self.floor_id.strip() == ''):
+        if self.floor_id is None or (
+            isinstance(self.floor_id, str) and self.floor_id.strip() == ""
+        ):
             errors.append("所属楼层ID不能为空")
-        if self.merchant_name is None or (isinstance(self.merchant_name, str) and self.merchant_name.strip() == ''):
+        if self.merchant_name is None or (
+            isinstance(self.merchant_name, str) and self.merchant_name.strip() == ""
+        ):
             errors.append("商人名称不能为空")
         return errors
 
@@ -146,12 +146,6 @@ class FloorMerchantModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # floor 外键验证
-        if self.floor_id is not None:
-            if self.floor_id <= 0:
-                errors.append("floor的ID必须是有效正整数")
-            if self.floor is None:
-                errors.append("floor对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -184,12 +178,15 @@ class FloorMerchantModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 7,
-            'required_fields': ['floor_id','merchant_name',],
-            'foreign_keys': ['floor',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 7,
+            "required_fields": [
+                "floor_id",
+                "merchant_name",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -202,7 +199,7 @@ class FloorMerchantModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -210,7 +207,7 @@ class FloorMerchantModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'FloorMerchantModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "FloorMerchantModel":
         """
         从字典创建实例
 

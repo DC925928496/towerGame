@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-12-03 15:41:23
+生���时间: 2025-12-09 13:33:34
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class WeaponAttributeModel(BaseModel):
     """装备属性表（武器防具通用）"""
-
 
     attribute_type: str
 
@@ -31,8 +29,6 @@ class WeaponAttributeModel(BaseModel):
     level: int = 0
     description: str = None
     equipment_type: str = "weapon"
-    # 外键关系
-    player: Optional['PlayerModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -68,9 +64,13 @@ class WeaponAttributeModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.player_id is None or (isinstance(self.player_id, str) and self.player_id.strip() == ''):
+        if self.player_id is None or (
+            isinstance(self.player_id, str) and self.player_id.strip() == ""
+        ):
             errors.append("所属玩家ID不能为空")
-        if self.attribute_type is None or (isinstance(self.attribute_type, str) and self.attribute_type.strip() == ''):
+        if self.attribute_type is None or (
+            isinstance(self.attribute_type, str) and self.attribute_type.strip() == ""
+        ):
             errors.append("attribute_type不能为空")
         return errors
 
@@ -166,12 +166,6 @@ class WeaponAttributeModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # player 外键验证
-        if self.player_id is not None:
-            if self.player_id <= 0:
-                errors.append("player的ID必须是有效正整数")
-            if self.player is None:
-                errors.append("player对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -204,12 +198,15 @@ class WeaponAttributeModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 9,
-            'required_fields': ['player_id','attribute_type',],
-            'foreign_keys': ['player',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 9,
+            "required_fields": [
+                "player_id",
+                "attribute_type",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -222,7 +219,7 @@ class WeaponAttributeModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -230,7 +227,7 @@ class WeaponAttributeModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'WeaponAttributeModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "WeaponAttributeModel":
         """
         从字典创建实例
 

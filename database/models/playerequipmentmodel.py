@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class PlayerEquipmentModel(BaseModel):
     """玩家装备表"""
-
 
     equipment_type: str
 
@@ -34,8 +32,6 @@ class PlayerEquipmentModel(BaseModel):
     rarity_level: str = "common"
     is_equipped: int = 0
     slot_position: int = 1
-    # 外键关系
-    player: Optional['PlayerModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -71,11 +67,17 @@ class PlayerEquipmentModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.player_id is None or (isinstance(self.player_id, str) and self.player_id.strip() == ''):
+        if self.player_id is None or (
+            isinstance(self.player_id, str) and self.player_id.strip() == ""
+        ):
             errors.append("所属玩家ID不能为空")
-        if self.equipment_type is None or (isinstance(self.equipment_type, str) and self.equipment_type.strip() == ''):
+        if self.equipment_type is None or (
+            isinstance(self.equipment_type, str) and self.equipment_type.strip() == ""
+        ):
             errors.append("装备类型(weapon/armor等)不能为空")
-        if self.item_name is None or (isinstance(self.item_name, str) and self.item_name.strip() == ''):
+        if self.item_name is None or (
+            isinstance(self.item_name, str) and self.item_name.strip() == ""
+        ):
             errors.append("装备名称不能为空")
         return errors
 
@@ -100,11 +102,15 @@ class PlayerEquipmentModel(BaseModel):
                 errors.append("装备名称必须是字符串")
         # attack_value 类型验证
         if self.attack_value is not None:
-            if not isinstance(self.attack_value, int) or isinstance(self.attack_value, bool):
+            if not isinstance(self.attack_value, int) or isinstance(
+                self.attack_value, bool
+            ):
                 errors.append("攻击力加成必须是整数")
         # defense_value 类型验证
         if self.defense_value is not None:
-            if not isinstance(self.defense_value, int) or isinstance(self.defense_value, bool):
+            if not isinstance(self.defense_value, int) or isinstance(
+                self.defense_value, bool
+            ):
                 errors.append("防御力加成必须是整数")
         # rarity_level 类型验证
         if self.rarity_level is not None:
@@ -112,11 +118,15 @@ class PlayerEquipmentModel(BaseModel):
                 errors.append("稀有度等级必须是字符串")
         # is_equipped 类型验证
         if self.is_equipped is not None:
-            if not isinstance(self.is_equipped, int) or isinstance(self.is_equipped, bool):
+            if not isinstance(self.is_equipped, int) or isinstance(
+                self.is_equipped, bool
+            ):
                 errors.append("是否已装备必须是整数")
         # slot_position 类型验证
         if self.slot_position is not None:
-            if not isinstance(self.slot_position, int) or isinstance(self.slot_position, bool):
+            if not isinstance(self.slot_position, int) or isinstance(
+                self.slot_position, bool
+            ):
                 errors.append("装备槽位置必须是整数")
         # created_at 类型验证
         if self.created_at is not None:
@@ -189,12 +199,6 @@ class PlayerEquipmentModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # player 外键验证
-        if self.player_id is not None:
-            if self.player_id <= 0:
-                errors.append("player的ID必须是有效正整数")
-            if self.player is None:
-                errors.append("player对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -227,12 +231,16 @@ class PlayerEquipmentModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 11,
-            'required_fields': ['player_id','equipment_type','item_name',],
-            'foreign_keys': ['player',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 11,
+            "required_fields": [
+                "player_id",
+                "equipment_type",
+                "item_name",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -245,7 +253,7 @@ class PlayerEquipmentModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -253,7 +261,7 @@ class PlayerEquipmentModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'PlayerEquipmentModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "PlayerEquipmentModel":
         """
         从字典创建实例
 

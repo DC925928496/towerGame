@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class PlayerInventoryModel(BaseModel):
     """玩家背包道具"""
-
 
     item_name: str
 
@@ -28,8 +26,6 @@ class PlayerInventoryModel(BaseModel):
     id: int = 0
     player_id: int = 0
     quantity: int = 1
-    # 外键关系
-    player: Optional['PlayerModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -65,9 +61,13 @@ class PlayerInventoryModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.player_id is None or (isinstance(self.player_id, str) and self.player_id.strip() == ''):
+        if self.player_id is None or (
+            isinstance(self.player_id, str) and self.player_id.strip() == ""
+        ):
             errors.append("player_id不能为空")
-        if self.item_name is None or (isinstance(self.item_name, str) and self.item_name.strip() == ''):
+        if self.item_name is None or (
+            isinstance(self.item_name, str) and self.item_name.strip() == ""
+        ):
             errors.append("item_name不能为空")
         return errors
 
@@ -136,12 +136,6 @@ class PlayerInventoryModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # player 外键验证
-        if self.player_id is not None:
-            if self.player_id <= 0:
-                errors.append("player的ID必须是有效正整数")
-            if self.player is None:
-                errors.append("player对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -174,12 +168,15 @@ class PlayerInventoryModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 6,
-            'required_fields': ['player_id','item_name',],
-            'foreign_keys': ['player',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 6,
+            "required_fields": [
+                "player_id",
+                "item_name",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -192,7 +189,7 @@ class PlayerInventoryModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -200,7 +197,7 @@ class PlayerInventoryModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'PlayerInventoryModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "PlayerInventoryModel":
         """
         从字典创建实例
 

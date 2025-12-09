@@ -1,18 +1,17 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class PlayerModel(BaseModel):
@@ -189,7 +188,7 @@ class PlayerModel(BaseModel):
         # login_attempts 类型验证
         if self.login_attempts is not None:
             if not isinstance(self.login_attempts, int) or isinstance(self.login_attempts, bool):
-                errors.append("登录尝试次数必须是整数")
+                errors.append("登录失败次数必须是整数")
         # locked_until 类型验证
         if self.locked_until is not None:
             if not isinstance(self.locked_until, datetime):
@@ -314,14 +313,16 @@ class PlayerModel(BaseModel):
             pass
         # last_login 约束验证
         if self.last_login is not None:
-            pass  # datetime字段不需要数值约束
+            # datetime类型不需要范围验证
+            pass
         # login_attempts 约束验证
         if self.login_attempts is not None:
             if self.login_attempts < 0:
-                errors.append("登录尝试次数不能为负数")
+                errors.append("登录失败次数不能为负数")
         # locked_until 约束验证
         if self.locked_until is not None:
-            pass  # datetime字段不需要数值约束
+            # datetime类型不需要范围验证
+            pass
         return errors
 
     def _validate_foreign_keys(self) -> List[str]:

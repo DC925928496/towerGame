@@ -1,23 +1,21 @@
 """
 自动生成的实体类文件
-生���时间: 2025-11-30 09:54:37
+生���时间: 2025-12-09 13:33:33
 工具版本: 2.0.0
 数据库版本: tower_game v2.2
 警告: 此文件由工具自动生成，请勿手动修改！
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import date, datetime, time
+from typing import Any, Dict, List, Optional
 
 from .base_model import BaseModel
+
 
 @dataclass
 class MerchantInventorieModel(BaseModel):
     """商人库存表"""
-
 
     item_name: str
 
@@ -34,8 +32,6 @@ class MerchantInventorieModel(BaseModel):
     price: int = 10
     rarity_level: str = "common"
     effect_value: int = 0
-    # 外键关系
-    merchant: Optional['FloorMerchantModel'] = None
 
     # 用户自定义方法保护区域
     # === USER_CUSTOM_METHODS_START ===
@@ -71,9 +67,13 @@ class MerchantInventorieModel(BaseModel):
     def _validate_required_fields(self) -> List[str]:
         """验证必填字段"""
         errors = []
-        if self.merchant_id is None or (isinstance(self.merchant_id, str) and self.merchant_id.strip() == ''):
+        if self.merchant_id is None or (
+            isinstance(self.merchant_id, str) and self.merchant_id.strip() == ""
+        ):
             errors.append("所属商人ID不能为空")
-        if self.item_name is None or (isinstance(self.item_name, str) and self.item_name.strip() == ''):
+        if self.item_name is None or (
+            isinstance(self.item_name, str) and self.item_name.strip() == ""
+        ):
             errors.append("物品名称不能为空")
         return errors
 
@@ -86,7 +86,9 @@ class MerchantInventorieModel(BaseModel):
                 errors.append("库存物品唯一标识ID必须是整数")
         # merchant_id 类型验证
         if self.merchant_id is not None:
-            if not isinstance(self.merchant_id, int) or isinstance(self.merchant_id, bool):
+            if not isinstance(self.merchant_id, int) or isinstance(
+                self.merchant_id, bool
+            ):
                 errors.append("所属商人ID必须是整数")
         # item_name 类型验证
         if self.item_name is not None:
@@ -114,7 +116,9 @@ class MerchantInventorieModel(BaseModel):
                 errors.append("效果类型必须是字符串")
         # effect_value 类型验证
         if self.effect_value is not None:
-            if not isinstance(self.effect_value, int) or isinstance(self.effect_value, bool):
+            if not isinstance(self.effect_value, int) or isinstance(
+                self.effect_value, bool
+            ):
                 errors.append("效果数值必须是整数")
         # created_at 类型验证
         if self.created_at is not None:
@@ -187,12 +191,6 @@ class MerchantInventorieModel(BaseModel):
     def _validate_foreign_keys(self) -> List[str]:
         """验证外键关系"""
         errors = []
-        # merchant 外键验证
-        if self.merchant_id is not None:
-            if self.merchant_id <= 0:
-                errors.append("merchant的ID必须是有效正整数")
-            if self.merchant is None:
-                errors.append("merchant对象不存在")
         return errors
 
     def _validate_business_rules(self) -> List[str]:
@@ -225,12 +223,15 @@ class MerchantInventorieModel(BaseModel):
         """
         errors = self.validate()
         return {
-            'valid': len(errors) == 0,
-            'error_count': len(errors),
-            'errors': errors,
-            'field_count': 11,
-            'required_fields': ['merchant_id','item_name',],
-            'foreign_keys': ['merchant',]
+            "valid": len(errors) == 0,
+            "error_count": len(errors),
+            "errors": errors,
+            "field_count": 11,
+            "required_fields": [
+                "merchant_id",
+                "item_name",
+            ],
+            "foreign_keys": [],
         }
 
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
@@ -243,7 +244,7 @@ class MerchantInventorieModel(BaseModel):
         Returns:
             字典表示
         """
-        result = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        result = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
         if exclude_none:
             result = {k: v for k, v in result.items() if v is not None}
@@ -251,7 +252,7 @@ class MerchantInventorieModel(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'MerchantInventorieModel':
+    def from_dict(cls, data: Dict[str, Any]) -> "MerchantInventorieModel":
         """
         从字典创建实例
 
