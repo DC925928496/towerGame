@@ -248,9 +248,9 @@ class ItemUtils:
             "铁甲": {"def": 9, "type": "armor", "value": 50},
             "魔法甲": {"def": 12, "type": "armor", "value": 100},
 
-            # 消耗品类
-            "小血瓶": {"hp": 50, "type": "potion", "value": 20},
-            "大血瓶": {"hp": 150, "type": "potion", "value": 50},
+            # 消耗品类（药瓶）
+            "小药瓶": {"hp": 50, "type": "potion", "value": 20},
+            "大药瓶": {"hp": 150, "type": "potion", "value": 50},
         }
 
         return item_stats.get(item_name, {"atk": 0, "def": 0, "hp": 0, "type": "unknown", "value": 0})

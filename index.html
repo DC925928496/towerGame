@@ -1624,7 +1624,7 @@
             <h3>背包</h3>
             <div id="inventory">
                 <div class="info-item">
-                    <span>小血瓶</span>
+                    <span>小药瓶</span>
                     <span>3</span>
                 </div>
             </div>
@@ -1675,7 +1675,7 @@
                         <div class="modal-legend-entry">
                             <span class="game-icon icon-potion">🧪</span>
                             <div class="legend-text">
-                                <span class="legend-name">血瓶</span>
+                                <span class="legend-name">药瓶</span>
                             </div>
                         </div>
                         <div class="modal-legend-entry">
@@ -2235,7 +2235,7 @@
             '@': { symbol: '\u{1F7E1}', color: '#2196F3', class: 'icon-player' },      // 玩家 - 蓝色
             'M': { symbol: '\u{1F47E}', color: '#f44336', class: 'icon-monster' },     // 怪物 - 红色
             '>': { symbol: '\u{1FA9C}', color: '#FFC107', class: 'icon-stairs' },      // 楼梯 - 黄色
-            '+': { symbol: '\u{1F9EA}', color: '#4CAF50', class: 'icon-potion' },      // 血瓶 - 绿色
+            '+': { symbol: '\u{1F9EA}', color: '#4CAF50', class: 'icon-potion' },      // 药瓶 - 绿色
             '↑': { symbol: '\u{1F5E1}', color: '#9C27B0', class: 'icon-weapon' },      // 武器 - 紫色
             '◆': { symbol: '\u{1F6E1}', color: '#00BCD4', class: 'icon-armor' },       // 防具 - 青色
             '$': { symbol: '\u{1F6CD}', color: '#FF9800', class: 'icon-merchant' },    // 商人 - 橙色
@@ -2434,12 +2434,21 @@
 
             // 背包
             const inventoryDiv = document.getElementById('inventory');
+            const getItemDisplayName = (name) => {
+                // 药瓶：在物品栏中额外展示百分比回血效果
+                if (name.startsWith('小药瓶')) return '小药瓶（恢复25%生命）';
+                if (name.startsWith('中药瓶')) return '中药瓶（恢复50%生命）';
+                if (name.startsWith('大药瓶')) return '大药瓶（恢复75%生命）';
+                return name;
+            };
             inventoryDiv.innerHTML = '';
             if (data.inventory && data.inventory.length > 0) {
                 data.inventory.forEach(([name, count]) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'info-item';
-                    itemDiv.innerHTML = `<span>${name}</span><span>${count}</span>`;
+                    // raw name used for command payload, display name used for UI
+                    itemDiv.dataset.itemName = name;
+                    itemDiv.innerHTML = `<span>${getItemDisplayName(name)}</span><span>${count}</span>`;
                     inventoryDiv.appendChild(itemDiv);
                 });
             } else {
@@ -2574,7 +2583,15 @@
         // 连接到WebSocket服务器
         function connect() {
             try {
-                ws = new WebSocket('ws://localhost:8080');
+                                let wsUrl;
+                if (window.location.protocol === 'file:') {
+                    // Windows 本地 file:// 调试：默认连本机 8080 端口
+                    wsUrl = 'ws://localhost:8080';
+                } else {
+                    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                    wsUrl = wsProtocol + window.location.host + '/ws';
+                }
+                ws = new WebSocket(wsUrl);
 
                 ws.onopen = function() {
 
@@ -2810,7 +2827,11 @@
                                 <div class="merchant-item">
                                     <div class="item-info">
                                         <div class="item-name">${item.name}</div>
-                                        <div class="item-stats">${item.type === 'potion' ? '回复' : item.type === 'weapon' ? '攻击' : '防御'} +${item.value}</div>
+                                        <div class="item-stats">${item.type === 'potion'
+                                            ? '回复最大生命' + item.value + '%'
+                                            : (item.type === 'weapon'
+                                                ? '攻击 +' + item.value
+                                                : '防御 +' + item.value)}</div>
                                     </div>
                                     <div class="price">${item.price}金币</div>
                                     <button onclick="buyItem('${item.name}')" ${merchantData.gold < item.price ? 'disabled' : ''}>购买</button>
@@ -3158,7 +3179,8 @@
                     const inventoryItems = document.querySelectorAll('#inventory .info-item');
                     const index = parseInt(event.key) - 1;
                     if (inventoryItems[index]) {
-                        const itemName = inventoryItems[index].querySelector('span:first-child').textContent;
+                        const itemElement = inventoryItems[index];
+                        const itemName = itemElement.dataset.itemName || itemElement.querySelector('span:first-child').textContent;
                         command = {cmd: 'use_item', item_name: itemName};
                     }
                     break;
@@ -3314,3 +3336,6 @@ window.onload = function() {
     </script>
 </body>
 </html>
+
+
+

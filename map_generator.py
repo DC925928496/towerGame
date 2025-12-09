@@ -537,8 +537,48 @@ def generate_item(floor_level: int, position: Position, forced_type: Optional[st
         item_type = random.choices(item_types, weights=weights)[0]
 
     if item_type == 'potion':
-        effect_value = config.POTION_BASE_HEAL + floor_level * config.POTION_HEAL_PER_FLOOR
-        potion_name = f"{config.POTION_NAME}{config.POTION_NAME_DELIMITER}{effect_value}"
+        # 使用档位+百分比回血的药瓶系统
+        # 基础权重从配置读取，并根据楼层轻微偏向中/大药瓶
+        base_weights = getattr(config, 'POTION_TYPE_WEIGHTS', None) or {
+            'small': 0.5,
+            'medium': 0.35,
+            'large': 0.15
+        }
+
+        small_w = base_weights.get('small', 0.5)
+        medium_w = base_weights.get('medium', 0.35)
+        large_w = base_weights.get('large', 0.15)
+
+        # 楼层越高，中/大药瓶权重越高，掉落机制更加友好
+        if 20 <= floor_level < 50:
+            small_w *= 0.7
+            medium_w *= 1.2
+            large_w *= 1.4
+        elif floor_level >= 50:
+            small_w *= 0.4
+            medium_w *= 1.3
+            large_w *= 1.8
+
+        weight_sum = small_w + medium_w + large_w
+        if weight_sum <= 0:
+            small_w, medium_w, large_w = 0.5, 0.35, 0.15
+
+        potion_types = ['small', 'medium', 'large']
+        potion_weights = [small_w, medium_w, large_w]
+        potion_type = random.choices(potion_types, weights=potion_weights)[0]
+
+        if potion_type == 'medium':
+            potion_name = config.POTION_MEDIUM_NAME
+            heal_rate = config.POTION_MEDIUM_HEAL_RATE
+        elif potion_type == 'large':
+            potion_name = config.POTION_LARGE_NAME
+            heal_rate = config.POTION_LARGE_HEAL_RATE
+        else:
+            potion_name = config.POTION_SMALL_NAME
+            heal_rate = config.POTION_SMALL_HEAL_RATE
+
+        # effect_value 使用百分比数值，便于前端与商人界面展示
+        effect_value = int(heal_rate * 100)
         symbol = '+'
         return Item(
             symbol=symbol,
@@ -650,13 +690,20 @@ def generate_merchant_inventory(floor_level: int) -> List[MerchantItem]:
     inventory: List[MerchantItem] = []
     base_price = config.MERCHANT_BASE_PRICE + floor_level * config.MERCHANT_PRICE_PER_FLOOR
 
-    # 药水 (3-4个)
+    # 药瓶 (3-4个)：与野外掉落共用档位/百分比配置
     potion_count = random.randint(*config.MERCHANT_POTION_RANGE)
+    medium_percent = int(getattr(config, 'POTION_MEDIUM_HEAL_RATE', 0.5) * 100) or 50
     for i in range(potion_count):
-        hp = config.POTION_BASE_HEAL + floor_level * config.POTION_HEAL_PER_FLOOR
-        potion_name = f"{config.POTION_NAME}{config.POTION_NAME_DELIMITER}{hp}"
-        price = int(base_price * config.MERCHANT_POTION_PRICE_MULTIPLIER)
-        inventory.append(MerchantItem(potion_name, "potion", hp, price))
+        potion_item = generate_item(floor_level, Position(0, 0), forced_type='potion')
+        rate_percent = potion_item.effect_value or medium_percent
+        price_factor = rate_percent / medium_percent
+        price = int(base_price * config.MERCHANT_POTION_PRICE_MULTIPLIER * price_factor)
+        inventory.append(MerchantItem(
+            potion_item.name,
+            "potion",
+            potion_item.effect_value,
+            price
+        ))
 
     # 武器 (2-3个)
     weapon_count = random.randint(*config.MERCHANT_WEAPON_RANGE)
@@ -874,12 +921,30 @@ def generate_floor(level: int, prev_floor: Optional[Floor] = None, merchant_atte
 
             high_value_item_count = min(high_value_item_count, config.HIGH_VALUE_ITEM_MAX)
 
+            # 一层最多生成 1 把武器和 1 件防具，避免同一层出现多把武器或多件防具
+            weapon_spawned = False
+            armor_spawned = False
+
             for _ in range(high_value_item_count):
-                item_type = random.choice(['weapon', 'armor'])
+                available_types = []
+                if not weapon_spawned:
+                    available_types.append('weapon')
+                if not armor_spawned:
+                    available_types.append('armor')
+
+                # 已经同时有武器和防具时，不再额外生成高价值装备
+                if not available_types:
+                    break
+
+                item_type = random.choice(available_types)
                 item = place_strategic_item(floor, rooms, key_items, item_type=item_type)
                 if item:
                     key_items.append(item)
                     high_value_items.append(item)
+                    if item_type == 'weapon':
+                        weapon_spawned = True
+                    elif item_type == 'armor':
+                        armor_spawned = True
 
         # 3. 在关键物品附近战略性放置守卫怪物
         if key_items:

@@ -30,7 +30,8 @@ class GameConfig:
     PLAYER_BASE_GOLD: int = 0
     PLAYER_START_POTION_HEAL: int = 200
     PLAYER_START_POTION_COUNT: int = 3
-    POTION_NAME: str = "血瓶"
+    PLAYER_START_POTION_SIZE: str = "small"
+    POTION_NAME: str = "药瓶"
     POTION_NAME_DELIMITER: str = "+"
 
     # 怪物配置
@@ -65,6 +66,15 @@ class GameConfig:
     ARMOR_WEIGHT: float = 0.35
     POTION_WEIGHT: float = 0.25
     STAIR_WEIGHT: float = 0.3
+
+    # 药瓶档位配置（百分比回血）
+    POTION_SMALL_NAME: str = "小药瓶"
+    POTION_MEDIUM_NAME: str = "中药瓶"
+    POTION_LARGE_NAME: str = "大药瓶"
+    POTION_SMALL_HEAL_RATE: float = 0.25  # 回复最大生命的25%
+    POTION_MEDIUM_HEAL_RATE: float = 0.5  # 回复最大生命的50%
+    POTION_LARGE_HEAL_RATE: float = 0.75  # 回复最大生命的75%
+    POTION_TYPE_WEIGHTS: Dict[str, float] = None  # 不同药瓶尺寸的生成权重
 
     # 守卫系统配置
     GUARD_WEIGHT_MULTIPLIER: float = 2.0
@@ -117,6 +127,15 @@ class GameConfig:
                 'weapon': self.WEAPON_WEIGHT,
                 'armor': self.ARMOR_WEIGHT,
                 'potion': self.POTION_WEIGHT
+            }
+
+        # 默认药瓶尺寸权重
+        if self.POTION_TYPE_WEIGHTS is None:
+            # 默认：小药瓶略多，中药瓶适中，大药瓶偏稀有
+            self.POTION_TYPE_WEIGHTS = {
+                'small': 0.5,
+                'medium': 0.35,
+                'large': 0.15
             }
 
         if self.FORGE_RARITY_COST_MULTIPLIER is None:
@@ -192,8 +211,8 @@ class GameConfig:
 
 # 预定义的物品配置
 ITEM_CONFIGS = {
-    "小血瓶": {"hp": 50, "type": "potion", "value": 20, "weight": 0.4},
-    "大血瓶": {"hp": 150, "type": "potion", "value": 50, "weight": 0.6},
+    "小药瓶": {"hp": 50, "type": "potion", "value": 20, "weight": 0.4},
+    "大药瓶": {"hp": 150, "type": "potion", "value": 50, "weight": 0.6},
 
     "木剑": {"atk": 5, "type": "weapon", "value": 10, "weight": 0.3},
     "铁剑": {"atk": 10, "type": "weapon", "value": 25, "weight": 0.3},
@@ -214,7 +233,7 @@ COLORS = {
     'monster': '#00FF00',     # 绿色 - 怪物
     'weapon': '#0000FF',      # 蓝色 - 武器
     'armor': '#800080',       # 紫色 - 防具
-    'potion': '#FF00FF',      # 粉色 - 血瓶
+    'potion': '#FF00FF',      # 粉色 - 药瓶
     'stair': '#FFA500',       # 橙色 - 楼梯
     'text': '#000000',        # 黑色 - 文本
     'background': '#FFFFFF'   # 白色 - 背景
@@ -295,3 +314,5 @@ class ConfigManager:
 
 # 全局配置管理器实例
 config_manager = ConfigManager()
+
+

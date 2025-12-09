@@ -430,9 +430,15 @@ class Player:
         self.armor_rarity = 'common'  # 新增：防具稀有度
 
         # 背包：{道具名: 数量}
-        start_potion_heal = config.PLAYER_START_POTION_HEAL
-        potion_key = f"{config.POTION_NAME}{config.POTION_NAME_DELIMITER}{start_potion_heal}"
-        self.inventory = {potion_key: config.PLAYER_START_POTION_COUNT}
+        # 起始药瓶使用尺寸+名称配置，默认给一批小药瓶
+        start_potion_size = getattr(config, 'PLAYER_START_POTION_SIZE', 'small')
+        if start_potion_size == 'medium':
+            start_potion_name = config.POTION_MEDIUM_NAME
+        elif start_potion_size == 'large':
+            start_potion_name = config.POTION_LARGE_NAME
+        else:
+            start_potion_name = config.POTION_SMALL_NAME
+        self.inventory = {start_potion_name: config.PLAYER_START_POTION_COUNT}
 
     def total_atk(self, floor_level: int = 1) -> int:
         """总攻击力 = 基础 + 武器加成 + 属性加成 + 层数加成 + 怒火加成"""
@@ -735,21 +741,29 @@ class Player:
         return list(self.inventory.items())
 
     def _parse_potion_heal_value(self, item_name: str) -> int:
-        """根据道具名称解析血瓶回复量"""
+        """根据道具名称解析药瓶回复量（百分比制）
+
+        当前版本只支持三档药瓶：小药瓶 / 中药瓶 / 大药瓶，按最大生命值百分比回复。
+        """
         config = config_manager.get_config()
-        base_name = config.POTION_NAME
-        delimiter = config.POTION_NAME_DELIMITER
 
-        if not item_name.startswith(base_name):
-            return 0
+        # 按药瓶档位名称（小/中/大）以百分比回血
+        potion_name_map = {
+            getattr(config, 'POTION_SMALL_NAME', '小药瓶'):
+                getattr(config, 'POTION_SMALL_HEAL_RATE', 0.25),
+            getattr(config, 'POTION_MEDIUM_NAME', '中药瓶'):
+                getattr(config, 'POTION_MEDIUM_HEAL_RATE', 0.5),
+            getattr(config, 'POTION_LARGE_NAME', '大药瓶'):
+                getattr(config, 'POTION_LARGE_HEAL_RATE', 0.75),
+        }
 
-        if delimiter not in item_name:
-            return config.POTION_BASE_HEAL
+        for name, rate in potion_name_map.items():
+            if item_name.startswith(name):
+                max_hp = self.max_hp  # 使用当前最大生命值作为百分比基准
+                return int(max_hp * rate)
 
-        try:
-            return int(item_name.split(delimiter, 1)[1])
-        except (ValueError, IndexError):
-            return config.POTION_BASE_HEAL
+        # 非药瓶道具或未知格式，按 0 处理
+        return 0
 
 
 class Room:
@@ -1100,3 +1114,5 @@ FINAL_BOSS = {
     "gold": 9999,
     "symbol": "B"
 }
+
+

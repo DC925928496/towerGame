@@ -1384,7 +1384,14 @@ async def handle_client(websocket):
 
 
 async def main():
-    """启动WebSocket服务器"""
+    """启动WebSocket服务器
+
+    在Linux部署环境中，建议通过环境变量配置监听地址和端口：
+    - TOWERGAME_HOST：默认 0.0.0.0
+    - TOWERGAME_PORT：默认 8080
+    """
+    import os
+
     # 测试数据库连接
     global DATABASE_AVAILABLE
     DATABASE_AVAILABLE = False
@@ -1392,12 +1399,15 @@ async def main():
         if db_config_manager.is_configured():
             if connection_pool.test_connection():
                 DATABASE_AVAILABLE = True
-    except:
+    except Exception:
         pass
 
-    async with websockets.serve(handle_client, "localhost", 8080):
-        print("服务器已启动: ws://localhost:8080")
-        print("在浏览器中打开 index.html 开始游戏")
+    host = os.getenv("TOWERGAME_HOST", "0.0.0.0")
+    port = int(os.getenv("TOWERGAME_PORT", "8080"))
+
+    async with websockets.serve(handle_client, host, port):
+        print(f"服务器已启动: ws://{host}:{port}")
+        print("请通过 Nginx 反向代理此端口，并在浏览器中访问部署好的 index.html 开始游戏")
         await asyncio.Future()  # 永久运行
 
 
